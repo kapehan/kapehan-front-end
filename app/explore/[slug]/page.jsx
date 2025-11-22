@@ -1,0 +1,692 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  FaStar,
+  FaMapMarkerAlt,
+  FaClock,
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaArrowLeft,
+  FaLeaf,
+  FaWifi,
+  FaCar,
+  FaDog,
+  FaWheelchair,
+  FaCheckCircle,
+  FaHeart,
+  FaRegHeart,
+  FaCoffee,
+  FaCouch,
+  FaLaptop,
+  FaPalette,
+  FaCreditCard,
+  FaTruck,
+  FaPlug,
+  FaSnowflake,
+  FaCalendarCheck 
+} from "react-icons/fa";
+
+import { LuCoffee } from "react-icons/lu";
+import Navigation from "../../../components/navigation";
+import RatingModal from "../../../components/rating-modal";
+import ReviewSection from "../../../components/ReviewSection";
+import CoffeeShopCard from "../../../components/CoffeeShopCard";
+import Footer from "../../../components/Footer";
+import UserAccountModal from "../../../components/UserAccountModal";
+import MenuModal from "../../../components/MenuModal";
+import { getCoffeeShopById } from "../../../services/coffeeShopService";
+import ShopDetailSkeleton from "./loading";
+import { useAuth } from "../../../context/authContext"; // added
+
+export default function CoffeeShopDetailPage() {
+  const params = useParams();
+  // Normalize slug in case it's an array
+  const shopSlug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+
+  const { isAuthenticated } = useAuth(); // use context instead of local state
+
+  const [shop, setShop] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [suggestedShops, setSuggestedShops] = useState([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [reviewVersion, setReviewVersion] = useState(0) // existing
+  const [userHasReview, setUserHasReview] = useState(null) // changed: was false
+
+  // Create slug from shop name for comparison
+  const createSlug = (name) => {
+    return (name || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  // Title-case utilities
+  const toTitleCase = (s) =>
+    (s || "")
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .split(/\s+/)
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
+      .join(" ");
+  const formatDayLabel = (day) => toTitleCase(day);
+  const formatCity = (city) => toTitleCase(city);
+
+  // Handle follow button click
+  const handleFollowClick = () => {
+    if (!isAuthenticated) {
+      setShowAccountModal(true);
+    } else {
+      setIsFollowing(!isFollowing);
+    }
+  };
+
+  // Handle write review click
+  const handleWriteReviewClick = () => {
+    if (!isAuthenticated) {
+      setShowAccountModal(true)
+      return
+    }
+    // Block if status not yet known OR already reviewed
+    if (userHasReview !== false) {
+      return
+    }
+    setShowReviewModal(true)
+  }
+
+  const handleLoginSuccess = () => {
+    // context updates isAuthenticated automatically
+    setShowAccountModal(false);
+  };
+
+  // Fetch shop details from API
+  useEffect(() => {
+    const fetchShopData = async () => {
+      setLoading(true);
+      try {
+        // Fetch using normalized slug
+        const res = await getCoffeeShopById(shopSlug);
+        const raw = res?.data ?? res;
+        if (!raw) {
+          setShop(null);
+          return;
+        }
+
+        // Normalize API payload to UI shape
+        const paymentMethods = Array.isArray(raw.payment_methods)
+          ? raw.payment_methods.map((p) => p?.type).filter(Boolean)
+          : [];
+
+        const openingHoursObj = Array.isArray(raw.openingHours)
+          ? raw.openingHours.reduce((acc, cur) => {
+              const day = (cur?.day || "").toLowerCase();
+              acc[day] = {
+                open: cur?.open || "",
+                close: cur?.close || "",
+                closed: !!cur?.isClosed,
+              };
+              return acc;
+            }, {})
+          : raw.openingHours || undefined;
+
+        const amenitiesArr = Array.isArray(raw.amenities)
+          ? raw.amenities.map((a) => String(a).toLowerCase())
+          : [];
+        const normalizedAmenities = {
+          wifi: amenitiesArr.includes("wi-fi") || amenitiesArr.includes("wifi"),
+          parking: amenitiesArr.includes("parking"),
+          outdoorSeating:
+            amenitiesArr.includes("outdoor seating") ||
+            amenitiesArr.includes("outdoor"),
+          petFriendly:
+            amenitiesArr.includes("pet-friendly") ||
+            amenitiesArr.includes("pet friendly"),
+          wheelchairAccessible:
+            amenitiesArr.includes("wheelchair-accessible") ||
+            amenitiesArr.includes("wheelchair accessible") ||
+            amenitiesArr.includes("accessible"),
+        };
+
+        const idValue = raw.id || raw._id || createSlug(raw.name || "shop");
+        const enhancedShop = {
+          _id: idValue,
+          id: idValue,
+          // primary
+          name: raw.name,
+          description: raw.description,
+          image: raw.imageUrl || raw.image,
+          address: raw.address,
+          city: raw.city,
+          rating: raw.rating,
+          categories:
+            Array.isArray(raw.vibes) && raw.vibes.length
+              ? raw.vibes
+              : undefined,
+          // social
+          socialMedia: {
+            facebook: raw.facebook || undefined,
+            instagram: raw.instagram || undefined,
+            twitter: raw.twitter || undefined,
+          },
+          // payment + hours + amenities
+          paymentMethods: paymentMethods.length ? paymentMethods : ["Cash"],
+          openingHours: openingHoursObj,
+          amenities: normalizedAmenities,
+          // open state
+          openNow: typeof raw.isOpen === "boolean" ? raw.isOpen : undefined,
+        };
+
+        // Verify slug by comparing normalized slugs to avoid case/space issues
+        const derivedSlug = createSlug(enhancedShop.name);
+        if (derivedSlug !== createSlug(shopSlug)) {
+          setShop(null);
+          return;
+        }
+
+        setShop(enhancedShop);
+
+        // if (isLoggedIn()) {
+        //   addVisitedShop(enhancedShop)
+        // }
+
+        // Suggestions can be fetched via another endpoint; keep empty for now
+        setSuggestedShops([]);
+      } catch (error) {
+        console.error("Error fetching shop data:", error);
+        setShop(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (shopSlug) fetchShopData();
+  }, [shopSlug]);
+
+  if (loading) {
+    return <ShopDetailSkeleton />;
+  }
+
+  if (!shop) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navigation />
+        <div className="container mx-auto px-4 py-12 text-center pt-24 md:pt-32">
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
+            Coffee Shop Not Found
+          </h1>
+          <p className="text-stone-600 mb-8">
+            The coffee shop you're looking for doesn't exist or has been
+            removed.
+          </p>
+          <Link
+            href="/explore"
+            className="inline-flex items-center bg-amber-600 hover:bg-amber-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg transition-colors"
+          >
+            <FaArrowLeft className="mr-2" />
+            Back to Explore
+          </Link>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Check if the shop is currently open
+  const isCurrentlyOpen = () => {
+    if (!shop.openingHours) return false;
+
+    const now = new Date();
+    const dayOfWeek = now.toLocaleDateString("en-US", { weekday: "lowercase" });
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTime = `${currentHours
+      .toString()
+      .padStart(2, "0")}:${currentMinutes.toString().padStart(2, "0")}`;
+
+    const todayHours = shop.openingHours[dayOfWeek];
+    if (!todayHours || todayHours.closed) return false;
+
+    return currentTime >= todayHours.open && currentTime <= todayHours.close;
+  };
+
+  // Use the provided openNow property or calculate it
+  const openNow = shop.openNow !== undefined ? shop.openNow : isCurrentlyOpen()
+
+  // Align amenity keys with normalized object
+  const amenityIcons = {
+    wifi: { icon: FaWifi, label: "Wi‑Fi" },
+    parking: { icon: FaCar, label: "Parking" },
+    outdoorSeating: { icon: FaLeaf, label: "Outdoor Seating" },
+    petFriendly: { icon: FaDog, label: "Pet Friendly" },
+    wheelchairAccessible: { icon: FaWheelchair, label: "Accessible" },
+  };
+
+  const CuratedRating = ({ icon: Icon, label, rating, notes, color }) => (
+    <div className="bg-white rounded-lg p-3 md:p-4 border border-stone-200 hover:border-stone-300 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <Icon className={`h-4 md:h-5 w-4 md:w-5 mr-2 text-stone-600`} />
+          <span className="font-medium text-stone-800 text-xs md:text-sm">
+            {label}
+          </span>
+        </div>
+        <div className="flex items-center">
+          {[...Array(5)].map((_, i) => (
+            <FaStar
+              key={i}
+              className={`h-3 md:h-4 w-3 md:w-4 ${
+                i < rating ? "text-amber-400" : "text-stone-200"
+              }`}
+            />
+          ))}
+          <span className="ml-1 md:ml-2 text-xs md:text-sm font-semibold text-stone-700">
+            {rating}/5
+          </span>
+        </div>
+      </div>
+      <p className="text-stone-600 text-xs md:text-sm leading-relaxed">
+        {notes}
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Navigation />
+
+      {/* Hero Section - Clean and Light */}
+      <div className="relative h-[50vh] md:h-[65vh] overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${
+              shop.image || "/placeholder.svg?height=1200&width=1600"
+            })`,
+            transform: "scale(1.1)",
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/20"></div>
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-4xl mx-auto"
+            >
+              <div className="inline-flex items-center bg-white/15 backdrop-blur-sm px-3 md:px-4 py-1 rounded-full mb-4 md:mb-6">
+                {shop.categories &&
+                  shop.categories.slice(0, 2).map((category, index) => (
+                    <span
+                      key={`${category}-${index}`}
+                      className="text-white text-xs md:text-sm font-medium"
+                    >
+                      {category}
+                      {index < Math.min(shop.categories.length, 2) - 1 && (
+                        <span className="mx-2 text-white/40">•</span>
+                      )}
+                    </span>
+                  ))}
+                {shop.categories && shop.categories.length > 2 && (
+                  <span className="text-white text-xs md:text-sm font-medium ml-2">
+                    +{shop.categories.length - 2}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center mb-4">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
+                  {shop.name}
+                </h1>
+                {shop.verified && (
+                  <FaCheckCircle className="text-blue-300 text-xl md:text-2xl lg:text-3xl mt-2 sm:mt-0 sm:ml-4 drop-shadow-lg" />
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-6">
+                <div className="flex items-center bg-white/15 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full">
+                  <FaStar className="text-amber-300 mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
+                  <span className="text-white font-medium text-sm md:text-base">
+                    {shop.rating}
+                  </span>
+                  <span className="text-white text-opacity-70 ml-1 text-xs md:text-sm">
+                    ({shop.reviewCount || 0})
+                  </span>
+                </div>
+
+                <div className="flex items-center bg-white/15 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full">
+                  <FaClock className="text-white mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
+                  <span className="text-white text-sm md:text-base">
+                    {openNow ? "Open Now" : "Closed"}
+                  </span>
+                </div>
+
+                <div className="flex items-center bg-white/15 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full">
+                  <FaMapMarkerAlt className="text-white mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
+                  <span className="text-white text-sm md:text-base">
+                    {formatCity(shop.city || "")}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleFollowClick}
+                  className="flex items-center bg-white/15 backdrop-blur-sm hover:bg-white/25 px-3 md:px-4 py-2 rounded-full transition-colors"
+                >
+                  {isFollowing ? (
+                    <FaHeart className="text-red-300 mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
+                  ) : (
+                    <FaRegHeart className="text-white mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
+                  )}
+                  <span className="text-white font-medium text-sm md:text-base">
+                    {isFollowing ? "Following" : "Follow"}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 -mt-6 md:-mt-12 relative z-10 pb-8 md:pb-16">
+        <div className="max-w-6xl mx-auto">
+          {/* About Section */}
+          <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden mb-6 md:mb-10">
+            <div className="p-4 md:p-8">
+              <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-4 flex items-center">
+                <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
+                  <LuCoffee className="text-stone-700 text-lg md:text-xl" />
+                </div>
+                About {shop.name}
+              </h2>
+
+              <p className="text-stone-700 text-base md:text-lg leading-relaxed mb-4">
+                {shop.description}
+              </p>
+              <div className="flex space-x-3">
+                {shop.socialMedia?.facebook && (
+                  <a
+                    href={`https://facebook.com/${shop.socialMedia.facebook}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-500 hover:text-stone-700 transition-colors"
+                  >
+                    <FaFacebook size={18} />
+                  </a>
+                )}
+                {shop.socialMedia?.instagram && (
+                  <a
+                    href={`https://instagram.com/${shop.socialMedia.instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-500 hover:text-stone-700 transition-colors"
+                  >
+                    <FaInstagram size={18} />
+                  </a>
+                )}
+                {shop.socialMedia?.twitter && (
+                  <a
+                    href={`https://twitter.com/${shop.socialMedia.twitter}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-500 hover:text-stone-700 transition-colors"
+                  >
+                    <FaTwitter size={18} />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Info Section */}
+          <div className="bg-stone-50 rounded-lg shadow-sm border border-stone-200 mb-6 md:mb-10 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-0 divide-y md:divide-y-0 md:divide-x divide-stone-200">
+              {/* Payment Methods */}
+              <div className="p-4 md:p-5">
+                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                  Payment Methods
+                </h3>
+                <div className="space-y-2">
+                  {shop.paymentMethods && shop.paymentMethods.length > 0 ? (
+                    shop.paymentMethods.map((method) => (
+                      <div
+                        key={method}
+                        className="text-sm text-stone-700 flex items-center"
+                      >
+                        <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mr-2"></span>
+                        {method}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-stone-700">Cash accepted</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Hours */}
+              <div className="p-4 md:p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700">
+                    Hours
+                  </h3>
+                  <div
+                    className={`inline-flex text-xs font-medium px-2 py-1 rounded ${
+                      openNow
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {openNow ? "Open" : "Closed"}
+                  </div>
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  {(() => {
+                    const weekDays = [
+                      "monday",
+                      "tuesday",
+                      "wednesday",
+                      "thursday",
+                      "friday",
+                      "saturday",
+                      "sunday",
+                    ];
+                    const hours = shop.openingHours || {};
+                    return weekDays
+                      .filter((day) => hours[day])
+                      .map((day) => {
+                        const h = hours[day];
+                        return (
+                          <div key={day} className="flex justify-between">
+                            <span className="text-stone-600 capitalize font-medium">
+                              {formatDayLabel(day)}
+                            </span>
+                            {h.closed ? (
+                              <span className="text-stone-400">Closed</span>
+                            ) : (
+                              <span className="text-stone-700">
+                                {h.open} - {h.close}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      });
+                  })()}
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="p-4 md:p-5">
+                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                  Amenities
+                </h3>
+                <div className="space-y-2">
+                  {shop.amenities &&
+                    Object.entries(shop.amenities)
+                      .filter(([key, value]) => value && amenityIcons[key])
+                      .slice(0, 3)
+                      .map(([key, value]) => {
+                        const { icon: Icon, label } = amenityIcons[key];
+                        return (
+                          <div
+                            key={key}
+                            className="flex items-center text-xs text-stone-700"
+                          >
+                            <Icon className="h-3 w-3 mr-2 text-stone-500" />
+                            {label}
+                          </div>
+                        );
+                      })}
+                </div>
+              </div>
+
+              {/* Location & View Menu Button */}
+              <div className="p-4 md:p-5">
+                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                  Location
+                </h3>
+                <p className="text-xs text-stone-700 mb-4 leading-relaxed">
+                  {shop.address}
+                </p>
+
+                <button
+                  onClick={() => setShowMenuModal(true)}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded font-medium text-xs transition-colors duration-200"
+                >
+                  View Menu
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Curated Section */}
+          {shop.curated && (
+            <div className="bg-white rounded-lg shadow-sm border border-stone-300 overflow-hidden mb-6 md:mb-10">
+              <div className="bg-stone-50 p-4 md:p-6 border-b border-stone-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
+                    <h2 className="text-lg md:text-xl font-bold text-stone-900 mb-1 flex items-center">
+                      <FaCheckCircle className="text-stone-600 mr-2 h-4 w-4" />
+                      Curated Review
+                    </h2>
+                    <p className="text-stone-600 text-xs md:text-sm">
+                      Team reviewed for quality assurance
+                    </p>
+                  </div>
+                  <div className="text-center sm:text-right">
+                    <div className="flex items-center justify-center sm:justify-end">
+                      <FaStar className="text-amber-400 mr-1 h-4 w-4" />
+                      <span className="text-lg md:text-xl font-bold text-stone-900">
+                        {shop.curated.overallRating}
+                      </span>
+                      <span className="text-stone-600 ml-1 text-sm">/5</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 md:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                  <CuratedRating
+                    icon={FaCoffee}
+                    label="Coffee Quality"
+                    rating={shop.curated.coffeeQuality.rating}
+                    notes={shop.curated.coffeeQuality.notes}
+                  />
+                  <CuratedRating
+                    icon={FaCouch}
+                    label="Comfortability"
+                    rating={shop.curated.comfortability.rating}
+                    notes={shop.curated.comfortability.notes}
+                  />
+                  <CuratedRating
+                    icon={FaLaptop}
+                    label="Remote Work Friendly"
+                    rating={shop.curated.remoteWorkFriendly.rating}
+                    notes={shop.curated.remoteWorkFriendly.notes}
+                  />
+                  <CuratedRating
+                    icon={FaPalette}
+                    label="Aesthetic Vibe"
+                    rating={shop.curated.aestheticVibe.rating}
+                    notes={shop.curated.aestheticVibe.notes}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Reviews Section */}
+          {shop._id && (
+            <ReviewSection
+              key={`reviews-${shop._id}-${reviewVersion}`}
+              shopId={shop._id}
+              slug={shopSlug}
+              onWriteReview={handleWriteReviewClick}
+              reviewVersion={reviewVersion}
+              onUserReviewStatus={(has) => setUserHasReview(has)} // unchanged callback (now sets boolean)
+            />
+          )}
+
+          {/* You Might Also Like */}
+          {suggestedShops.length > 0 && (
+            <div className="mb-6 md:mb-10">
+              <div className="text-center mb-6 md:mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-stone-900 mb-2 flex items-center justify-center">
+                  <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
+                    <LuCoffee className="text-stone-700 text-lg md:text-xl" />
+                  </div>
+                  You Might Also Like
+                </h2>
+                <p className="text-stone-600 text-sm md:text-base">
+                  More coffee shops in {formatCity(shop.city || "")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                {suggestedShops.map((suggestedShop, index) => (
+                  <motion.div
+                    key={suggestedShop.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <CoffeeShopCard shop={suggestedShop} showDistance={false} />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modals */}
+      <RatingModal
+        key={`rating-${shop._id || "pending"}`}
+        show={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        shopId={shop._id}
+        slug={shopSlug}
+        onSubmitted={() => setReviewVersion(v => v + 1)}
+        userHasReview={userHasReview === true} // normalize null -> false in modal
+      />
+      <UserAccountModal
+        show={showAccountModal}
+        onClose={() => setShowAccountModal(false)}
+        onLogin={handleLoginSuccess}
+      />
+      {showMenuModal && (
+        <MenuModal shop={shop} onClose={() => setShowMenuModal(false)} />
+      )}
+
+      <Footer />
+    </div>
+  );
+}
