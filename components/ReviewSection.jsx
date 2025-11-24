@@ -18,8 +18,8 @@ const Review = ({
   onDelete,
   onSave,
   onCancel,
-  savingEdit, // added
-  deletingId // added
+  savingEdit,
+  deletingId
 }) => {
   return (
     <motion.div
@@ -27,83 +27,6 @@ const Review = ({
       animate={{ opacity: 1, y: 0 }}
       className="relative bg-white rounded-xl shadow-sm p-6 mb-4 border border-stone-200"
     >
-      {/* Action buttons bottom-right */}
-      {isOwner && (
-        <div className="absolute bottom-3 right-3">
-          <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm border border-stone-200 rounded-full px-2 py-1 shadow-sm">
-            {!isEditing && (
-              <>
-                <button
-                  onClick={() => !savingEdit && deletingId !== review._id && onEdit(review)}
-                  title="Edit"
-                  disabled={savingEdit || deletingId === review._id}
-                  className="h-8 w-8 flex items-center justify-center rounded-full text-stone-600 hover:text-amber-700 hover:bg-amber-50 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50"
-                >
-                  <FaEdit className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => !savingEdit && deletingId !== review._id && onDelete(review._id)}
-                  title="Delete"
-                  disabled={savingEdit || deletingId === review._id}
-                  className={`h-8 px-3 flex items-center justify-center rounded-full text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                    deletingId === review._id
-                      ? "bg-red-500 text-white"
-                      : "text-stone-600 hover:text-red-600 hover:bg-red-50"
-                  } disabled:opacity-50`}
-                >
-                  {deletingId === review._id ? (
-                    <span className="flex items-center gap-1">
-                      <span className="inline-block h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Deleting...
-                    </span>
-                  ) : (
-                    <>
-                      <FaTrash className="h-4 w-4 mr-1" />
-                      Delete
-                    </>
-                  )}
-                </button>
-              </>
-            )}
-            {isEditing && (
-              <>
-                <button
-                  onClick={!savingEdit ? onSave : undefined}
-                  title="Save"
-                  disabled={savingEdit}
-                  className={`h-8 px-3 flex items-center justify-center rounded-full font-medium text-xs transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 ${
-                    savingEdit
-                      ? "bg-amber-500 text-white"
-                      : "bg-amber-600 hover:bg-amber-700 text-white"
-                  }`}
-                >
-                  {savingEdit ? (
-                    <span className="flex items-center gap-1">
-                      <span className="inline-block h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Saving...
-                    </span>
-                  ) : (
-                    <>
-                      <FaSave className="h-4 w-4 mr-1" />
-                      Save
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={!savingEdit ? onCancel : undefined}
-                  title="Cancel"
-                  disabled={savingEdit}
-                  className="h-8 px-3 flex items-center justify-center rounded-full text-stone-600 bg-stone-100 hover:bg-stone-200 transition-colors text-xs font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 disabled:opacity-50"
-                >
-                  <FaTimes className="h-4 w-4 mr-1" />
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="flex items-start">
         <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
           <img
@@ -150,16 +73,88 @@ const Review = ({
 
           {/* Content area */}
           {!isEditing && (
-            <p className="text-stone-700 whitespace-pre-line">{review.content}</p>
+            <p className="text-stone-700 whitespace-pre-line mb-4">{review.content}</p>
           )}
           {isEditing && (
             <textarea
               value={editingContent}
               onChange={(e) => setEditingContent(e.target.value)}
               rows={4}
-              className="w-full text-sm px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full text-sm px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4"
               placeholder="Update your review..."
             />
+          )}
+
+          {/* Action buttons below content */}
+          {isOwner && (
+            <div className="flex flex-wrap items-center gap-2">
+              {!isEditing && (
+                <>
+                  <button
+                    onClick={() => !savingEdit && deletingId !== review._id && onEdit(review)}
+                    title="Edit"
+                    disabled={savingEdit || deletingId === review._id}
+                    className="h-9 px-4 flex items-center justify-center rounded-lg text-sm font-medium text-stone-600 bg-stone-100 hover:bg-stone-200 hover:text-amber-700 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50"
+                  >
+                    <FaEdit className="h-4 w-4 mr-1.5" />
+                  </button>
+                  <button
+                    onClick={() => !savingEdit && deletingId !== review._id && onDelete(review._id)}
+                    title="Delete"
+                    disabled={savingEdit || deletingId === review._id}
+                    className={`h-9 px-4 flex items-center justify-center rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                      deletingId === review._id
+                        ? "bg-red-500 text-white cursor-not-allowed"
+                        : "bg-red-50 text-red-600 hover:bg-red-100"
+                    } disabled:opacity-50`}
+                  >
+                    {deletingId === review._id ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Deleting...
+                      </span>
+                    ) : (
+                      <>
+                        <FaTrash className="h-4 w-4 mr-1.5" />
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+              {isEditing && (
+                <>
+                  <button
+                    onClick={!savingEdit ? onSave : undefined}
+                    title="Save"
+                    disabled={savingEdit}
+                    className={`h-9 px-4 flex items-center justify-center rounded-lg font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                      savingEdit
+                        ? "bg-amber-500 text-white cursor-not-allowed"
+                        : "bg-amber-600 hover:bg-amber-700 text-white"
+                    }`}
+                  >
+                    {savingEdit ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </span>
+                    ) : (
+                      <>
+                        <FaSave className="h-4 w-4 mr-1.5" />
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={!savingEdit ? onCancel : undefined}
+                    title="Cancel"
+                    disabled={savingEdit}
+                    className="h-9 px-4 flex items-center justify-center rounded-lg text-stone-600 bg-stone-100 hover:bg-stone-200 transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 disabled:opacity-50"
+                  >
+                    <FaTimes className="h-4 w-4 mr-1.5" />
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -204,28 +199,18 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
   useEffect(() => {
     let cancelled = false
 
-    // Wait for user id before determining (prevents false enabling)
     if (!slug) {
       setReviews([])
       setDisplayedReviews([])
       setTotalCount(0)
       setLoading(false)
-      setUserHasReview(null)
+      setUserHasReview(false) // treat as no review when no slug
       setReviewsLoaded(true)
-      return
-    }
-
-    if (currentUserId === null) {
-      // user context not ready yet; keep skeleton
-      setLoading(true)
-      setUserHasReview(null)
-      setReviewsLoaded(false)
       return
     }
 
     const loadReviews = async () => {
       setLoading(true)
-      setReviewsLoaded(false)
       try {
         const payload = await getCoffeeShopReviewsBySlug(slug, {})
         const listRaw = Array.isArray(payload?.data) ? payload.data : []
@@ -236,7 +221,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
           setDisplayedReviews(normalized.slice(0, 5))
           setShowingCount(Math.min(5, normalized.length))
           setTotalCount(total)
-          const has = normalized.some(r => r.userId === String(currentUserId))
+          const has = currentUserId ? normalized.some(r => r.userId === String(currentUserId)) : false
           setUserHasReview(has)
           onUserReviewStatus && onUserReviewStatus(has)
         }
@@ -246,7 +231,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
           setDisplayedReviews([])
           setShowingCount(0)
           setTotalCount(0)
-          setUserHasReview(false) // safe fallback (no review found)
+          setUserHasReview(false)
         }
       } finally {
         if (!cancelled) {
@@ -332,7 +317,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
     }
   }
 
-  const isStillDetermining = loading || !reviewsLoaded || userHasReview === null
+  const isStillDetermining = loading && !reviewsLoaded
 
   if (isStillDetermining) {
     return (

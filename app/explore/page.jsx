@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaFilter,
@@ -18,6 +19,7 @@ import CoffeeShopCard from "../../components/CoffeeShopCard";
 import Footer from "../../components/Footer";
 import metroManilaCities from "../../data/metro-manila-cities.json";
 import { getAllCoffeeShop } from "../../services/coffeeShopService";
+import { getAnonLocation } from "../../services/commonService";
 import ExploreLoading from './loading'
 
 export default function ExplorePage() {
@@ -30,12 +32,45 @@ export default function ExplorePage() {
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedVibes, setSelectedVibes] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(true);
+  // start hidden and decide on mount based on stored anon location
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // start in loading state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   // Track total results for display
   const [resultCount, setResultCount] = useState(0);
+
+  const searchParams = useSearchParams(); // added
+  const paramsInitializedRef = useRef(false); // added - ensure we initialize from URL once
+
+  // Initialize state from URL search params once (supports direct /explore?city=... or ?q=...)
+  useEffect(() => {
+    if (paramsInitializedRef.current) return;
+    paramsInitializedRef.current = true;
+
+    if (!searchParams) return;
+
+    const cityParam = searchParams.get("city") || "";
+    const qParam = searchParams.get("q") || searchParams.get("search") || "";
+    const pageParam = parseInt(searchParams.get("page") || "", 10);
+    const ratingParam = parseFloat(searchParams.get("minRating") || searchParams.get("rating") || "");
+    const amenitiesParam = searchParams.get("amenities") || "";
+    const vibesParam = searchParams.get("vibes") || "";
+
+    if (cityParam) setSelectedCity(cityParam);
+    if (qParam) {
+      setSearchTerm(qParam);
+      setDebouncedSearchTerm(qParam); // immediate fetch when seeded from URL
+    }
+    if (!Number.isNaN(pageParam) && pageParam > 0) setCurrentPage(pageParam);
+    if (!Number.isNaN(ratingParam) && ratingParam > 0) setMinRating(ratingParam);
+    if (amenitiesParam) {
+      setSelectedAmenities(amenitiesParam.split(",").map(s => s.trim()).filter(Boolean));
+    }
+    if (vibesParam) {
+      setSelectedVibes(vibesParam.split(",").map(s => s.trim()).filter(Boolean));
+    }
+  }, [searchParams]);
 
   // Memoize the query so effect only runs when relevant inputs change.
   const queryWithPagination = useMemo(() => {
@@ -63,17 +98,10 @@ export default function ExplorePage() {
     setCurrentPage(1);
   }, [debouncedSearchTerm, selectedCity, minRating, selectedAmenities, selectedVibes]);
 
-  // Prevent Strict Mode double-invoke of effects in development
-  const fetchedOnceRef = useRef(false);
-
-  // Fetch from backend with dev guard and stale-cancel
+  // Fetch from backend with stale-cancel
   useEffect(() => {
-    // In development, React Strict Mode runs effects twice.
-    // Skip the first run; allow the second to proceed (one real request).
-    if (process.env.NODE_ENV !== "production" && !fetchedOnceRef.current) {
-      fetchedOnceRef.current = true;
-      return;
-    }
+    // Wait for URL params to be initialized before fetching (so direct /explore?city=... triggers a request)
+    if (!paramsInitializedRef.current) return;
 
     let cancelled = false;
     setIsLoading(true);
@@ -166,12 +194,93 @@ export default function ExplorePage() {
     "Spacious",
   ];
 
-  // ✅ Location Modal Handler
-  const handleLocationPermission = (useLocation) => {
-    if (useLocation) {
-      console.log("📍 Getting user location for nearest coffee shops...");
+  // Local storage key + TTL (20 minutes)
+  const ANON_LOC_KEY = "kapehan_anon_loc";
+  const ANON_LOC_TTL = 1000 * 60 * 20; // 20 minutes
+
+  // helper: save anon location with timestamp (store only lat/long)
+  const saveAnonLocation = ({ latitude, longitude }) => {
+    try {
+      const payload = { latitude, longitude, ts: Date.now() };
+      localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.error("Error saving anon location:", e);
     }
-    setShowLocationModal(false);
+  };
+
+  // helper: read and validate stored anon location
+  const readAnonLocation = () => {
+    try {
+      const raw = localStorage.getItem(ANON_LOC_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed.ts || Date.now() - parsed.ts > ANON_LOC_TTL) {
+        localStorage.removeItem(ANON_LOC_KEY);
+        return null;
+      }
+      return parsed; // { latitude, longitude, city, ts }
+    } catch (e) {
+      console.error("Error reading anon location:", e);
+      return null;
+    }
+  };
+
+  // send to backend and optionally save
+  const sendAnonLocation = async ({ latitude, longitude }, save = false) => {
+    try {
+      const payload = { latitude, longitude }; // no city
+      console.log("Sending anon location payload:", payload);
+      await getAnonLocation(payload);
+      if (save) saveAnonLocation({ latitude, longitude });
+      setShowLocationModal(false);
+    } catch (e) {
+      console.error("Failed to send anon location:", e);
+      setShowLocationModal(false);
+    }
+  };
+
+  // on mount: check stored anon location and decide whether to show modal
+  useEffect(() => {
+    // only run on client
+    const stored = readAnonLocation();
+    if (stored) {
+      console.log("Found stored anon location, keeping it and skipping backend resend:", stored);
+      // keep modal hidden and do NOT resend — avoid unnecessary backend calls
+      setShowLocationModal(false);
+    } else {
+      // no stored coords -> show modal to ask user and call backend only when user allows
+      setShowLocationModal(true);
+    }
+  }, []);
+
+  // updated location permission handler
+  const handleLocationPermission = (useLocation) => {
+    if (!useLocation) {
+      setShowLocationModal(false);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      setShowLocationModal(false);
+      return;
+    }
+
+    // try to get current position
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        console.log("Geolocation obtained:", pos.coords); // <-- added
+        const latitude = pos.coords.latitude;
+        const longitude = pos.coords.longitude;
+        // send and save lat/long only
+        await sendAnonLocation({ latitude, longitude }, true);
+      },
+      (err) => {
+        console.warn("Geolocation error:", err);
+        setShowLocationModal(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   // ✅ Filter handlers

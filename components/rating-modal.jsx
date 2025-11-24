@@ -40,7 +40,10 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
 
   const handleLoginSuccess = () => setShowAccountModal(false)
 
-  // Guard if hidden or no shop id yet
+  // Block entirely if not authenticated
+  if (!isAuthenticated) return null
+
+  // Guard if hidden or no shop id
   if (!show || !shopId) return null
 
   return (

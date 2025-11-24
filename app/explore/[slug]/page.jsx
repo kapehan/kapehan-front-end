@@ -87,22 +87,20 @@ export default function CoffeeShopDetailPage() {
     }
   };
 
-  // Handle write review click
+  // Handle write review click (now blocked if not authenticated)
   const handleWriteReviewClick = () => {
     if (!isAuthenticated) {
       setShowAccountModal(true)
       return
     }
-    // Block if status not yet known OR already reviewed
-    if (userHasReview !== false) {
-      return
-    }
+    if (userHasReview === true) return
     setShowReviewModal(true)
   }
 
   const handleLoginSuccess = () => {
-    // context updates isAuthenticated automatically
     setShowAccountModal(false);
+    // after login, force ReviewSection to re-fetch user-specific status
+    setReviewVersion(v => v + 1);
   };
 
   // Fetch shop details from API
@@ -675,7 +673,8 @@ export default function CoffeeShopDetailPage() {
         shopId={shop._id}
         slug={shopSlug}
         onSubmitted={() => setReviewVersion(v => v + 1)}
-        userHasReview={userHasReview === true} // normalize null -> false in modal
+        // only treat as already reviewed if authenticated and server reported true
+        userHasReview={isAuthenticated ? userHasReview === true : false}
       />
       <UserAccountModal
         show={showAccountModal}

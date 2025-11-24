@@ -29,3 +29,22 @@ export const getAmenities = async () => {
     throw error; // Re-throw the error for further handling
   }
 };
+
+// Updated: accept payload and POST to /user/anon
+export const getAnonLocation = async (payload) => {
+  try {
+    // payload expected: { latitude: number, longitude: number }
+    console.log("commonService.getAnonLocation payload:", payload); // <-- added
+    // only send lat/long to backend (no city)
+    const body = { latitude: payload.latitude, longitude: payload.longitude };
+    const response = await axiosInstance.post("/user/anon/update", body);
+    console.log("commonService.getAnonLocation response:", {
+      status: response?.status,
+      data: response?.data?.data ?? response?.data,
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error posting anonymous location:", error);
+    throw error;
+  }
+};
