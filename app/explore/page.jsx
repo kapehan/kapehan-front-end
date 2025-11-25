@@ -11,10 +11,10 @@ import {
   FaDog,
   FaWheelchair,
   FaTimes,
-  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { LuCoffee, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import Navigation from "../../components/navigation";
+import LocationPermissionModal from "../../components/LocationPermissionModal";
 import CoffeeShopCard from "../../components/CoffeeShopCard";
 import Footer from "../../components/Footer";
 import metroManilaCities from "../../data/metro-manila-cities.json";
@@ -42,6 +42,11 @@ export default function ExplorePage() {
 
   const searchParams = useSearchParams(); // added
   const paramsInitializedRef = useRef(false); // added - ensure we initialize from URL once
+  const locationIntervalRef = useRef(null);
+
+  // Local storage key + TTL (20 minutes)
+  const ANON_LOC_KEY = "user_location";
+  const LOCATION_TTL = 1000 * 60 * 20; // 20 minutes
 
   // Initialize state from URL search params once (supports direct /explore?city=... or ?q=...)
   useEffect(() => {
@@ -194,93 +199,99 @@ export default function ExplorePage() {
     "Spacious",
   ];
 
-  // Local storage key + TTL (20 minutes)
-  const ANON_LOC_KEY = "kapehan_anon_loc";
-  const ANON_LOC_TTL = 1000 * 60 * 20; // 20 minutes
-
-  // helper: save anon location with timestamp (store only lat/long)
-  const saveAnonLocation = ({ latitude, longitude }) => {
-    try {
-      const payload = { latitude, longitude, ts: Date.now() };
-      localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.error("Error saving anon location:", e);
-    }
-  };
-
-  // helper: read and validate stored anon location
+  // helper: read and validate stored anon location (with TTL check)
   const readAnonLocation = () => {
     try {
       const raw = localStorage.getItem(ANON_LOC_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      if (!parsed.ts || Date.now() - parsed.ts > ANON_LOC_TTL) {
+      // Check if expired
+      if (!parsed.ts || Date.now() - parsed.ts > LOCATION_TTL) {
+        console.log("Location expired, removing from localStorage");
         localStorage.removeItem(ANON_LOC_KEY);
         return null;
       }
-      return parsed; // { latitude, longitude, city, ts }
+      return parsed;
     } catch (e) {
       console.error("Error reading anon location:", e);
       return null;
     }
   };
 
-  // send to backend and optionally save
-  const sendAnonLocation = async ({ latitude, longitude }, save = false) => {
-    try {
-      const payload = { latitude, longitude }; // no city
-      console.log("Sending anon location payload:", payload);
-      await getAnonLocation(payload);
-      if (save) saveAnonLocation({ latitude, longitude });
-      setShowLocationModal(false);
-    } catch (e) {
-      console.error("Failed to send anon location:", e);
-      setShowLocationModal(false);
+  // Fetch current geolocation and update backend + localStorage
+  const updateLocation = async () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const latitude = pos.coords.latitude;
+        const longitude = pos.coords.longitude;
+        console.log("Auto-updating location:", { latitude, longitude });
+        try {
+          await getAnonLocation({ latitude, longitude });
+          // Save with timestamp
+          const payload = { 
+            latitude, 
+            longitude, 
+            ts: Date.now(),
+            expiresAt: Date.now() + LOCATION_TTL
+          };
+          localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
+        } catch (e) {
+          console.error("Failed to auto-update location:", e);
+        }
+      },
+      (err) => console.warn("Geolocation error during auto-update:", err),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  // Start auto-refresh interval (check every 5 minutes if location needs refresh)
+  const startLocationInterval = () => {
+    if (locationIntervalRef.current) return;
+    console.log("Starting location auto-refresh check");
+    locationIntervalRef.current = setInterval(() => {
+     const stored = readAnonLocation();
+     if (!stored) {
+       console.log("Location expired during interval, showing modal");
+       setShowLocationModal(true);
+       stopLocationInterval();
+     }
+    }, 1000 * 60 * 5); // Check every 5 minutes
+  };
+
+  // Stop auto-refresh interval
+  const stopLocationInterval = () => {
+    if (locationIntervalRef.current) {
+      clearInterval(locationIntervalRef.current);
+      locationIntervalRef.current = null;
     }
   };
 
   // on mount: check stored anon location and decide whether to show modal
   useEffect(() => {
-    // only run on client
     const stored = readAnonLocation();
     if (stored) {
-      console.log("Found stored anon location, keeping it and skipping backend resend:", stored);
-      // keep modal hidden and do NOT resend — avoid unnecessary backend calls
+      console.log("Found valid stored location:", stored);
       setShowLocationModal(false);
+      startLocationInterval();
     } else {
-      // no stored coords -> show modal to ask user and call backend only when user allows
+      console.log("No stored location, showing modal");
       setShowLocationModal(true);
     }
+    
+    return () => {
+      stopLocationInterval();
+    };
   }, []);
 
-  // updated location permission handler
-  const handleLocationPermission = (useLocation) => {
-    if (!useLocation) {
-      setShowLocationModal(false);
-      return;
-    }
+  const handleLocationSuccess = () => {
+    console.log("Location success, hiding modal and starting interval");
+    setShowLocationModal(false);
+    startLocationInterval();
+  };
 
-    if (!navigator.geolocation) {
-      console.warn("Geolocation not supported");
-      setShowLocationModal(false);
-      return;
-    }
-
-    // try to get current position
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        console.log("Geolocation obtained:", pos.coords); // <-- added
-        const latitude = pos.coords.latitude;
-        const longitude = pos.coords.longitude;
-        // send and save lat/long only
-        await sendAnonLocation({ latitude, longitude }, true);
-      },
-      (err) => {
-        console.warn("Geolocation error:", err);
-        setShowLocationModal(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+  const handleLocationDeny = () => {
+    setShowLocationModal(false);
   };
 
   // ✅ Filter handlers
@@ -322,47 +333,13 @@ export default function ExplorePage() {
     <div className="min-h-screen bg-white">
       <Navigation />
 
-      <AnimatePresence>
-        {showLocationModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center"
-            >
-              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaMapMarkerAlt className="text-amber-700 text-xl" />
-              </div>
-              <h2 className="text-2xl font-bold text-stone-900 mb-2">
-                Find Nearest Coffee Shops
-              </h2>
-              <p className="text-stone-600 mb-6">
-                To help us show you the nearest coffee shops based on your
-                location, may we access your location?
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => handleLocationPermission(false)}
-                  className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-lg font-semibold hover:bg-stone-50 transition-colors"
-                >
-                  Not Now
-                </button>
-                <button
-                  onClick={() => handleLocationPermission(true)}
-                  className="flex-1 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition-colors"
-                >
-                  Allow Location
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LocationPermissionModal
+        isOpen={showLocationModal}
+        onSuccess={handleLocationSuccess}
+        onDeny={handleLocationDeny}
+        localStorageKey={ANON_LOC_KEY}
+        ttl={LOCATION_TTL}
+      />
 
       {/* Enhanced Search and Filter Bar - Mobile First */}
       <div className="pt-12 bg-stone-50 border-b border-stone-200 sticky top-12 z-30">

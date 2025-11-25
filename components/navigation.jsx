@@ -22,7 +22,7 @@ export default function Navigation() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const pathname = usePathname();
 
-  const { user, isAuthenticated, login, logout } = useAuth();
+  const { user, isAuthenticated, isAnonymous, login, logout } = useAuth();
 
   // Unified user display helpers
   const displayName =

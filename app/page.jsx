@@ -10,14 +10,116 @@ import OwnerCTA from "../components/OwnerCTA";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import Navigation from "../components/navigation";
+import { useState, useEffect, useRef } from "react";
+import LocationPermissionModal from "../components/LocationPermissionModal";
+import { getAnonLocation } from "../services/commonService";
+
 const Page = () => {
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const locationIntervalRef = useRef(null);
+
   const featuredShops = [...allShops]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 4);
 
+  // Local storage key + TTL (20 minutes)
+  const ANON_LOC_KEY = "user_location";
+  const REFRESH_INTERVAL = 1000 * 60 * 30; // 30 minutes
+
+  // helper: save anon location
+  const saveAnonLocation = ({ latitude, longitude }) => {
+    try {
+      const payload = { latitude, longitude, ts: Date.now() };
+      localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.error("Error saving anon location:", e);
+    }
+  };
+
+  // helper: read and validate stored anon location
+  const readAnonLocation = () => {
+    try {
+      const raw = localStorage.getItem(ANON_LOC_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed.ts || Date.now() - parsed.ts > ANON_LOC_TTL) {
+        localStorage.removeItem(ANON_LOC_KEY);
+        return null;
+      }
+      return parsed;
+    } catch (e) {
+      console.error("Error reading anon location:", e);
+      return null;
+    }
+  };
+
+  // Fetch current geolocation and update backend + localStorage
+  const updateLocation = async () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const latitude = pos.coords.latitude;
+        const longitude = pos.coords.longitude;
+        console.log("Auto-updating location:", { latitude, longitude });
+        try {
+          await getAnonLocation({ latitude, longitude });
+          saveAnonLocation({ latitude, longitude });
+        } catch (e) {
+          console.error("Failed to auto-update location:", e);
+        }
+      },
+      (err) => console.warn("Geolocation error during auto-update:", err),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  // Start auto-refresh interval
+  const startLocationInterval = () => {
+    if (locationIntervalRef.current) return;
+    locationIntervalRef.current = setInterval(() => {
+      updateLocation();
+    }, REFRESH_INTERVAL);
+  };
+
+  // Stop auto-refresh interval
+  const stopLocationInterval = () => {
+    if (locationIntervalRef.current) {
+      clearInterval(locationIntervalRef.current);
+      locationIntervalRef.current = null;
+    }
+  };
+
+  // on mount: check stored anon location and decide whether to show modal
+  useEffect(() => {
+    const stored = readAnonLocation();
+    if (stored) {
+      console.log("Found stored anon location:", stored);
+      setShowLocationModal(false);
+      startLocationInterval();
+    } else {
+      // no stored coords -> show modal to ask user
+      setShowLocationModal(true);
+    }
+
+    return () => {
+      stopLocationInterval();
+    };
+  }, []);
+
+  const handleLocationSuccess = () => {
+    setShowLocationModal(false);
+    startLocationInterval();
+  };
+
   return (
     <>
       <Navigation />
+
+      <LocationPermissionModal
+        isOpen={showLocationModal}
+        onSuccess={handleLocationSuccess}
+        onDeny={() => setShowLocationModal(false)}
+      />
 
       {/* Hero Section - Simplified and Clean */}
       <div className="pt-20 bg-white border-b border-stone-100">

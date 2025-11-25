@@ -37,7 +37,7 @@ export const getAnonLocation = async (payload) => {
     console.log("commonService.getAnonLocation payload:", payload); // <-- added
     // only send lat/long to backend (no city)
     const body = { latitude: payload.latitude, longitude: payload.longitude };
-    const response = await axiosInstance.post("/user/anon/update", body);
+    const response = await axiosInstance.post("/user/location", body);
     console.log("commonService.getAnonLocation response:", {
       status: response?.status,
       data: response?.data?.data ?? response?.data,
