@@ -1,6 +1,6 @@
 // src/api/axiosInstance.js
 import axios from "axios";
-import { getNewAccessToken } from "./authService";
+import { getNewAccessToken } from "./auth-utils";
 
 let isRefreshing = false;
 let failedQueue = [];

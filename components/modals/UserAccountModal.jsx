@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaTimes,
@@ -10,9 +10,22 @@ import {
   FaUserTag,
 } from "react-icons/fa";
 import { LuCoffee } from "react-icons/lu";
-import { getCities } from "../services/commonService";
-import { createAccount, loginAccount } from "../utils/auth-utils";
-import { useAuth } from "../context/authContext";
+import metroManilaCities from "../../data/metro-manila-cities.json";
+import { createAccount, loginAccount } from "../../utils/auth-utils";
+import { useAuth } from "../../context/authContext";
+import SuccessModal from "./SuccessModal"; // <-- Import SuccessModal
+
+const modalBackdrop = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.25 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const modalContent = {
+  hidden: { opacity: 0, scale: 0.95, y: 40 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, type: "spring" } },
+  exit: { opacity: 0, scale: 0.95, y: 40, transition: { duration: 0.2 } },
+};
 
 export default function UserAccountModal({ show, onClose }) {
   const { login } = useAuth();
@@ -20,37 +33,18 @@ export default function UserAccountModal({ show, onClose }) {
   const [isSignUp, setIsSignUp] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showWelcome, setShowWelcome] = useState(false); // <-- new state
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeLoading, setWelcomeLoading] = useState(false);
   const [formData, setFormData] = useState({
-    // Sign Up fields
     name: "",
     username: "",
     location: "",
     email: "",
     password: "",
     confirmPassword: "",
-    // Sign In fields
     loginEmail: "",
     loginPassword: "",
   });
-  const [cities, setCities] = useState([]);
-
-  // Fetch cities on mount
-  useEffect(() => {
-    let mounted = true;
-    async function fetchCities() {
-      try {
-        const result = await getCities();
-        if (mounted) setCities(Array.isArray(result) ? result : []);
-      } catch (e) {
-        setCities([]);
-      }
-    }
-    fetchCities();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -66,11 +60,9 @@ export default function UserAccountModal({ show, onClose }) {
 
     try {
       if (isSignUp) {
-        // Handle sign up
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords do not match");
         }
-
         const result = await createAccount({
           name: formData.name,
           username: formData.username,
@@ -78,18 +70,15 @@ export default function UserAccountModal({ show, onClose }) {
           email: formData.email,
           password: formData.password,
         });
-
         login(result.user);
-        setShowWelcome(true); // show welcome modal
+        setShowWelcome(true);
         resetForm();
-        return; // skip rest of flow for sign up
+        return;
       } else {
-        // Handle sign in
         const result = await loginAccount({
           email: formData.loginEmail,
           password: formData.loginPassword,
         });
-
         login(result.user);
         resetForm();
         onClose();
@@ -125,52 +114,62 @@ export default function UserAccountModal({ show, onClose }) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        variants={modalBackdrop}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
         {/* Backdrop */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          variants={modalBackdrop}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
           className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           onClick={onClose}
         />
 
         {/* Modal */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          variants={modalContent}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
           className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
         >
-          {/* Show welcome modal if registration was successful */}
           {showWelcome ? (
-            <div className="flex flex-col items-center justify-center p-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-700 rounded-full flex items-center justify-center mb-4">
-                <LuCoffee className="text-white text-3xl" />
-              </div>
-              <h2 className="text-2xl font-bold text-stone-900 mb-2">
-                Welcome to Kapehan!
-              </h2>
-              <p className="text-stone-600 mb-6 text-center">
-                Your profile has been created successfully.
-                <br />
-                Enjoy discovering the best coffee shops!
-              </p>
-              <button
-                onClick={() => {
+            <SuccessModal
+              show={showWelcome}
+              title="Welcome to Kapehan!"
+              description={
+                <>
+                  Your profile has been created successfully.<br />
+                  Enjoy discovering the best coffee shops!
+                </>
+              }
+              buttonText="Continue"
+              loading={welcomeLoading}
+              onClose={() => {
+                setWelcomeLoading(true);
+                setTimeout(() => {
+                  setWelcomeLoading(false);
                   setShowWelcome(false);
                   onClose();
                   window.location.reload();
-                }}
-                className="px-6 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition-colors"
-              >
-                Continue
-              </button>
-            </div>
+                }, 900);
+              }}
+            />
           ) : (
             <>
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-stone-200">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center justify-between p-6 border-b border-stone-200"
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl flex items-center justify-center">
                     <LuCoffee className="text-white text-lg" />
@@ -190,13 +189,18 @@ export default function UserAccountModal({ show, onClose }) {
                 >
                   <FaTimes />
                 </button>
-              </div>
+              </motion.div>
 
               {/* Error Message */}
               {error && (
-                <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+                >
                   <p className="text-sm text-red-600">{error}</p>
-                </div>
+                </motion.div>
               )}
 
               {/* Form */}
@@ -255,13 +259,11 @@ export default function UserAccountModal({ show, onClose }) {
                             required
                           >
                             <option value="">Select your city</option>
-                            {cities.map((city) =>
-                              city && city.city_value ? (
-                                <option key={city.city_value} value={city.city_value}>
-                                  {city.city_name}
-                                </option>
-                              ) : null
-                            )}
+                            {metroManilaCities.map((city) => (
+                              <option key={city} value={city}>
+                                {city}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </div>
@@ -368,7 +370,9 @@ export default function UserAccountModal({ show, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 mt-6 disabled:opacity-50"
+                  className={`w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 mt-6 ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   {loading
                     ? isSignUp
@@ -405,7 +409,7 @@ export default function UserAccountModal({ show, onClose }) {
             </>
           )}
         </motion.div>
-      </div>
+      </motion.div>
     </AnimatePresence>
   );
 }

@@ -24,6 +24,7 @@ const Page = () => {
 
   // Local storage key + TTL (20 minutes)
   const ANON_LOC_KEY = "user_location";
+  const ANON_LOC_TTL = 1000 * 60 * 20; // 20 minutes
   const REFRESH_INTERVAL = 1000 * 60 * 30; // 30 minutes
 
   // helper: save anon location

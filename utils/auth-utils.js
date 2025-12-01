@@ -45,60 +45,13 @@ export async function createAccount(userData) {
 }
 
 /**
- * Submit a review for a coffee shop
- * @param {Object} reviewData - Review data
- * @param {string} reviewData.shopId - ID of the coffee shop
- * @param {number} reviewData.rating - Rating (1-5)
- * @param {string} reviewData.content - Review content
- * @param {string} token - Authentication token
- * @returns {Promise<Object>} - Submitted review data
- */
-export async function submitReview(reviewData, token) {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // This is a mock implementation - in a real app, this would be an API call
-  // Example: return await fetch('/api/reviews', {
-  //   method: 'POST',
-  //   headers: { 'Authorization': `Bearer ${token}` },
-  //   body: JSON.stringify(reviewData)
-  // }).then(res => res.json());
-
-  // Validate token
-  if (!token || !token.startsWith("token_")) {
-    throw new Error("Unauthorized");
-  }
-
-  // Validate review data
-  if (!reviewData.shopId || !reviewData.rating || !reviewData.content) {
-    throw new Error("Invalid review data");
-  }
-
-  const user = getCurrentUser();
-
-  // Return mock review data
-  return {
-    id: `review_${Math.random().toString(36).substring(2)}`,
-    shopId: reviewData.shopId,
-    rating: reviewData.rating,
-    content: reviewData.content,
-    date: new Date().toISOString(),
-    user: {
-      id: user?.id || "user_123",
-      name: user?.name || "Current User",
-      avatar: user?.avatar || "/placeholder.svg?height=50&width=50",
-    },
-  };
-}
-
-/**
  * Get current user data
  * Fetches from backend using cookie
  */
 export async function getCurrentUser() {
   try {
     const res = await axiosInstance.get("/user");
-    return {...res.data || null};
+    return { ...(res.data || null) };
   } catch (err) {
     return null;
   }
@@ -116,38 +69,8 @@ export async function logoutUser() {
   }
 }
 
-/**
- * Add a visited coffee shop to user's history
- * @param {Object} shop - Coffee shop data
- */
-export function addVisitedShop(shop) {
-  if (typeof window === "undefined") return;
-
-  const user = getCurrentUser();
-  if (!user) return;
-
-  const visitedShops = user.visitedShops || [];
-
-  // Remove if already exists to avoid duplicates
-  const filteredShops = visitedShops.filter((s) => s.id !== shop.id);
-
-  // Add to beginning of array
-  const updatedShops = [
-    {
-      id: shop.id,
-      name: shop.name,
-      image: shop.image,
-      city: shop.city,
-      rating: shop.rating,
-      visitedAt: new Date().toISOString(),
-    },
-    ...filteredShops,
-  ].slice(0, 10); // Keep only last 10 visited
-
-  const updatedUser = {
-    ...user,
-    visitedShops: updatedShops,
-  };
-
-  saveUser(updatedUser);
+// 🔁 Refresh token silently (cookie-based)
+export async function getNewAccessToken() {
+  const res = await axiosInstance.post("/user/refreshToken");
+  return res.data;
 }
