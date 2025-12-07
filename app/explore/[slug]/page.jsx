@@ -137,10 +137,28 @@ export default function CoffeeShopDetailPage() {
         const openingHoursObj = Array.isArray(raw.openingHours)
           ? raw.openingHours.reduce((acc, cur) => {
               const day = (cur?.day || "").toLowerCase();
+              
+              // Convert 12-hour format (7:00 AM) to 24-hour format (07:00)
+              const convertTo24Hour = (timeStr) => {
+                if (!timeStr) return timeStr;
+                const time12 = timeStr.trim();
+                const [time, period] = time12.split(' ');
+                const [hours, minutes] = time.split(':');
+                let hours24 = parseInt(hours);
+                
+                if (period?.toUpperCase() === 'AM') {
+                  if (hours24 === 12) hours24 = 0;
+                } else if (period?.toUpperCase() === 'PM') {
+                  if (hours24 !== 12) hours24 += 12;
+                }
+                
+                return `${String(hours24).padStart(2, '0')}:${minutes}`;
+              };
+              
               acc[day] = {
-                open: cur?.open || "",
-                close: cur?.close || "",
-                closed: !!cur?.isClosed,
+                open: convertTo24Hour(cur?.open || ""),
+                close: convertTo24Hour(cur?.close || ""),
+                closed: false, // Always false since isClosed in API is unreliable
               };
               return acc;
             }, {})
@@ -202,11 +220,14 @@ export default function CoffeeShopDetailPage() {
           return;
         }
 
-        // Always compare API response with cache and update if different
+        // Check if API data differs from cache
         if (!cached || JSON.stringify(cached) !== JSON.stringify(enhancedShop)) {
+          // Data changed, update cache and UI
           setCache(CACHE_KEY, enhancedShop);
           setShop(enhancedShop);
         }
+        // If data is same as cache, we already set it above, so just keep it
+        
       } catch (error) {
         console.error("Error fetching shop:", error);
         if (!cached) {
