@@ -32,3 +32,13 @@ export const getCoffeeShopById = async (slug) => {
     throw error;
   }
 };
+
+export const getMenuByCoffeeShopId = async (slug) => {
+  try {
+    const response = await axiosInstance.get(`/shop/menu/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coffee shops:", error);
+    throw error;
+  }
+};

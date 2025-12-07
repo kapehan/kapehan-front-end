@@ -30,6 +30,16 @@ export const getAmenities = async () => {
   }
 };
 
+export const getCityShopCounts = async () => {
+  try {
+    const response = await axiosInstance.get("/cities/shop-counts");
+    return response.data.data; // Return the data from the response
+  } catch (error) {
+    console.error("Error fetching city counts:", error);
+    throw error; // Re-throw the error for further handling
+  }
+};
+
 // Updated: accept payload and POST to /user/anon
 export const getAnonLocation = async (payload) => {
   try {
@@ -47,4 +57,18 @@ export const getAnonLocation = async (payload) => {
     console.error("Error posting anonymous location:", error);
     throw error;
   }
+};
+
+// Autocomplete places by query string
+export const autoComplete = async (query = {}) => {
+  // Normalize to { search: string }
+  const params =
+    typeof query === "string"
+      ? { search: query }
+      : query && typeof query === "object"
+      ? { ...query, search: query.search ?? "" }
+      : { search: "" };
+
+  const response = await axiosInstance.get("/places/autocomplete", { params });
+  return response.data.data;
 };

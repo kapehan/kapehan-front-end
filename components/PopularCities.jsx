@@ -1,18 +1,62 @@
 "use client"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { FaMapMarkerAlt } from "react-icons/fa"
+import { getCityShopCounts} from "../services/commonService"
+
+const CITY_COUNTS_KEY = "city_shop_counts"
+const CITY_COUNTS_TTL = 1000 * 60 * 30 // 30 minutes
 
 const PopularCities = () => {
-  const cities = [
-    { name: "Makati", count: 42 },
-    { name: "BGC", count: 38 },
-    { name: "Quezon City", count: 35 },
-    { name: "Pasig", count: 29 },
-    { name: "Manila", count: 24 },
-    { name: "Mandaluyong", count: 18 },
-  ]
+  const [cities, setCities] = useState([])
+
+  // Helper: read cached city counts
+  const readCityCounts = () => {
+    try {
+      const raw = localStorage.getItem(CITY_COUNTS_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      if (!parsed.ts || Date.now() - parsed.ts > CITY_COUNTS_TTL) {
+        localStorage.removeItem(CITY_COUNTS_KEY)
+        return null
+      }
+      return parsed.data
+    } catch {
+      return null
+    }
+  }
+
+  // Fetch and cache city shop counts
+  useEffect(() => {
+    let cancelled = false
+    const cached = readCityCounts()
+    if (cached && Array.isArray(cached)) {
+      setCities(cached)
+    } else {
+      (async () => {
+        try {
+          const resp = await getCityShopCounts()
+          // Expect array of { city_name, city_value, count }
+          const data =
+            Array.isArray(resp?.data) ? resp.data :
+            Array.isArray(resp) ? resp :
+            []
+          const normalized = data.map(c => ({
+            name: c.city_name ?? c.name ?? c.city ?? c.city_value,
+            count: c.count ?? c.shop_count ?? 0,
+          })).filter(c => c.name)
+          if (!cancelled) setCities(normalized)
+          // Save to localStorage with timestamp
+          localStorage.setItem(CITY_COUNTS_KEY, JSON.stringify({ ts: Date.now(), data: normalized }))
+        } catch {
+          if (!cancelled) setCities([])
+        }
+      })()
+    }
+    return () => { cancelled = true }
+  }, [])
 
   return (
     <section className="bg-white py-20 px-4 md:px-12">
@@ -63,7 +107,7 @@ const PopularCities = () => {
                   </div>
                 </div>
               </div>
-              <Link href={`/explore?city=${city.name}`} className="absolute inset-0">
+              <Link href={`/explore?city=${encodeURIComponent(city.name)}`} className="absolute inset-0">
                 <span className="sr-only">Explore {city.name} coffee shops</span>
               </Link>
             </motion.div>

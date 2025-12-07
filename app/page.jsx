@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { allShops } from "../data/dummy-data";
 import CoffeeShopCard from "../components/CoffeeShopCard";
 import { motion } from "framer-motion";
 import SearchBox from "../components/search-box";
@@ -13,14 +12,15 @@ import Navigation from "../components/navigation";
 import { useState, useEffect, useRef } from "react";
 import LocationPermissionModal from "../components/LocationPermissionModal";
 import { getAnonLocation } from "../services/commonService";
+import { getAllCoffeeShop } from "../services/coffeeShopService";
 
 const Page = () => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const locationIntervalRef = useRef(null);
 
-  const featuredShops = [...allShops]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 4);
+  // Featured shops state (API-driven)
+  const [featuredShops, setFeaturedShops] = useState([]);
+  const [shopsLoading, setShopsLoading] = useState(true);
 
   // Local storage key + TTL (20 minutes)
   const ANON_LOC_KEY = "user_location";
@@ -111,6 +111,30 @@ const Page = () => {
     setShowLocationModal(false);
     startLocationInterval();
   };
+
+  // Fetch top-rated shops (limit 4)
+  useEffect(() => {
+    let cancelled = false;
+    setShopsLoading(true);
+    (async () => {
+      try {
+        const resp = await getAllCoffeeShop({ limit: 4, sort: "rating:desc" });
+        const data = resp?.data ?? resp;
+        const items =
+          (Array.isArray(data) && data) ||
+          (Array.isArray(data?.items) && data.items) ||
+          (Array.isArray(data?.docs) && data.docs) ||
+          (Array.isArray(resp?.items) && resp.items) ||
+          [];
+        if (!cancelled) setFeaturedShops(items);
+      } catch (e) {
+        if (!cancelled) setFeaturedShops([]);
+      } finally {
+        if (!cancelled) setShopsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <>
@@ -212,17 +236,27 @@ const Page = () => {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {featuredShops.map((shop, index) => (
-              <motion.div
-                key={shop.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <CoffeeShopCard shop={shop} showDistance={false} />
-              </motion.div>
-            ))}
+            {shopsLoading ? (
+              // minimal skeleton
+              <>
+                <div className="h-48 bg-stone-200 animate-pulse rounded-lg" />
+                <div className="h-48 bg-stone-200 animate-pulse rounded-lg" />
+                <div className="h-48 bg-stone-200 animate-pulse rounded-lg" />
+                <div className="h-48 bg-stone-200 animate-pulse rounded-lg" />
+              </>
+            ) : (
+              featuredShops.map((shop, index) => (
+                <motion.div
+                  key={shop.id || shop._id || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <CoffeeShopCard shop={shop} showDistance={false} />
+                </motion.div>
+              ))
+            )}
           </div>
 
           <div className="text-center">

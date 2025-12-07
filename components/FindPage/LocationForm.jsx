@@ -12,6 +12,8 @@ export function LocationForm({
   isLoading,
   locationError,
   onGetLocation,
+  friendSuggestions,
+  onFriendSuggestionSelect,
 }) {
   return (
     <div className="pt-20 bg-white relative overflow-hidden">
@@ -34,10 +36,12 @@ export function LocationForm({
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Enter your location..."
+                      placeholder="Fetching your location..."
                       value={yourLocation}
                       onChange={(e) => onYourLocationChange(e.target.value)}
-                      className="w-full p-3 md:p-4 pl-10 md:pl-12 pr-12 md:pr-16 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-base md:text-lg"
+                      className="w-full p-3 md:p-4 pl-10 md:pl-12 pr-12 md:pr-16 border border-stone-300 rounded-xl focus:outline-none bg-stone-50 text-base md:text-lg text-stone-700 cursor-not-allowed"
+                      disabled
+                      readOnly
                     />
                     <LuMapPin className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-stone-400 h-4 md:h-5 w-4 md:w-5" />
                     <button
@@ -79,6 +83,27 @@ export function LocationForm({
                       <LuNavigation className="h-3 md:h-4 w-3 md:w-4" />
                     </button>
                   </div>
+
+                  {/* Suggestions panel (first 5) */}
+                  {Array.isArray(friendSuggestions) && friendSuggestions.length > 0 && (
+                    <div className="mt-2 bg-white border border-stone-200 rounded-lg shadow-sm">
+                      <ul className="divide-y divide-stone-200">
+                        {friendSuggestions.slice(0, 5).map((s, idx) => (
+                          <li key={`${s.address || s.label || s.value}-${idx}`}>
+                            <button
+                              type="button"
+                              onClick={() => onFriendSuggestionSelect(s)}
+                              className="w-full text-left px-3 sm:px-4 py-2.5 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-600 transition-colors"
+                            >
+                              <span className="block text-sm sm:text-base text-stone-800">
+                                {s.address ?? s.label ?? s.value}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 <button

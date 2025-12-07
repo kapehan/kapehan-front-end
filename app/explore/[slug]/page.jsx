@@ -41,6 +41,7 @@ import MenuModal from "../../../components/MenuModal";
 import { getCoffeeShopById } from "../../../services/coffeeShopService";
 import ShopDetailSkeleton from "./loading";
 import { useAuth } from "../../../context/authContext"; // added
+import { getCache, setCache } from "../../utils/cacheUtils";
 
 export default function CoffeeShopDetailPage() {
   const params = useParams();
@@ -105,14 +106,26 @@ export default function CoffeeShopDetailPage() {
 
   // Fetch shop details from API
   useEffect(() => {
+    const CACHE_KEY = `coffeeShop:${shopSlug}`;
+    const CACHE_TTL = 24 * 60 * 60 * 1000; // 1 day in ms
+
     const fetchShopData = async () => {
       setLoading(true);
+      const cached = getCache(CACHE_KEY, CACHE_TTL);
+      
+      // Show cached data immediately while fetching
+      if (cached) {
+        setShop(cached);
+      }
+
       try {
-        // Fetch using normalized slug
         const res = await getCoffeeShopById(shopSlug);
         const raw = res?.data ?? res;
         if (!raw) {
-          setShop(null);
+          if (!cached) {
+            setShop(null);
+          }
+          setLoading(false);
           return;
         }
 
@@ -162,6 +175,7 @@ export default function CoffeeShopDetailPage() {
           address: raw.address,
           city: raw.city,
           rating: raw.rating,
+          review_count: raw.review_count,
           categories:
             Array.isArray(raw.vibes) && raw.vibes.length
               ? raw.vibes
@@ -184,27 +198,28 @@ export default function CoffeeShopDetailPage() {
         const derivedSlug = createSlug(enhancedShop.name);
         if (derivedSlug !== createSlug(shopSlug)) {
           setShop(null);
+          setLoading(false);
           return;
         }
 
-        setShop(enhancedShop);
-
-        // if (isLoggedIn()) {
-        //   addVisitedShop(enhancedShop)
-        // }
-
-        // Suggestions can be fetched via another endpoint; keep empty for now
-        setSuggestedShops([]);
+        // Always compare API response with cache and update if different
+        if (!cached || JSON.stringify(cached) !== JSON.stringify(enhancedShop)) {
+          setCache(CACHE_KEY, enhancedShop);
+          setShop(enhancedShop);
+        }
       } catch (error) {
-        console.error("Error fetching shop data:", error);
-        setShop(null);
+        console.error("Error fetching shop:", error);
+        if (!cached) {
+          setShop(null);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (shopSlug) fetchShopData();
-  }, [shopSlug]);
+    fetchShopData();
+    // eslint-disable-next-line
+  }, [shopSlug, reviewVersion]);
 
   if (loading) {
     return <ShopDetailSkeleton />;
@@ -356,7 +371,7 @@ export default function CoffeeShopDetailPage() {
                     {shop.rating}
                   </span>
                   <span className="text-white text-opacity-70 ml-1 text-xs md:text-sm">
-                    ({shop.reviewCount || 0})
+                    ({shop.review_count})
                   </span>
                 </div>
 
@@ -545,21 +560,15 @@ export default function CoffeeShopDetailPage() {
                 </div>
               </div>
 
-              {/* Location & View Menu Button */}
+              {/* Location (remove inline button) */}
               <div className="p-4 md:p-5">
                 <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
                   Location
                 </h3>
-                <p className="text-xs text-stone-700 mb-4 leading-relaxed">
+                <p className="text-xs text-stone-700 mb-0 leading-relaxed">
                   {shop.address}
                 </p>
-
-                <button
-                  onClick={() => setShowMenuModal(true)}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded font-medium text-xs transition-colors duration-200"
-                >
-                  View Menu
-                </button>
+                {/* View Menu button removed */}
               </div>
             </div>
           </div>
@@ -665,6 +674,16 @@ export default function CoffeeShopDetailPage() {
         </div>
       </div>
 
+      {/* Floating Menu FAB */}
+      <button
+        type="button"
+        aria-label="Open menu"
+        onClick={() => setShowMenuModal(true)}
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-lg p-3 md:p-4 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+      >
+        <LuCoffee className="h-5 w-5 md:h-6 md:w-6" />
+      </button>
+
       {/* Modals */}
       <RatingModal
         key={`rating-${shop._id || "pending"}`}
@@ -682,7 +701,7 @@ export default function CoffeeShopDetailPage() {
         onLogin={handleLoginSuccess}
       />
       {showMenuModal && (
-        <MenuModal shop={shop} onClose={() => setShowMenuModal(false)} />
+        <MenuModal shop={shop} slug={shopSlug} onClose={() => setShowMenuModal(false)} />
       )}
 
       <Footer />

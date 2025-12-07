@@ -8,6 +8,7 @@ import {
   FaLock,
   FaMapMarkerAlt,
   FaUserTag,
+  FaTransgender,
 } from "react-icons/fa";
 import { LuCoffee } from "react-icons/lu";
 import { getCities } from "../services/commonService";
@@ -25,6 +26,7 @@ export default function UserAccountModal({ show, onClose }) {
     // Sign Up fields
     name: "",
     username: "",
+    gender: "",
     location: "",
     email: "",
     password: "",
@@ -74,6 +76,7 @@ export default function UserAccountModal({ show, onClose }) {
         const result = await createAccount({
           name: formData.name,
           username: formData.username,
+          gender: formData.gender,
           location: formData.location,
           email: formData.email,
           password: formData.password,
@@ -106,6 +109,7 @@ export default function UserAccountModal({ show, onClose }) {
     setFormData({
       name: "",
       username: "",
+      gender: "",
       location: "",
       email: "",
       password: "",
@@ -262,6 +266,35 @@ export default function UserAccountModal({ show, onClose }) {
                                 </option>
                               ) : null
                             )}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Gender select after city */}
+                      <div>
+                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                          Gender
+                        </label>
+                        <div className="relative">
+                          <FaTransgender className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
+                          <select
+                            name="gender"
+                            value={formData.gender}
+                            onChange={handleInputChange}
+                            className="w-full pl-10 pr-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            required
+                          >
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Transgender Male">Transgender Male</option>
+                            <option value="Transgender Female">Transgender Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Genderqueer">Genderqueer</option>
+                            <option value="Genderfluid">Genderfluid</option>
+                            <option value="Agender">Agender</option>
+                            <option value="Bigender">Bigender</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
                           </select>
                         </div>
                       </div>

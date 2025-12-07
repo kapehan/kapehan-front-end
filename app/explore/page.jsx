@@ -17,10 +17,17 @@ import Navigation from "../../components/navigation";
 import LocationPermissionModal from "../../components/LocationPermissionModal";
 import CoffeeShopCard from "../../components/CoffeeShopCard";
 import Footer from "../../components/Footer";
-import metroManilaCities from "../../data/metro-manila-cities.json";
+// Remove static city list import and use dynamic loader instead
+// import metroManilaCities from "../../data/metro-manila-cities.json";
 import { getAllCoffeeShop } from "../../services/coffeeShopService";
-import { getAnonLocation } from "../../services/commonService";
-import ExploreLoading from './loading'
+import {
+  getAnonLocation,
+  getAmenities,
+  getVibes,
+  getCities,
+} from "../../services/commonService";
+import ExploreLoading from "./loading";
+import { getCache, setCache } from "../utils/cacheUtils";
 
 export default function ExplorePage() {
   const [shops, setShops] = useState([]);
@@ -40,6 +47,14 @@ export default function ExplorePage() {
   // Track total results for display
   const [resultCount, setResultCount] = useState(0);
 
+  // Remove static fallbacks; load from API only
+  const [amenityOptions, setAmenityOptions] = useState([]);
+  const [vibesOptions, setVibesOptions] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  // Track location updates to re-trigger fetches
+  const [locationVersion, setLocationVersion] = useState(0);
+
   const searchParams = useSearchParams(); // added
   const paramsInitializedRef = useRef(false); // added - ensure we initialize from URL once
   const locationIntervalRef = useRef(null);
@@ -47,6 +62,12 @@ export default function ExplorePage() {
   // Local storage key + TTL (20 minutes)
   const ANON_LOC_KEY = "user_location";
   const LOCATION_TTL = 1000 * 60 * 20; // 20 minutes
+
+  // Cache keys and TTL
+  const CITIES_CACHE_KEY = "explore:cities";
+  const AMENITIES_CACHE_KEY = "explore:amenities";
+  const VIBES_CACHE_KEY = "explore:vibes";
+  const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours
 
   // Initialize state from URL search params once (supports direct /explore?city=... or ?q=...)
   useEffect(() => {
@@ -58,7 +79,9 @@ export default function ExplorePage() {
     const cityParam = searchParams.get("city") || "";
     const qParam = searchParams.get("q") || searchParams.get("search") || "";
     const pageParam = parseInt(searchParams.get("page") || "", 10);
-    const ratingParam = parseFloat(searchParams.get("minRating") || searchParams.get("rating") || "");
+    const ratingParam = parseFloat(
+      searchParams.get("minRating") || searchParams.get("rating") || ""
+    );
     const amenitiesParam = searchParams.get("amenities") || "";
     const vibesParam = searchParams.get("vibes") || "";
 
@@ -68,40 +91,107 @@ export default function ExplorePage() {
       setDebouncedSearchTerm(qParam); // immediate fetch when seeded from URL
     }
     if (!Number.isNaN(pageParam) && pageParam > 0) setCurrentPage(pageParam);
-    if (!Number.isNaN(ratingParam) && ratingParam > 0) setMinRating(ratingParam);
+    if (!Number.isNaN(ratingParam) && ratingParam > 0)
+      setMinRating(ratingParam);
     if (amenitiesParam) {
-      setSelectedAmenities(amenitiesParam.split(",").map(s => s.trim()).filter(Boolean));
+      setSelectedAmenities(
+        amenitiesParam
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      );
     }
     if (vibesParam) {
-      setSelectedVibes(vibesParam.split(",").map(s => s.trim()).filter(Boolean));
+      setSelectedVibes(
+        vibesParam
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      );
     }
   }, [searchParams]);
 
+  // Helper: read stored location and validate TTL
+  const getValidStoredLocation = () => {
+    try {
+      const raw = localStorage.getItem(ANON_LOC_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const { latitude, longitude, ts, expiresAt } = parsed || {};
+      const notExpired =
+        typeof expiresAt === "number"
+          ? Date.now() < expiresAt
+          : typeof ts === "number"
+            ? Date.now() - ts <= LOCATION_TTL
+            : false;
+      if (notExpired && typeof latitude === "number" && typeof longitude === "number") {
+        return { latitude, longitude };
+      }
+      // cleanup if expired or invalid
+      localStorage.removeItem(ANON_LOC_KEY);
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Show modal if no location stored; start interval if exists
+  useEffect(() => {
+    const loc = getValidStoredLocation();
+    if (loc) {
+      setShowLocationModal(false);
+      startLocationInterval();
+    } else {
+      setShowLocationModal(true);
+    }
+    return () => {
+      stopLocationInterval();
+    };
+  }, []);
+
   // Memoize the query so effect only runs when relevant inputs change.
   const queryWithPagination = useMemo(() => {
+    const loc = getValidStoredLocation();
     return {
       search: debouncedSearchTerm || undefined,
       city: selectedCity || undefined,
       minRating: minRating > 0 ? minRating : undefined,
       amenities: selectedAmenities.length ? selectedAmenities.join(",") : undefined,
       vibes: selectedVibes.length ? selectedVibes.join(",") : undefined,
+      // Include coordinates if available
+      lat: loc?.latitude ?? undefined,
+      lng: loc?.longitude ?? undefined,
       // Do not send page=1; backend defaults to page 1 already
       page: currentPage > 1 ? currentPage : undefined,
     };
-  }, [debouncedSearchTerm, selectedCity, minRating, selectedAmenities, selectedVibes, currentPage]);
+  }, [
+    debouncedSearchTerm,
+    selectedCity,
+    minRating,
+    selectedAmenities,
+    selectedVibes,
+    currentPage,
+    locationVersion, // re-run when location updates
+  ]);
 
   // Debounce effect (3 seconds)
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 500);
+    }, 1000);
     return () => clearTimeout(t);
   }, [searchTerm]);
 
   // Reset page when debounced search or other filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm, selectedCity, minRating, selectedAmenities, selectedVibes]);
+  }, [
+    debouncedSearchTerm,
+    selectedCity,
+    minRating,
+    selectedAmenities,
+    selectedVibes,
+  ]);
 
   // Fetch from backend with stale-cancel
   useEffect(() => {
@@ -137,8 +227,7 @@ export default function ExplorePage() {
           data?.count ??
           items.length;
 
-        const pages =
-          pageInfo?.totalPages ?? 1;
+        const pages = pageInfo?.totalPages ?? 1;
 
         if (!cancelled) {
           setShops(items || []);
@@ -162,61 +251,65 @@ export default function ExplorePage() {
     };
   }, [queryWithPagination]);
 
-  // ✅ Amenity Options
-  const amenityOptions = [
-    { key: "wifi", label: "WiFi", icon: FaWifi },
-    { key: "parking", label: "Parking", icon: FaCar },
-    { key: "outdoorSeating", label: "Outdoor Seating", icon: FaLeaf },
-    { key: "petFriendly", label: "Pet Friendly", icon: FaDog },
-    {
-      key: "wheelchairAccessible",
-      label: "Wheelchair Accessible",
-      icon: FaWheelchair,
-    },
-  ];
+  // Load dynamic filters (amenities, vibes, cities) once on mount
+  useEffect(() => {
+    let cancelled = false;
 
-  // ✅ Vibe Options
-  const vibesOptions = [
-    "Artsy",
-    "Cozy",
-    "Modern",
-    "Rustic",
-    "Industrial",
-    "Minimalist",
-    "Vintage",
-    "Bohemian",
-    "Elegant",
-    "Casual",
-    "Romantic",
-    "Family-friendly",
-    "Professional",
-    "Hipster",
-    "Traditional",
-    "Trendy",
-    "Quiet",
-    "Lively",
-    "Intimate",
-    "Spacious",
-  ];
-
-  // helper: read and validate stored anon location (with TTL check)
-  const readAnonLocation = () => {
-    try {
-      const raw = localStorage.getItem(ANON_LOC_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      // Check if expired
-      if (!parsed.ts || Date.now() - parsed.ts > LOCATION_TTL) {
-        console.log("Location expired, removing from localStorage");
-        localStorage.removeItem(ANON_LOC_KEY);
-        return null;
+    // Only cache if not present or expired, never update if different
+    const cacheIfMissing = async (key, fetchFn, setter, normalizer) => {
+      const cached = getCache(key, CACHE_TTL);
+      if (cached) {
+        setter(cached);
+        return;
       }
-      return parsed;
-    } catch (e) {
-      console.error("Error reading anon location:", e);
-      return null;
-    }
-  };
+      try {
+        const apiData = await fetchFn();
+        if (!cancelled && Array.isArray(apiData) && apiData.length) {
+          const normalized = apiData.map(normalizer).filter(Boolean);
+          setCache(key, normalized);
+          setter(normalized);
+        }
+      } catch {}
+    };
+
+    cacheIfMissing(
+      CITIES_CACHE_KEY,
+      getCities,
+      setCities,
+      (c) => {
+        const value = c?.city_value ?? c?.value ?? c?.key ?? c?.city;
+        const label = c?.city_name ?? c?.label ?? c?.name ?? c?.city;
+        return value && label ? { value, label } : null;
+      }
+    );
+
+    cacheIfMissing(
+      AMENITIES_CACHE_KEY,
+      getAmenities,
+      setAmenityOptions,
+      (a) => {
+        const key = a?.amenity_value ?? a?.value ?? a?.key ?? a?.name;
+        const label = a?.amenity_name ?? a?.label ?? a?.name;
+        const iconMap = { wifi: FaWifi, parking: FaCar, outdoorSeating: FaLeaf, petFriendly: FaDog, wheelchairAccessible: FaWheelchair };
+        return key && label ? { key, label, icon: iconMap[key] } : null;
+      }
+    );
+
+    cacheIfMissing(
+      VIBES_CACHE_KEY,
+      getVibes,
+      setVibesOptions,
+      (v) => {
+        const value = v?.vibe_value ?? v?.value ?? v?.key;
+        const label = v?.vibe_name ?? v?.label ?? v?.name;
+        return value && label ? { value, label } : null;
+      }
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Fetch current geolocation and update backend + localStorage
   const updateLocation = async () => {
@@ -225,17 +318,11 @@ export default function ExplorePage() {
       async (pos) => {
         const latitude = pos.coords.latitude;
         const longitude = pos.coords.longitude;
-        console.log("Auto-updating location:", { latitude, longitude });
         try {
           await getAnonLocation({ latitude, longitude });
-          // Save with timestamp
-          const payload = { 
-            latitude, 
-            longitude, 
-            ts: Date.now(),
-            expiresAt: Date.now() + LOCATION_TTL
-          };
+          const payload = { latitude, longitude, ts: Date.now(), expiresAt: Date.now() + LOCATION_TTL };
           localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
+          setLocationVersion((v) => v + 1); // trigger re-fetch
         } catch (e) {
           console.error("Failed to auto-update location:", e);
         }
@@ -245,21 +332,13 @@ export default function ExplorePage() {
     );
   };
 
-  // Start auto-refresh interval (check every 5 minutes if location needs refresh)
   const startLocationInterval = () => {
-    if (locationIntervalRef.current) return;
-    console.log("Starting location auto-refresh check");
+    stopLocationInterval();
     locationIntervalRef.current = setInterval(() => {
-     const stored = readAnonLocation();
-     if (!stored) {
-       console.log("Location expired during interval, showing modal");
-       setShowLocationModal(true);
-       stopLocationInterval();
-     }
-    }, 1000 * 60 * 5); // Check every 5 minutes
+      updateLocation();
+    }, LOCATION_TTL);
   };
 
-  // Stop auto-refresh interval
   const stopLocationInterval = () => {
     if (locationIntervalRef.current) {
       clearInterval(locationIntervalRef.current);
@@ -267,27 +346,17 @@ export default function ExplorePage() {
     }
   };
 
-  // on mount: check stored anon location and decide whether to show modal
-  useEffect(() => {
-    const stored = readAnonLocation();
-    if (stored) {
-      console.log("Found valid stored location:", stored);
-      setShowLocationModal(false);
-      startLocationInterval();
-    } else {
-      console.log("No stored location, showing modal");
-      setShowLocationModal(true);
-    }
-    
-    return () => {
-      stopLocationInterval();
-    };
-  }, []);
-
-  const handleLocationSuccess = () => {
-    console.log("Location success, hiding modal and starting interval");
+  // Add missing handlers
+  const handleLocationSuccess = async () => {
     setShowLocationModal(false);
+    await updateLocation();
     startLocationInterval();
+  };
+
+  // Add a handler for "Find Nearest coffee shop"
+  const handleFindNearest = async () => {
+    await updateLocation(); // updates localStorage and bumps locationVersion
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLocationDeny = () => {
@@ -332,7 +401,6 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-
       <LocationPermissionModal
         isOpen={showLocationModal}
         onSuccess={handleLocationSuccess}
@@ -340,11 +408,8 @@ export default function ExplorePage() {
         localStorageKey={ANON_LOC_KEY}
         ttl={LOCATION_TTL}
       />
-
-      {/* Enhanced Search and Filter Bar - Mobile First */}
       <div className="pt-12 bg-stone-50 border-b border-stone-200 sticky top-12 z-30">
         <div className="container mx-auto px-4 py-3 md:py-4">
-          {/* Main Filter Row */}
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-center">
             {/* Search Bar */}
             <div className="relative flex-1 max-w-full sm:max-w-md">
@@ -396,6 +461,14 @@ export default function ExplorePage() {
                 </button>
               )}
 
+              {/* Find Nearest coffee shop */}
+              <button
+                onClick={handleFindNearest}
+                className="px-4 py-2.5 rounded-lg bg-amber-700 text-white hover:bg-amber-800 text-sm font-medium"
+              >
+                Find Nearest coffee shop
+              </button>
+
               {/* Results Count */}
               <div className="text-stone-600 font-medium text-sm whitespace-nowrap">
                 <span className="hidden sm:inline">
@@ -442,9 +515,9 @@ export default function ExplorePage() {
                         className="w-full p-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-white"
                       >
                         <option value="">All Cities</option>
-                        {metroManilaCities.map((city) => (
-                          <option key={city} value={city}>
-                            {city}
+                        {cities.map((city) => (
+                          <option key={city.value} value={city.value}>
+                            {city.label}
                           </option>
                         ))}
                       </select>
@@ -487,7 +560,11 @@ export default function ExplorePage() {
                               onChange={() => handleAmenityToggle(amenity.key)}
                               className="mr-2 h-4 w-4 text-amber-700 focus:ring-amber-600 border-stone-300 rounded"
                             />
-                            <amenity.icon className="mr-2 h-3 w-3 text-stone-500 flex-shrink-0" />
+                            {amenity.icon ? (
+                              <amenity.icon className="mr-2 h-3 w-3 text-stone-500 flex-shrink-0" />
+                            ) : (
+                              <span className="mr-2 h-3 w-3" />
+                            )}
                             <span className="text-sm text-stone-700">
                               {amenity.label}
                             </span>
@@ -505,17 +582,17 @@ export default function ExplorePage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-40 overflow-y-auto">
                       {vibesOptions.map((vibe) => (
                         <label
-                          key={vibe}
+                          key={vibe.value}
                           className="flex items-center cursor-pointer hover:bg-stone-50 rounded p-1.5"
                         >
                           <input
                             type="checkbox"
-                            checked={selectedVibes.includes(vibe)}
-                            onChange={() => handleVibesToggle(vibe)}
+                            checked={selectedVibes.includes(vibe.value)}
+                            onChange={() => handleVibesToggle(vibe.value)}
                             className="mr-2 h-4 w-4 text-amber-700 focus:ring-amber-600 border-stone-300 rounded flex-shrink-0"
                           />
                           <span className="text-xs sm:text-sm text-stone-700 leading-tight">
-                            {vibe}
+                            {vibe.label}
                           </span>
                         </label>
                       ))}
@@ -554,7 +631,7 @@ export default function ExplorePage() {
       {/* Coffee Shops Grid - Mobile First */}
       <div className="container mx-auto px-4 py-6">
         {isLoading ? (
-          <ExploreLoading /> 
+          <ExploreLoading />
         ) : shops.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
@@ -601,7 +678,10 @@ export default function ExplorePage() {
                         {page}
                       </button>
                     );
-                  } else if (page === currentPage - 2 || page === currentPage + 2) {
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
                     return (
                       <span
                         key={page}

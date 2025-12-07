@@ -1,129 +1,48 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { FaStar, FaTimes } from "react-icons/fa"
+import { getMenuByCoffeeShopId } from "../services/coffeeShopService"
 
-export default function MenuModal({ shop, onClose }) {
+export default function MenuModal({ shop, slug, onClose }) {
   const [selectedCategory, setSelectedCategory] = useState("coffee")
+  const [menuData, setMenuData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const menuData = {
-    coffee: [
-      {
-        name: "Espresso",
-        price: 60,
-        bestselling: false,
-        sizes: [
-          { size: "Single", price: 60 },
-          { size: "Double", price: 80 },
-        ],
-      },
-      {
-        name: "Americano",
-        price: 70,
-        bestselling: true,
-        sizes: [
-          { size: "Small", price: 70 },
-          { size: "Medium", price: 85 },
-          { size: "Large", price: 100 },
-        ],
-      },
-      {
-        name: "Latte",
-        price: 90,
-        bestselling: true,
-        sizes: [
-          { size: "Small", price: 90 },
-          { size: "Medium", price: 110 },
-          { size: "Large", price: 130 },
-        ],
-      },
-      {
-        name: "Cappuccino",
-        price: 90,
-        bestselling: false,
-        sizes: [
-          { size: "Small", price: 90 },
-          { size: "Medium", price: 110 },
-          { size: "Large", price: 130 },
-        ],
-      },
-      {
-        name: "Macchiato",
-        price: 85,
-        bestselling: false,
-        sizes: [
-          { size: "Small", price: 85 },
-          { size: "Medium", price: 100 },
-          { size: "Large", price: 120 },
-        ],
-      },
-      { name: "Cortado", price: 75, bestselling: false, sizes: [{ size: "Standard", price: 75 }] },
-    ],
-    nonCoffee: [
-      {
-        name: "Iced Tea",
-        price: 50,
-        bestselling: false,
-        sizes: [
-          { size: "Small", price: 50 },
-          { size: "Large", price: 70 },
-        ],
-      },
-      {
-        name: "Chocolate Drink",
-        price: 80,
-        bestselling: true,
-        sizes: [
-          { size: "Small", price: 80 },
-          { size: "Medium", price: 100 },
-          { size: "Large", price: 120 },
-        ],
-      },
-      {
-        name: "Fresh Juice",
-        price: 85,
-        bestselling: false,
-        sizes: [
-          { size: "Regular", price: 85 },
-          { size: "Large", price: 110 },
-        ],
-      },
-      {
-        name: "Smoothie",
-        price: 95,
-        bestselling: false,
-        sizes: [
-          { size: "Regular", price: 95 },
-          { size: "Large", price: 120 },
-        ],
-      },
-      {
-        name: "Milkshake",
-        price: 90,
-        bestselling: true,
-        sizes: [
-          { size: "Regular", price: 90 },
-          { size: "Large", price: 115 },
-        ],
-      },
-    ],
-    pastry: [
-      { name: "Croissant", price: 45, bestselling: false, sizes: [] },
-      { name: "Danish", price: 50, bestselling: true, sizes: [] },
-      { name: "Muffin", price: 55, bestselling: false, sizes: [] },
-      { name: "Donut", price: 40, bestselling: true, sizes: [] },
-      { name: "Sandwich", price: 65, bestselling: false, sizes: [] },
-      { name: "Bagel", price: 60, bestselling: false, sizes: [] },
-    ],
-    riceMeals: [
-      { name: "Chicken Adobo Rice", price: 120, bestselling: true, sizes: [] },
-      { name: "Beef Stew Rice", price: 130, bestselling: false, sizes: [] },
-      { name: "Tapa with Fried Rice", price: 125, bestselling: true, sizes: [] },
-      { name: "Sinigang Rice", price: 115, bestselling: false, sizes: [] },
-      { name: "Fried Chicken Rice", price: 110, bestselling: false, sizes: [] },
-      { name: "Vegetable Rice Bowl", price: 95, bestselling: false, sizes: [] },
-    ],
-  }
+  useEffect(() => {
+    let mounted = true
+    setIsLoading(true)
+    setError("")
+    setMenuData(null)
+    getMenuByCoffeeShopId(slug)
+      .then((resp) => {
+        const data = resp?.data?.menu ?? resp?.menu ?? resp?.data ?? null
+        if (!data || Object.values(data).every((arr) => !arr || arr.length === 0)) {
+          if (mounted) {
+            setMenuData(null)
+            setError("Sorry, this coffee shop menu is unavailable. Please try again later.")
+          }
+        } else {
+          if (mounted) {
+            setMenuData(data)
+            setError("")
+          }
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setMenuData(null)
+          setError("Sorry, this coffee shop menu is unavailable. Please try again later.")
+        }
+      })
+      .finally(() => {
+        if (mounted) setIsLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [slug])
 
   const categoryLabels = {
     coffee: "Coffee",
@@ -132,25 +51,19 @@ export default function MenuModal({ shop, onClose }) {
     riceMeals: "Rice Meals",
   }
 
-  const MenuItem = ({ item, category }) => (
+  const MenuItem = ({ item }) => (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-stone-50 rounded-lg">
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="font-semibold text-stone-800 text-sm">{item.name}</h4>
-            {item.bestselling && (
-              <span className="inline-flex items-center gap-1 bg-amber-100 px-2 py-0.5 rounded text-xs font-medium text-amber-700">
-                <FaStar className="h-3 w-3" />
-                Best Seller
-              </span>
-            )}
+            {/* No best seller info in API, so skip */}
           </div>
         </div>
       </div>
-
-      {item.sizes && item.sizes.length > 0 ? (
+      {item.has_variants && Array.isArray(item.variants) && item.variants.length > 0 ? (
         <div className="space-y-1">
-          {item.sizes.map((sizeOption, idx) => (
+          {item.variants.map((sizeOption, idx) => (
             <div key={idx} className="flex justify-between items-center text-xs">
               <span className="text-stone-600">{sizeOption.size}</span>
               <span className="font-semibold text-amber-700">₱{sizeOption.price}</span>
@@ -211,22 +124,33 @@ export default function MenuModal({ shop, onClose }) {
                   ? "bg-amber-700 text-white shadow-sm"
                   : "bg-stone-100 text-stone-700 hover:bg-stone-200"
               }`}
+              disabled={isLoading || !menuData || !menuData[key] || menuData[key].length === 0}
             >
               {label}
             </button>
           ))}
         </div>
 
-        {/* Menu Items Grid */}
+        {/* Menu Items Grid or Loading/Error */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
-          <div
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4"
-            role="list"
-          >
-            {menuData[selectedCategory].map((item, idx) => (
-              <MenuItem key={idx} item={item} category={selectedCategory} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-40 text-stone-500 text-sm">Loading menu...</div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-40 text-stone-500 text-sm text-center">{error}</div>
+          ) : menuData && menuData[selectedCategory] && menuData[selectedCategory].length > 0 ? (
+            <div
+              className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4"
+              role="list"
+            >
+              {menuData[selectedCategory].map((item, idx) => (
+                <MenuItem key={item.id || idx} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-40 text-stone-500 text-sm text-center">
+              Sorry, this coffee shop menu is unavailable. Please try again later.
+            </div>
+          )}
         </div>
 
         {/* Footer */}

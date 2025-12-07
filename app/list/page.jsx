@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaImage, FaTrash, FaStar } from "react-icons/fa";
+import { LuSearch } from "react-icons/lu"; // add search icon
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
 import { createCoffeeShop } from "../../services/coffeeShopService";
@@ -9,6 +10,7 @@ import {
   getCities,
   getVibes,
   getAmenities,
+  autoComplete,
 } from "../../services/commonService";
 
 export default function ListCoffeeShopPage() {
@@ -94,6 +96,8 @@ export default function ListCoffeeShopPage() {
   const [cities, setCities] = useState([]);
   const [vibes, setVibes] = useState([]);
   const [amenitiesList, setAmenitiesList] = useState([]);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const acTimerRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,7 +116,7 @@ export default function ListCoffeeShopPage() {
     fetchData();
   }, []);
 
-  const paymentOptions = ["CASH", "GCASH", "CREDITCARD"];
+  const paymentOptions = ["CASH", "QR PAYMENT", "CARD PAYMENT"];
   const days = [
     "monday",
     "tuesday",
@@ -397,6 +401,48 @@ export default function ListCoffeeShopPage() {
     });
   };
 
+  // Debounced autocomplete for address
+  const handleAddressChange = (value) => {
+    setFormData({ ...formData, address: value });
+    if (acTimerRef.current) clearTimeout(acTimerRef.current);
+    acTimerRef.current = setTimeout(async () => {
+      if (!value || value.length < 2) {
+        setAddressSuggestions([]);
+        return;
+      }
+      try {
+        const res = await autoComplete({ search: value });
+        const raw = res?.data ?? res;
+        const list =
+          Array.isArray(raw) || Array.isArray(raw?.items)
+            ? raw.items ?? raw
+            : [];
+        const normalized = list
+          .map((s) => ({
+            address: s.address ?? s.label ?? s.value ?? s.display_name,
+            lat: Number(s.lat ?? s.latitude),
+            lon: Number(s.lon ?? s.lng ?? s.longitude),
+          }))
+          .filter(
+            (s) => s.address && Number.isFinite(s.lat) && Number.isFinite(s.lon)
+          );
+        setAddressSuggestions(normalized.slice(0, 5));
+      } catch {
+        setAddressSuggestions([]);
+      }
+    }, 400);
+  };
+
+  const handleAddressSuggestionSelect = (sugg) => {
+    setFormData({
+      ...formData,
+      address: sugg.address,
+      latitude: String(sugg.lat),
+      longitude: String(sugg.lon),
+    });
+    setAddressSuggestions([]);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -424,6 +470,9 @@ export default function ListCoffeeShopPage() {
                   handleInputChange={handleInputChange}
                   handleImageChange={handleImageChange}
                   cities={cities}
+                  onAddressChange={handleAddressChange}
+                  addressSuggestions={addressSuggestions}
+                  onAddressSuggestionSelect={handleAddressSuggestionSelect}
                 />
               )}
               {step === 2 && (
@@ -601,6 +650,9 @@ function Step1ShopInfo({
   handleInputChange,
   handleImageChange,
   cities,
+  onAddressChange,
+  addressSuggestions,
+  onAddressSuggestionSelect,
 }) {
   return (
     <motion.div
@@ -698,15 +750,40 @@ function Step1ShopInfo({
         <label className="block text-sm font-semibold text-stone-900 mb-3">
           Address <span className="text-red-600">*</span>
         </label>
-        <input
-          type="text"
-          name="address"
-          value={formData.address}
-          onChange={handleInputChange}
-          placeholder="Full address"
-          className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-          required
-        />
+        <div className="relative">
+          {/* search icon */}
+          <LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 h-4 w-4" />
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={(e) => onAddressChange(e.target.value)}
+            placeholder="Full address"
+            className="w-full px-4 py-3 pl-10 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            required
+          />
+          {/* Suggestions under address input (first 5) */}
+          {Array.isArray(addressSuggestions) &&
+            addressSuggestions.length > 0 && (
+              <div className="mt-2 bg-white border border-stone-200 rounded-lg shadow-sm">
+                <ul className="divide-y divide-stone-200">
+                  {addressSuggestions.map((s, idx) => (
+                    <li key={`${s.address}-${idx}`}>
+                      <button
+                        type="button"
+                        onClick={() => onAddressSuggestionSelect(s)}
+                        className="w-full text-left px-3 sm:px-4 py-2.5 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-600 transition-colors"
+                      >
+                        <span className="block text-sm sm:text-base text-stone-800">
+                          {s.address}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+        </div>
       </div>
 
       <div>
@@ -1221,34 +1298,30 @@ function Step4Amenities({
         </div>
       </div>
 
+      {/* Remove manual lat/lon inputs; show read-only preview of selected coords */}
       <div>
         <label className="block text-sm font-semibold text-stone-900 mb-4">
           Location Coordinates
         </label>
         <div className="grid grid-cols-2 gap-4">
           <input
-            type="number"
-            name="latitude"
-            value={formData.latitude}
-            onChange={(e) =>
-              setFormData({ ...formData, latitude: e.target.value })
-            }
-            placeholder="Latitude"
-            step="0.000001"
-            className="px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            type="text"
+            value={formData.latitude || ""}
+            readOnly
+            placeholder="Latitude (auto-filled)"
+            className="px-4 py-3 border border-stone-300 rounded-lg bg-stone-50 text-stone-700 cursor-not-allowed"
           />
           <input
-            type="number"
-            name="longitude"
-            value={formData.longitude}
-            onChange={(e) =>
-              setFormData({ ...formData, longitude: e.target.value })
-            }
-            placeholder="Longitude"
-            step="0.000001"
-            className="px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+            type="text"
+            value={formData.longitude || ""}
+            readOnly
+            placeholder="Longitude (auto-filled)"
+            className="px-4 py-3 border border-stone-300 rounded-lg bg-stone-50 text-stone-700 cursor-not-allowed"
           />
         </div>
+        <p className="text-xs text-stone-500 mt-2">
+          Coordinates are auto-filled when you pick an address suggestion.
+        </p>
       </div>
     </motion.div>
   );

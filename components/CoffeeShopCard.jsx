@@ -91,7 +91,9 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
               </h3>
               <p className="text-stone-600 text-sm line-clamp-1 flex items-center">
                 <FaMapMarkerAlt className="mr-1 h-3 w-3 flex-shrink-0" />
-                {shop.address || `${shop.city}, Metro Manila`}
+                {shop.address && shop.address.length > 30
+                  ? shop.address.slice(0, 30) + "..."
+                  : shop.address}
               </p>
             </div>
 

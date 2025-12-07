@@ -5,7 +5,6 @@ import Link from "next/link";
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
 import UserAccountModal from "../../components/UserAccountModal";
-// Removed unused imports getCurrentUser, isLoggedIn
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -16,20 +15,52 @@ import {
 } from "react-icons/fa";
 import { LuCoffee } from "react-icons/lu";
 import { useAuth } from "../../context/authContext";
+import NiceAvatar, { genConfig } from "react-nice-avatar";
+import { getCache, setCache } from "../utils/cacheUtils";
 
 export default function ProfilePage() {
+  const DETAILS_CACHE_KEY = "profile:userDetails";
+  const AVATAR_CACHE_KEY = "profile:avatarConfig";
+  const DETAILS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+  const AVATAR_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
   const { user, isAuthenticated, loading } = useAuth();
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [editingUsername, setEditingUsername] = useState(false);
 
-  // Null-safe extraction
-  const apiUser = user?.data || {};
-  const displayName = apiUser.full_name || apiUser.username || "User";
+  // Cache user details for 24h, update only if changed
+  useEffect(() => {
+    if (!user || !isAuthenticated) return;
+    const cached = getCache(DETAILS_CACHE_KEY, DETAILS_CACHE_TTL);
+    const userData = user?.data || {};
+    if (
+      !cached ||
+      JSON.stringify(cached) !== JSON.stringify(userData)
+    ) {
+      setCache(DETAILS_CACHE_KEY, userData);
+    }
+  }, [user, isAuthenticated]);
+
+  // Use cached details if available
+  const cachedDetails = getCache(DETAILS_CACHE_KEY, DETAILS_CACHE_TTL);
+  const apiUser = cachedDetails || user?.data || {};
+  const displayName = apiUser.username || "User";
   const email = apiUser.email || "";
   const joinedRaw = apiUser.created_at;
   const visitedShops = Array.isArray(apiUser.visitedShops) ? apiUser.visitedShops : [];
+
+  // Avatar config caching
+  const [avatarConfig, setAvatarConfig] = useState(null);
+  useEffect(() => {
+    let config = getCache(AVATAR_CACHE_KEY, AVATAR_CACHE_TTL);
+    if (!config) {
+      config = genConfig();
+      setCache(AVATAR_CACHE_KEY, config);
+    }
+    setAvatarConfig(config);
+  }, []);
 
   // Format helpers
   const formatDate = (dateString) =>
@@ -84,6 +115,19 @@ export default function ProfilePage() {
       setEditingUsername(false);
     }
   };
+
+  // Remove cached user details and avatar only after initial auth check
+  const [authChecked, setAuthChecked] = useState(false);
+  useEffect(() => {
+    if (!authChecked && !loading) setAuthChecked(true);
+  }, [loading, authChecked]);
+
+  useEffect(() => {
+    if (authChecked && !isAuthenticated) {
+      localStorage.removeItem(DETAILS_CACHE_KEY);
+      localStorage.removeItem(AVATAR_CACHE_KEY);
+    }
+  }, [isAuthenticated, authChecked]);
 
   // ✅ Show loader first while auth is loading
   if (loading) {
@@ -147,11 +191,27 @@ export default function ProfilePage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
               <div className="flex gap-6 items-start">
                 <div>
-                  <img
-                    src={apiUser.avatar || "/placeholder.svg?height=120&width=120"}
-                    alt={displayName}
-                    className="w-24 h-24 md:w-32 md:h-32 rounded-2xl object-cover border border-stone-200"
-                  />
+                  {/* Use react-nice-avatar, cache config for 24h */}
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl border border-stone-200 bg-stone-100 flex items-center justify-center overflow-hidden">
+                    {avatarConfig ? (
+                      <NiceAvatar
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "1rem", // match rounded-2xl
+                          overflow: "hidden",
+                        }}
+                        {...avatarConfig}
+                        shape="square"
+                      />
+                    ) : (
+                      <img
+                        src={apiUser.avatar || "/placeholder.svg?height=120&width=120"}
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1 pt-2">
                   <div className="flex items-center gap-3 mb-4">
