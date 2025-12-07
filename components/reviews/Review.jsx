@@ -33,7 +33,7 @@ export default function Review({
         </div>
         <div className="flex-1">
           <div className="flex flex-wrap items-center justify-between mb-2">
-            <h3 className="font-semibold text-stone-800">
+            <h3 className="font-whyte-bold text-stone-800">
               {review.name}
               {isOwner && (
                 <span className="ml-2 text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">

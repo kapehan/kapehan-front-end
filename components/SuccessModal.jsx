@@ -32,7 +32,7 @@ export default function SuccessModal({ show, onClose }) {
                 <FaCheckCircle className="text-white text-lg" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-stone-800">Success!</h2>
+                <h2 className="text-xl font-whyte-bold text-stone-800">Success!</h2>
                 <p className="text-sm text-stone-600">Your account has been created</p>
               </div>
             </div>
@@ -49,13 +49,13 @@ export default function SuccessModal({ show, onClose }) {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <LuCoffee className="text-green-600 text-2xl" />
             </div>
-            <h3 className="text-lg font-semibold text-stone-800 mb-2">Welcome to Kapehan!</h3>
+            <h3 className="text-lg font-whyte-bold text-stone-800 mb-2">Welcome to Kapehan!</h3>
             <p className="text-stone-600 mb-6">
               You can now explore coffee shops, write reviews, and discover amazing coffee experiences.
             </p>
             <button
               onClick={onClose}
-              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+              className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-lg font-whyte-bold hover:shadow-lg transition-all duration-300"
             >
               Get Started
             </button>

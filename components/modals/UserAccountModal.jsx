@@ -175,7 +175,7 @@ export default function UserAccountModal({ show, onClose }) {
                     <LuCoffee className="text-white text-lg" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-stone-800">
+                    <h2 className="text-xl font-whyte-bold text-stone-800">
                       {isSignUp ? "Join Kapehan" : "Welcome Back"}
                     </h2>
                     <p className="text-sm text-stone-600">
@@ -210,7 +210,7 @@ export default function UserAccountModal({ show, onClose }) {
                     {/* Sign Up Form */}
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Full Name
                         </label>
                         <div className="relative">
@@ -228,7 +228,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Username
                         </label>
                         <div className="relative">
@@ -246,7 +246,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Location
                         </label>
                         <div className="relative">
@@ -269,7 +269,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Email Address
                         </label>
                         <div className="relative">
@@ -287,7 +287,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Password
                         </label>
                         <div className="relative">
@@ -305,7 +305,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Confirm Password
                         </label>
                         <div className="relative">
@@ -328,7 +328,7 @@ export default function UserAccountModal({ show, onClose }) {
                     {/* Sign In Form */}
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Email
                         </label>
                         <div className="relative">
@@ -346,7 +346,7 @@ export default function UserAccountModal({ show, onClose }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                        <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                           Password
                         </label>
                         <div className="relative">
@@ -370,7 +370,7 @@ export default function UserAccountModal({ show, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 mt-6 ${
+                  className={`w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-whyte-bold hover:shadow-lg transition-all duration-300 mt-6 ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
@@ -392,7 +392,7 @@ export default function UserAccountModal({ show, onClose }) {
                     <button
                       type="button"
                       onClick={toggleMode}
-                      className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
+                      className="text-amber-600 hover:text-amber-700 font-whyte-medium transition-colors"
                     >
                       {isSignUp ? "Sign In" : "Sign Up"}
                     </button>

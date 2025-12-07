@@ -19,7 +19,7 @@ export function LocationForm({
     <div className="pt-20 bg-white relative overflow-hidden">
       <div className="relative z-10 container mx-auto px-4 md:px-6 py-12 md:py-16 lg:py-24">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-stone-900 leading-tight mb-4 md:mb-6">
+          <h1 className="text-3xl md:text-4xl lg:text-6xl font-whyte-bold text-stone-900 leading-tight mb-4 md:mb-6">
             Meet in the
             <span className="text-amber-600 block">Middle</span>
           </h1>
@@ -32,7 +32,7 @@ export function LocationForm({
             <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 md:p-8">
               <div className="space-y-4 md:space-y-6">
                 <div className="relative">
-                  <label className="block text-sm font-semibold text-stone-700 mb-2">Your Location</label>
+                  <label className="block text-sm font-whyte-bold text-stone-700 mb-2">Your Location</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -65,7 +65,7 @@ export function LocationForm({
                 </div>
 
                 <div className="relative">
-                  <label className="block text-sm font-semibold text-stone-700 mb-2">Friend's Location</label>
+                  <label className="block text-sm font-whyte-bold text-stone-700 mb-2">Friend's Location</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -109,7 +109,7 @@ export function LocationForm({
                 <button
                   onClick={onSearch}
                   disabled={isLoading || !yourLocation.trim() || !friendLocation.trim()}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 md:py-4 px-6 md:px-8 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg"
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 md:py-4 px-6 md:px-8 rounded-xl font-whyte-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-base md:text-lg"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">

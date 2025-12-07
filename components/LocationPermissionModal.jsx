@@ -115,7 +115,7 @@ export default function LocationPermissionModal({
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <FaMapMarkerAlt className="text-amber-700 text-xl" />
           </div>
-          <h2 className="text-2xl font-bold text-stone-900 mb-2">
+          <h2 className="text-2xl font-whyte-bold text-stone-900 mb-2">
             Find Nearest Coffee Shops
           </h2>
           <p className="text-stone-600 mb-6">
@@ -126,14 +126,14 @@ export default function LocationPermissionModal({
             <button
               onClick={onDeny}
               disabled={loading}
-              className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-lg font-semibold hover:bg-stone-50 transition-colors"
+              className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors"
             >
               Not Now
             </button>
             <button
               onClick={handleAllow}
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-amber-700 text-white rounded-lg font-semibold hover:bg-amber-800 transition-colors"
+              className="flex-1 px-4 py-3 bg-amber-700 text-white rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors"
             >
               {loading ? "Locating..." : "Allow Location"}
             </button>

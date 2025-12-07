@@ -83,7 +83,7 @@ export default function Navigation() {
               <div className="w-7 h-7 bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg flex items-center justify-center">
                 <LuCoffee className="text-white text-base" />
               </div>
-              <span className="text-base font-bold text-[#5F4429]">
+              <span className="text-base font-whyte-bold text-[#5F4429]">
                 Kapehan
               </span>
             </Link>
@@ -94,7 +94,7 @@ export default function Navigation() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors hover:text-amber-600 ${
+                  className={`text-sm font-whyte-medium transition-colors hover:text-amber-600 ${
                     isActive(item.href) ? "text-amber-600" : "text-stone-600"
                   }`}
                 >
@@ -116,7 +116,7 @@ export default function Navigation() {
                       alt={displayName}
                       className="w-5 h-5 rounded-full object-cover"
                     />
-                    <span className="text-sm font-medium text-stone-700">
+                    <span className="text-sm font-whyte-medium text-stone-700">
                       {displayName}
                     </span>
                     <FaChevronDown className="text-stone-500 text-xs" />
@@ -124,7 +124,7 @@ export default function Navigation() {
                 ) : (
                   <button
                     onClick={handleAccountClick}
-                    className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-4 py-1.5 rounded-lg transition-all duration-300 font-medium text-sm"
+                    className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-4 py-1.5 rounded-lg transition-all duration-300 font-whyte-medium text-sm"
                   >
                     Account
                   </button>
@@ -140,7 +140,7 @@ export default function Navigation() {
                       className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-stone-200 py-2 z-50"
                     >
                       <div className="px-4 py-2 border-b border-stone-200">
-                        <p className="text-sm font-medium text-stone-800">
+                        <p className="text-sm font-whyte-medium text-stone-800">
                           {displayName}
                         </p>
                         {email && (
@@ -208,7 +208,7 @@ export default function Navigation() {
                     <div className="w-7 h-7 bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg flex items-center justify-center">
                       <LuCoffee className="text-white text-base" />
                     </div>
-                    <span className="text-base font-bold text-[#5F4429]">
+                    <span className="text-base font-whyte-bold text-[#5F4429]">
                       Kapehan
                     </span>
                   </Link>
@@ -226,7 +226,7 @@ export default function Navigation() {
                       key={item.name}
                       href={item.href}
                       onClick={() => setIsOpen(false)}
-                      className={`block text-base font-medium transition-colors hover:text-amber-600 py-2 ${
+                      className={`block text-base font-whyte-medium transition-colors hover:text-amber-600 py-2 ${
                         isActive(item.href)
                           ? "text-amber-600"
                           : "text-stone-600"
@@ -246,7 +246,7 @@ export default function Navigation() {
                             className="w-10 h-10 rounded-full object-cover"
                           />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-stone-800 truncate">
+                            <p className="text-sm font-whyte-medium text-stone-800 truncate">
                               {displayName}
                             </p>
                             {email && (
@@ -278,7 +278,7 @@ export default function Navigation() {
                           setShowAccountModal(true);
                           setIsOpen(false);
                         }}
-                        className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-4 py-2.5 rounded-lg transition-all duration-300 font-medium text-sm"
+                        className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-4 py-2.5 rounded-lg transition-all duration-300 font-whyte-medium text-sm"
                       >
                         Account
                       </button>

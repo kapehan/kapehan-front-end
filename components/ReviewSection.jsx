@@ -195,7 +195,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
     <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6 md:mb-10 border border-stone-200">
       <div className="p-4 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-stone-800 flex items-center mb-4 md:mb-0">
+          <h2 className="text-2xl md:text-3xl font-whyte-bold text-stone-800 flex items-center mb-4 md:mb-0">
             <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
               <FaStar className="text-amber-600 text-lg md:text-xl" />
             </div>
@@ -205,7 +205,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
           <button
             onClick={userHasReview === false ? onWriteReview : undefined}
             disabled={userHasReview !== false}
-            className={`px-6 py-3 rounded-lg transition-colors font-medium ${
+            className={`px-6 py-3 rounded-lg transition-colors font-whyte-medium ${
               userHasReview === false
                 ? "bg-amber-600 hover:bg-amber-700 text-white"
                 : "bg-stone-200 text-stone-500 cursor-not-allowed"
@@ -243,7 +243,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
           <div className="text-center mt-6">
             <button
               onClick={loadMoreReviews}
-              className="bg-stone-100 hover:bg-stone-200 text-stone-800 px-6 py-3 rounded-lg transition-colors font-medium"
+              className="bg-stone-100 hover:bg-stone-200 text-stone-800 px-6 py-3 rounded-lg transition-colors font-whyte-medium"
             >
               Load More Reviews ({Math.max(0, totalCount - showingCount)} remaining)
             </button>
@@ -253,7 +253,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
         {totalCount === 0 && (
           <div className="text-center py-8">
             <FaUser className="mx-auto text-stone-400 mb-4 h-12 w-12" />
-            <h3 className="text-lg font-semibold text-stone-800 mb-2">
+            <h3 className="text-lg font-whyte-bold text-stone-800 mb-2">
               No Reviews Yet
             </h3>
             <p className="text-stone-600 mb-6">
@@ -261,7 +261,7 @@ export default function ReviewSection({ slug, shopId, onWriteReview, reviewVersi
             </p>
             <button
               onClick={onWriteReview}
-              className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+              className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg transition-colors font-whyte-medium"
             >
               Write the First Review
             </button>

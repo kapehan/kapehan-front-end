@@ -65,7 +65,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
                 <FaStore className="text-white text-lg" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-stone-800">List Your Coffee Shop</h2>
+                <h2 className="text-xl font-whyte-bold text-stone-800">List Your Coffee Shop</h2>
                 <p className="text-sm text-stone-600">Join Kapehan community</p>
               </div>
             </div>
@@ -81,7 +81,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Coffee Shop Name</label>
+                <label className="block text-sm font-whyte-medium text-stone-700 mb-2">Coffee Shop Name</label>
                 <div className="relative">
                   <FaStore className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
                   <input
@@ -97,7 +97,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">City</label>
+                <label className="block text-sm font-whyte-medium text-stone-700 mb-2">City</label>
                 <div className="relative">
                   <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
                   <select
@@ -118,7 +118,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Email Address</label>
+                <label className="block text-sm font-whyte-medium text-stone-700 mb-2">Email Address</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
                   <input
@@ -134,7 +134,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Password</label>
+                <label className="block text-sm font-whyte-medium text-stone-700 mb-2">Password</label>
                 <div className="relative">
                   <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
                   <input
@@ -150,7 +150,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Confirm Password</label>
+                <label className="block text-sm font-whyte-medium text-stone-700 mb-2">Confirm Password</label>
                 <div className="relative">
                   <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
                   <input
@@ -169,7 +169,7 @@ export default function OwnerAccountModal({ show, onClose, onSuccess }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 mt-6"
+              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-whyte-bold hover:shadow-lg transition-all duration-300 mt-6"
             >
               Create Account
             </button>

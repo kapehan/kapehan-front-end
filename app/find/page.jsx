@@ -243,7 +243,7 @@ export default function FindPage() {
         <section className="py-12 md:py-16 lg:py-20 px-4 md:px-6 bg-stone-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-stone-900 mb-4">Perfect Meeting Spots</h2>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-whyte-bold text-stone-900 mb-4">Perfect Meeting Spots</h2>
               <p className="text-base md:text-lg text-stone-600">
                 Found {nearbyShops.length} coffee shops that are convenient for both of you
               </p>
@@ -282,7 +282,7 @@ export default function FindPage() {
                       <button
                         key={page}
                         onClick={() => goToPage(page)}
-                        className={`px-3 md:px-4 py-2 rounded-lg border transition-colors text-sm md:text-base font-medium ${
+                        className={`px-3 md:px-4 py-2 rounded-lg border transition-colors text-sm md:text-base font-whyte-medium ${
                           currentPage === page
                             ? "bg-amber-600 text-white border-amber-600"
                             : "border-stone-300 text-stone-700 hover:bg-stone-100"
@@ -317,7 +317,7 @@ export default function FindPage() {
         <section className="py-12 md:py-16 lg:py-20 px-4 md:px-6 bg-stone-50">
           <div className="max-w-4xl mx-auto text-center">
             <LuCoffee className="mx-auto text-stone-400 mb-4 md:mb-6 h-12 md:h-16 w-12 md:w-16" />
-            <h3 className="text-xl md:text-2xl font-semibold text-stone-900 mb-3 md:mb-4">
+            <h3 className="text-xl md:text-2xl font-whyte-bold text-stone-900 mb-3 md:mb-4">
               Find Your Perfect Meeting Spot
             </h3>
             <p className="text-stone-600 mb-6 md:mb-8 text-sm md:text-base">
@@ -326,19 +326,19 @@ export default function FindPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl mx-auto">
               <div className="text-center">
                 <div className="w-10 md:w-12 h-10 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
-                  <span className="text-amber-600 font-bold text-sm md:text-base">1</span>
+                  <span className="text-amber-600 font-whyte-bold text-sm md:text-base">1</span>
                 </div>
                 <p className="text-xs md:text-sm text-stone-600">Enter your location</p>
               </div>
               <div className="text-center">
                 <div className="w-10 md:w-12 h-10 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
-                  <span className="text-amber-600 font-bold text-sm md:text-base">2</span>
+                  <span className="text-amber-600 font-whyte-bold text-sm md:text-base">2</span>
                 </div>
                 <p className="text-xs md:text-sm text-stone-600">Add your friend's location</p>
               </div>
               <div className="text-center">
                 <div className="w-10 md:w-12 h-10 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-3">
-                  <span className="text-amber-600 font-bold text-sm md:text-base">3</span>
+                  <span className="text-amber-600 font-whyte-bold text-sm md:text-base">3</span>
                 </div>
                 <p className="text-xs md:text-sm text-stone-600">Find meeting spots</p>
               </div>

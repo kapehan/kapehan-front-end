@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Column 1 - About */}
           <div>
-            <h3 className="text-2xl font-poppins-bold text-[#5F4429] mb-4">Kapehan</h3>
+            <h3 className="text-2xl font-whyte-bold text-[#5F4429] mb-4">Kapehan</h3>
             <p className="text-sm font-poppins text-gray-600 mb-4">
               We index the unique coffee shops in Metro Manila to help you find the best local spots for your caffeine
               fix.
@@ -21,7 +21,7 @@ const Footer = () => {
 
           {/* Column 2 - Quick Links */}
           <div>
-            <h3 className="text-lg font-poppins-bold text-[#5F4429] mb-4">Quick Links</h3>
+            <h3 className="text-lg font-whyte-bold text-[#5F4429] mb-4">Quick Links</h3>
             <ul className="space-y-2">
               {[
                 { name: "Home", path: "/" },
@@ -44,7 +44,7 @@ const Footer = () => {
 
           {/* Column 3 - Popular Cities */}
           <div>
-            <h3 className="text-lg font-poppins-bold text-[#5F4429] mb-4">Popular Cities</h3>
+            <h3 className="text-lg font-whyte-bold text-[#5F4429] mb-4">Popular Cities</h3>
             <ul className="space-y-2">
               {["Makati", "BGC", "Quezon City", "Pasig", "Manila"].map((city) => (
                 <li key={city}>
@@ -61,7 +61,7 @@ const Footer = () => {
 
           {/* Column 4 - Contact */}
           <div>
-            <h3 className="text-lg font-poppins-bold text-[#5F4429] mb-4">Contact Us</h3>
+            <h3 className="text-lg font-whyte-bold text-[#5F4429] mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start">
                 <FaMapMarkerAlt className="text-amber-600 mt-1 mr-2" />

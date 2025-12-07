@@ -428,7 +428,7 @@ export default function ExplorePage() {
               {/* Filter Toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-colors text-sm font-medium ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-colors text-sm font-whyte-medium ${
                   showFilters || hasActiveFilters
                     ? "bg-amber-100 text-amber-700 border border-amber-200"
                     : "bg-stone-100 text-stone-700 hover:bg-stone-200"
@@ -464,13 +464,13 @@ export default function ExplorePage() {
               {/* Find Nearest coffee shop */}
               <button
                 onClick={handleFindNearest}
-                className="px-4 py-2.5 rounded-lg bg-amber-700 text-white hover:bg-amber-800 text-sm font-medium"
+                className="px-4 py-2.5 rounded-lg bg-amber-700 text-white hover:bg-amber-800 text-sm font-whyte-medium"
               >
                 Find Nearest coffee shop
               </button>
 
               {/* Results Count */}
-              <div className="text-stone-600 font-medium text-sm whitespace-nowrap">
+              <div className="text-stone-600 font-whyte-medium text-sm whitespace-nowrap">
                 <span className="hidden sm:inline">
                   {resultCount} coffee shop
                   {resultCount !== 1 ? "s" : ""} found
@@ -492,7 +492,7 @@ export default function ExplorePage() {
               >
                 {/* Filter Header - Mobile */}
                 <div className="flex items-center justify-between mb-4 sm:hidden">
-                  <h3 className="font-semibold text-stone-900">Filters</h3>
+                  <h3 className="font-whyte-bold text-stone-900">Filters</h3>
                   <button
                     onClick={() => setShowFilters(false)}
                     className="p-1 text-stone-500 hover:text-stone-700"
@@ -506,7 +506,7 @@ export default function ExplorePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* City Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-stone-900 mb-2">
+                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
                         City
                       </label>
                       <select
@@ -525,7 +525,7 @@ export default function ExplorePage() {
 
                     {/* Rating Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-stone-900 mb-2">
+                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
                         Minimum Rating
                       </label>
                       <select
@@ -545,7 +545,7 @@ export default function ExplorePage() {
 
                     {/* Amenities Filter */}
                     <div className="sm:col-span-2 lg:col-span-1">
-                      <label className="block text-sm font-medium text-stone-900 mb-2">
+                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
                         Amenities
                       </label>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -576,7 +576,7 @@ export default function ExplorePage() {
 
                   {/* Vibes Filter - Full Width */}
                   <div>
-                    <label className="block text-sm font-medium text-stone-900 mb-3">
+                    <label className="block text-sm font-whyte-medium text-stone-900 mb-3">
                       Vibes & Atmosphere
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-40 overflow-y-auto">
@@ -603,7 +603,7 @@ export default function ExplorePage() {
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-stone-200 space-y-2 sm:space-y-0">
                     <button
                       onClick={clearFilters}
-                      className="text-stone-600 hover:text-stone-800 transition-colors text-sm font-medium"
+                      className="text-stone-600 hover:text-stone-800 transition-colors text-sm font-whyte-medium"
                     >
                       Clear All Filters
                     </button>
@@ -707,7 +707,7 @@ export default function ExplorePage() {
         ) : (
           <div className="text-center py-12 md:py-16">
             <LuCoffee className="mx-auto text-stone-400 mb-4 h-12 md:h-16 w-12 md:w-16" />
-            <h3 className="text-xl md:text-2xl font-semibold text-stone-900 mb-2">
+            <h3 className="text-xl md:text-2xl font-whyte-bold text-stone-900 mb-2">
               No coffee shops found
             </h3>
             <p className="text-stone-600 mb-4 md:mb-6 text-sm md:text-base">

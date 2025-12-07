@@ -41,7 +41,7 @@ export default function Newsletter() {
             <LuCoffee className="h-8 w-8 text-white" />
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-stone-800 mb-4">Stay in the Loop</h2>
+          <h2 className="text-3xl md:text-4xl font-whyte-bold text-stone-800 mb-4">Stay in the Loop</h2>
 
           <p className="text-lg text-stone-600 mb-8 max-w-2xl mx-auto">
             Get weekly updates on new coffee shops, exclusive reviews, and special offers from your favorite cafés.
@@ -64,7 +64,7 @@ export default function Newsletter() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-stone-800 mb-2">Welcome to the Community!</h3>
+              <h3 className="text-xl font-whyte-bold text-stone-800 mb-2">Welcome to the Community!</h3>
               <p className="text-stone-600">
                 You're all set! Check your inbox for a welcome email with exclusive coffee shop recommendations.
               </p>
@@ -87,7 +87,7 @@ export default function Newsletter() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-whyte-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   {isLoading ? (
                     <div className="flex items-center">

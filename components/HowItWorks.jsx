@@ -40,7 +40,7 @@ const HowItWorks = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto"
+          className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto  font-whyte-medium"
         >
           Finding your perfect coffee spot in Metro Manila has never been easier
         </motion.p>
@@ -59,12 +59,12 @@ const HowItWorks = () => {
                 <div className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-6">
                   {step.icon}
                 </div>
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-[#8B5E3B] rounded-full flex items-center justify-center text-white font-bold">
+                <div className="absolute -top-3 -right-3 w-8 h-8 bg-[#8B5E3B] rounded-full flex items-center justify-center text-white font-whyte-bold">
                   {index + 1}
                 </div>
               </div>
               <h3 className="text-2xl font-whyte-bold text-[#5F4429] mb-3">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
+              <p className="text-gray-600 font-whyte">{step.description}</p>
             </motion.div>
           ))}
         </div>

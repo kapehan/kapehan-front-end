@@ -521,7 +521,7 @@ export default function ListCoffeeShopPage() {
                     type="button"
                     onClick={() => setStep(step - 1)}
                     disabled={isLoading}
-                    className="flex-1 px-6 py-3 border border-stone-300 text-stone-700 rounded-lg font-semibold hover:bg-stone-50 transition-colors disabled:opacity-50"
+                    className="flex-1 px-6 py-3 border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors disabled:opacity-50"
                   >
                     Back
                   </button>
@@ -529,7 +529,7 @@ export default function ListCoffeeShopPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 bg-amber-700 text-white px-6 py-3 rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isLoading && (
                     <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -571,7 +571,7 @@ export default function ListCoffeeShopPage() {
             >
               <FaCheckCircle className="text-5xl text-emerald-600 mx-auto mb-4" />
             </motion.div>
-            <h2 className="text-2xl font-bold text-stone-900 mb-2">
+            <h2 className="text-2xl font-whyte-bold text-stone-900 mb-2">
               Listing Submitted!
             </h2>
             <p className="text-stone-600 mb-6">
@@ -599,7 +599,7 @@ function HeaderSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-4xl md:text-5xl font-bold text-stone-900 mb-4">
+        <h1 className="text-4xl md:text-5xl font-whyte-bold text-stone-900 mb-4">
           List Your Coffee Shop
         </h1>
         <p className="text-lg text-stone-600">
@@ -632,7 +632,7 @@ function ProgressSteps({ step }) {
           />
           <p
             className={`text-xs md:text-sm text-center transition-colors ${
-              s.num <= step ? "font-semibold text-amber-700" : "text-stone-400"
+              s.num <= step ? "font-whyte-bold text-amber-700" : "text-stone-400"
             }`}
           >
             {s.label}
@@ -662,7 +662,7 @@ function Step1ShopInfo({
       className="space-y-8"
     >
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-4">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-4">
           Coffee Shop Image
         </label>
         <div className="relative border-2 border-dashed border-stone-300 rounded-xl p-8 text-center hover:border-amber-400 transition-colors cursor-pointer">
@@ -686,7 +686,7 @@ function Step1ShopInfo({
           ) : (
             <div className="space-y-3">
               <FaImage className="mx-auto text-4xl text-stone-300" />
-              <p className="text-stone-700 font-medium">
+              <p className="text-stone-700 font-whyte-medium">
                 Upload your coffee shop image
               </p>
               <p className="text-sm text-stone-500">PNG, JPG up to 10MB</p>
@@ -696,7 +696,7 @@ function Step1ShopInfo({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-3">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-3">
           Coffee Shop Name <span className="text-red-600">*</span>
         </label>
         <input
@@ -712,7 +712,7 @@ function Step1ShopInfo({
 
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-stone-900 mb-3">
+          <label className="block text-sm font-whyte-bold text-stone-900 mb-3">
             City <span className="text-red-600">*</span>
           </label>
           <select
@@ -732,7 +732,7 @@ function Step1ShopInfo({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-stone-900 mb-3">
+          <label className="block text-sm font-whyte-bold text-stone-900 mb-3">
             Established Date <span className="text-red-600">*</span>
           </label>
           <input
@@ -747,7 +747,7 @@ function Step1ShopInfo({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-3">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-3">
           Address <span className="text-red-600">*</span>
         </label>
         <div className="relative">
@@ -787,7 +787,7 @@ function Step1ShopInfo({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-3">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-3">
           Description
         </label>
         <textarea
@@ -819,12 +819,12 @@ function Step2ContactHours({
       className="space-y-8"
     >
       <div>
-        <h3 className="font-semibold text-stone-900 mb-4 text-lg">
+        <h3 className="font-whyte-bold text-stone-900 mb-4 text-lg">
           Contact Information
         </h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-stone-900 mb-2">
+            <label className="block text-sm font-whyte-bold text-stone-900 mb-2">
               Email <span className="text-red-600">*</span>
             </label>
             <input
@@ -838,7 +838,7 @@ function Step2ContactHours({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-stone-900 mb-2">
+            <label className="block text-sm font-whyte-bold text-stone-900 mb-2">
               Mobile Number
             </label>
             <input
@@ -851,7 +851,7 @@ function Step2ContactHours({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-stone-900 mb-2">
+            <label className="block text-sm font-whyte-bold text-stone-900 mb-2">
               Facebook
             </label>
             <input
@@ -864,7 +864,7 @@ function Step2ContactHours({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-stone-900 mb-2">
+            <label className="block text-sm font-whyte-bold text-stone-900 mb-2">
               Instagram
             </label>
             <input
@@ -879,7 +879,7 @@ function Step2ContactHours({
       </div>
 
       <div>
-        <h3 className="font-semibold text-stone-900 mb-4 text-lg">
+        <h3 className="font-whyte-bold text-stone-900 mb-4 text-lg">
           Opening Hours
         </h3>
         <div className="space-y-3">
@@ -888,7 +888,7 @@ function Step2ContactHours({
               key={day}
               className="flex items-center gap-3 bg-stone-50 p-4 rounded-lg"
             >
-              <span className="w-20 text-sm font-medium text-stone-700 capitalize">
+              <span className="w-20 text-sm font-whyte-medium text-stone-700 capitalize">
                 {day}
               </span>
               <div className="flex items-center gap-2 flex-1">
@@ -927,7 +927,7 @@ function Step2ContactHours({
       </div>
 
       <div>
-        <h3 className="font-semibold text-stone-900 mb-4 text-lg">
+        <h3 className="font-whyte-bold text-stone-900 mb-4 text-lg">
           Payment Methods Accepted
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -936,7 +936,7 @@ function Step2ContactHours({
               key={method}
               type="button"
               onClick={() => handlePaymentToggle(method)}
-              className={`p-3 rounded-lg border-2 transition-all font-medium text-sm ${
+              className={`p-3 rounded-lg border-2 transition-all font-whyte-medium text-sm ${
                 formData.paymentMethods.includes(method)
                   ? "bg-amber-50 border-amber-600 text-amber-700"
                   : "bg-stone-50 border-stone-300 text-stone-700 hover:border-stone-400"
@@ -1019,7 +1019,7 @@ function MenuCategorySection({
     <div className="border border-stone-200 rounded-lg overflow-hidden">
       {/* Header */}
       <div className="bg-stone-50 px-6 py-4 border-b border-stone-200">
-        <h3 className="text-lg font-semibold text-stone-900">
+        <h3 className="text-lg font-whyte-bold text-stone-900">
           {emoji} {title}
         </h3>
         <p className="text-xs text-stone-500 mt-1">
@@ -1040,7 +1040,7 @@ function MenuCategorySection({
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-stone-900 text-sm">
+                    <p className="font-whyte-medium text-stone-900 text-sm">
                       {item.name}
                     </p>
                     {item.bestselling && (
@@ -1071,7 +1071,7 @@ function MenuCategorySection({
         <button
           type="button"
           onClick={onToggleForm}
-          className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+          className={`w-full py-2 px-4 rounded-lg font-whyte-medium text-sm transition-all ${
             section.isAdding
               ? "bg-amber-100 text-amber-700 border border-amber-300"
               : "bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-200"
@@ -1090,7 +1090,7 @@ function MenuCategorySection({
           >
             {/* Item Name */}
             <div>
-              <label className="text-xs font-semibold text-stone-700 mb-2 block">
+              <label className="text-xs font-whyte-bold text-stone-700 mb-2 block">
                 Item Name *
               </label>
               <input
@@ -1108,7 +1108,7 @@ function MenuCategorySection({
                 <button
                   type="button"
                   onClick={() => onFormChange({ hasSizes: false, sizes: [] })}
-                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  className={`py-2 px-3 rounded-lg text-xs font-whyte-bold transition-all ${
                     section.form.hasSizes
                       ? "bg-stone-100 text-stone-700 border border-stone-300"
                       : "bg-amber-600 text-white border border-amber-600"
@@ -1124,7 +1124,7 @@ function MenuCategorySection({
                       sizes: [{ size: "", price: "" }],
                     })
                   }
-                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  className={`py-2 px-3 rounded-lg text-xs font-whyte-bold transition-all ${
                     section.form.hasSizes
                       ? "bg-amber-600 text-white border border-amber-600"
                       : "bg-stone-100 text-stone-700 border border-stone-300"
@@ -1138,7 +1138,7 @@ function MenuCategorySection({
             {/* Single Price */}
             {!section.form.hasSizes && (
               <div>
-                <label className="text-xs font-semibold text-stone-700 mb-2 block">
+                <label className="text-xs font-whyte-bold text-stone-700 mb-2 block">
                   Price (₱) *
                 </label>
                 <input
@@ -1155,7 +1155,7 @@ function MenuCategorySection({
             {/* Multiple Sizes */}
             {section.form.hasSizes && (
               <div>
-                <label className="text-xs font-semibold text-stone-700 mb-2 block">
+                <label className="text-xs font-whyte-bold text-stone-700 mb-2 block">
                   Sizes *
                 </label>
                 <div className="space-y-2">
@@ -1186,7 +1186,7 @@ function MenuCategorySection({
                 <button
                   type="button"
                   onClick={onAddSize}
-                  className="text-amber-600 hover:text-amber-700 text-xs font-semibold mt-2 py-1"
+                  className="text-amber-600 hover:text-amber-700 text-xs font-whyte-bold mt-2 py-1"
                 >
                   + Add Another Size
                 </button>
@@ -1201,7 +1201,7 @@ function MenuCategorySection({
                 onChange={(e) => onFormChange({ bestseller: e.target.checked })}
                 className="rounded accent-amber-600"
               />
-              <span className="text-xs font-medium text-stone-700">
+              <span className="text-xs font-whyte-medium text-stone-700">
                 Mark as best seller ⭐
               </span>
             </label>
@@ -1211,14 +1211,14 @@ function MenuCategorySection({
               <button
                 type="button"
                 onClick={onToggleForm}
-                className="flex-1 bg-stone-200 hover:bg-stone-300 text-stone-700 font-semibold py-2 rounded-lg text-sm transition-colors"
+                className="flex-1 bg-stone-200 hover:bg-stone-300 text-stone-700 font-whyte-bold py-2 rounded-lg text-sm transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={onAdd}
-                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg text-sm transition-colors"
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-whyte-bold py-2 rounded-lg text-sm transition-colors"
               >
                 Add Item
               </button>
@@ -1245,7 +1245,7 @@ function Step4Amenities({
       className="space-y-8"
     >
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-4">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-4">
           Amenities (Select all that apply)
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -1255,7 +1255,7 @@ function Step4Amenities({
                 key={amenity_value}
                 type="button"
                 onClick={() => handleAmenityToggle(amenity_value)}
-                className={`p-4 rounded-lg border-2 transition-all text-sm font-medium ${
+                className={`p-4 rounded-lg border-2 transition-all text-sm font-whyte-medium ${
                   formData.amenities.includes(amenity_value)
                     ? "bg-amber-50 border-amber-600 text-amber-700"
                     : "bg-stone-50 border-stone-300 text-stone-700 hover:border-stone-400"
@@ -1271,7 +1271,7 @@ function Step4Amenities({
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-4">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-4">
           Vibes
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -1283,7 +1283,7 @@ function Step4Amenities({
                 onClick={() =>
                   setFormData({ ...formData, atmosphere: vibe_value }) // Fix here
                 }
-                className={`p-4 rounded-lg border-2 transition-all text-sm font-medium ${
+                className={`p-4 rounded-lg border-2 transition-all text-sm font-whyte-medium ${
                   formData.atmosphere === vibe_value
                     ? "bg-amber-50 border-amber-600 text-amber-700"
                     : "bg-stone-50 border-stone-300 text-stone-700 hover:border-stone-400"
@@ -1300,7 +1300,7 @@ function Step4Amenities({
 
       {/* Remove manual lat/lon inputs; show read-only preview of selected coords */}
       <div>
-        <label className="block text-sm font-semibold text-stone-900 mb-4">
+        <label className="block text-sm font-whyte-bold text-stone-900 mb-4">
           Location Coordinates
         </label>
         <div className="grid grid-cols-2 gap-4">
@@ -1353,7 +1353,7 @@ function Step5Review({ formData, menuSections, imagePreview, days }) {
           />
           <ReviewRow label="Address" value={formData.address} />
           <div className="pt-3 border-t border-stone-200">
-            <p className="text-xs font-semibold text-stone-700 mb-1">
+            <p className="text-xs font-whyte-bold text-stone-700 mb-1">
               Description
             </p>
             <p className="text-sm text-stone-600">
@@ -1398,7 +1398,7 @@ function Step5Review({ formData, menuSections, imagePreview, days }) {
               formData.paymentMethods.map((method) => (
                 <span
                   key={method}
-                  className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium"
+                  className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-whyte-medium"
                 >
                   {method}
                 </span>
@@ -1428,7 +1428,7 @@ function Step5Review({ formData, menuSections, imagePreview, days }) {
           </ReviewSection>
 
           <ReviewSection title="Atmosphere">
-            <p className="text-stone-700 font-medium">
+            <p className="text-stone-700 font-whyte-medium">
               {formData.atmosphere || "Not specified"}
             </p>
           </ReviewSection>
@@ -1465,7 +1465,7 @@ function Step5Review({ formData, menuSections, imagePreview, days }) {
                   key={category}
                   className="pb-3 border-b border-stone-200 last:border-b-0 last:pb-0"
                 >
-                  <p className="font-semibold text-stone-800 mb-2">
+                  <p className="font-whyte-bold text-stone-800 mb-2">
                     {categoryLabel}
                   </p>
                   <div className="space-y-1 ml-2">
@@ -1503,7 +1503,7 @@ function Step5Review({ formData, menuSections, imagePreview, days }) {
 function ReviewSection({ title, children }) {
   return (
     <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
-      <h3 className="font-semibold text-stone-900 mb-4 text-lg">{title}</h3>
+      <h3 className="font-whyte-bold text-stone-900 mb-4 text-lg">{title}</h3>
       {children}
     </div>
   );
@@ -1513,7 +1513,7 @@ function ReviewSection({ title, children }) {
 function ReviewRow({ label, value }) {
   return (
     <div className="flex justify-between pb-3 border-b border-stone-100 last:border-b-0 last:pb-0">
-      <span className="font-medium text-stone-700 text-sm">{label}</span>
+      <span className="font-whyte-medium text-stone-700 text-sm">{label}</span>
       <span className="text-stone-600 text-sm">{value}</span>
     </div>
   );

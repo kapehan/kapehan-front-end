@@ -75,7 +75,7 @@ const PopularCities = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto"
+          className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto font-whyte"
         >
           Explore coffee shops by city and discover the unique coffee culture in each area of Metro Manila
         </motion.p>

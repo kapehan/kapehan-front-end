@@ -111,7 +111,7 @@ export default function BlogDetailPage() {
       <div className="min-h-screen bg-white">
         <Navigation />
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Story Not Found</h1>
+          <h1 className="text-3xl font-whyte-bold text-gray-900 mb-4">Story Not Found</h1>
           <p className="text-gray-600 mb-8">The coffee story you're looking for doesn't exist or has been removed.</p>
           <Link
             href="/blog"
@@ -138,13 +138,13 @@ export default function BlogDetailPage() {
         <div className="max-w-4xl mx-auto">
           {/* Category badge */}
           <div className="mb-4">
-            <span className="bg-amber-50 text-amber-700 text-sm px-3 py-1 rounded-full font-medium">
+            <span className="bg-amber-50 text-amber-700 text-sm px-3 py-1 rounded-full font-whyte-medium">
               {post.category}
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">{post.title}</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-whyte-bold text-gray-900 mb-6">{post.title}</h1>
 
           {/* Author info */}
           <div className="flex items-center mb-8 pb-8 border-b border-gray-100">
@@ -152,7 +152,7 @@ export default function BlogDetailPage() {
               {/* Placeholder for author image */}
             </div>
             <div className="ml-4">
-              <p className="font-medium text-gray-900">{post.author}</p>
+              <p className="font-whyte-medium text-gray-900">{post.author}</p>
               <p className="text-sm text-gray-500">{new Date(post.date).toLocaleDateString()}</p>
             </div>
           </div>

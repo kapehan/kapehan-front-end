@@ -61,7 +61,7 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
           {/* 🕒 Status Badge */}
           <div className="absolute top-3 left-3">
             <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm ${getStatusColor(
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-whyte-medium bg-white/90 backdrop-blur-sm ${getStatusColor(
                 shop.isOpen
               )}`}
             >
@@ -73,7 +73,7 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
           {/* 📍 Distance (if available) */}
           {showDistance && shop.distance && (
             <div className="absolute top-3 right-3">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 backdrop-blur-sm text-stone-700">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-whyte-medium bg-white/90 backdrop-blur-sm text-stone-700">
                 <FaMapMarkerAlt className="mr-1 h-3 w-3" />
                 {shop.distance} km
               </span>
@@ -86,7 +86,7 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
           <div className="space-y-3 flex-1">
             {/* 📌 Header */}
             <div>
-              <h3 className="font-bold text-lg text-stone-800 mb-1 line-clamp-1">
+              <h3 className="font-whyte-bold text-lg text-stone-800 mb-1 line-clamp-1">
                 {shop.name}
               </h3>
               <p className="text-stone-600 text-sm line-clamp-1 flex items-center">
@@ -100,7 +100,7 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
             {/* ⭐ Rating */}
             <div className="flex items-center">
               <FaStar className="text-yellow-400 mr-1 h-4 w-4" />
-              <span className="font-semibold text-stone-800">
+              <span className="font-whyte-bold text-stone-800">
                 {parseFloat(shop.rating || 0).toFixed(1)}
               </span>
             </div>
@@ -111,13 +111,13 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
                 {shop.vibes.slice(0, 2).map((vibe, index) => (
                   <span
                     key={index}
-                    className="inline-block px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-medium"
+                    className="inline-block px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-whyte-medium"
                   >
                     {vibe}
                   </span>
                 ))}
                 {shop.vibes.length > 2 && (
-                  <span className="inline-block px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-full font-medium">
+                  <span className="inline-block px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-full font-whyte-medium">
                     +{shop.vibes.length - 2}
                   </span>
                 )}
@@ -152,7 +152,7 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
           </div>
 
           {/* 👁️ View Details */}
-          <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-xl transition-all duration-300 font-medium mt-4">
+          <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-xl transition-all duration-300 font-whyte-medium mt-4">
             View Details
           </button>
         </div>

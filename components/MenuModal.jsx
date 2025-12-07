@@ -56,7 +56,7 @@ export default function MenuModal({ shop, slug, onClose }) {
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-stone-800 text-sm">{item.name}</h4>
+            <h4 className="font-whyte-bold text-stone-800 text-sm">{item.name}</h4>
             {/* No best seller info in API, so skip */}
           </div>
         </div>
@@ -66,14 +66,14 @@ export default function MenuModal({ shop, slug, onClose }) {
           {item.variants.map((sizeOption, idx) => (
             <div key={idx} className="flex justify-between items-center text-xs">
               <span className="text-stone-600">{sizeOption.size}</span>
-              <span className="font-semibold text-amber-700">₱{sizeOption.price}</span>
+              <span className="font-whyte-bold text-amber-700">₱{sizeOption.price}</span>
             </div>
           ))}
         </div>
       ) : (
         <div className="flex justify-between items-center">
           <span className="text-stone-600 text-sm">Price</span>
-          <span className="font-semibold text-amber-700 text-sm">₱{item.price}</span>
+          <span className="font-whyte-bold text-amber-700 text-sm">₱{item.price}</span>
         </div>
       )}
     </motion.div>
@@ -99,7 +99,7 @@ export default function MenuModal({ shop, slug, onClose }) {
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-amber-50 to-stone-50 px-5 sm:px-6 py-4 sm:py-6 border-b border-stone-200 flex items-start sm:items-center justify-between z-10">
           <div className="text-left">
-            <h2 className="text-lg sm:text-2xl font-bold text-stone-900 truncate" title={shop.name}>
+            <h2 className="text-lg sm:text-2xl font-whyte-bold text-stone-900 truncate" title={shop.name}>
               {shop.name}
             </h2>
             <p className="text-xs sm:text-sm text-stone-600 mt-1 line-clamp-2">{shop.address}</p>
@@ -119,7 +119,7 @@ export default function MenuModal({ shop, slug, onClose }) {
             <button
               key={key}
               onClick={() => setSelectedCategory(key)}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm whitespace-nowrap transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-whyte-medium text-xs sm:text-sm whitespace-nowrap transition-colors ${
                 selectedCategory === key
                   ? "bg-amber-700 text-white shadow-sm"
                   : "bg-stone-100 text-stone-700 hover:bg-stone-200"
@@ -157,7 +157,7 @@ export default function MenuModal({ shop, slug, onClose }) {
         <div className="border-t border-stone-200 px-5 sm:px-6 py-4 bg-stone-50">
           <button
             onClick={onClose}
-            className="w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 rounded-lg transition-colors text-sm sm:text-base"
+            className="w-full bg-amber-700 hover:bg-amber-800 text-white font-whyte-bold py-3 rounded-lg transition-colors text-sm sm:text-base"
           >
             Close Menu
           </button>

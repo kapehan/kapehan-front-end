@@ -45,7 +45,7 @@ export default function ContactPage() {
       <div className="pt-24 pb-16 border-b border-stone-200">
         <div className="max-w-4xl mx-auto px-4 md:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <h1 className="text-4xl md:text-5xl font-bold text-stone-900 leading-tight mb-6">Get In Touch</h1>
+            <h1 className="text-4xl md:text-5xl font-whyte-bold text-stone-900 leading-tight mb-6">Get In Touch</h1>
             <p className="text-lg text-stone-600 max-w-2xl mx-auto">
               Have questions or want to partner with us? We'd love to hear from you.
             </p>
@@ -65,7 +65,7 @@ export default function ContactPage() {
               className="space-y-8"
             >
               <div>
-                <h2 className="text-2xl font-bold text-stone-900 mb-4">Let's Connect</h2>
+                <h2 className="text-2xl font-whyte-bold text-stone-900 mb-4">Let's Connect</h2>
                 <p className="text-stone-600 leading-relaxed">
                   Reach out to us for any inquiries about listing your coffee shop, partnership opportunities, or
                   general feedback.
@@ -78,7 +78,7 @@ export default function ContactPage() {
                     <FaEnvelope className="h-5 w-5 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-stone-900">Email</h3>
+                    <h3 className="font-whyte-bold text-stone-900">Email</h3>
                     <p className="text-stone-600">hello@kapehan.com</p>
                   </div>
                 </div>
@@ -88,7 +88,7 @@ export default function ContactPage() {
                     <FaPhone className="h-5 w-5 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-stone-900">Phone</h3>
+                    <h3 className="font-whyte-bold text-stone-900">Phone</h3>
                     <p className="text-stone-600">+63 912 345 6789</p>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export default function ContactPage() {
                     <FaMapMarkerAlt className="h-5 w-5 text-amber-700" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-stone-900">Location</h3>
+                    <h3 className="font-whyte-bold text-stone-900">Location</h3>
                     <p className="text-stone-600">Metro Manila, Philippines</p>
                   </div>
                 </div>
@@ -117,16 +117,16 @@ export default function ContactPage() {
                   <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <FaPaperPlane className="h-8 w-8 text-emerald-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-stone-900 mb-2">Message Sent!</h3>
+                  <h3 className="text-xl font-whyte-bold text-stone-900 mb-2">Message Sent!</h3>
                   <p className="text-stone-600">We'll get back to you soon.</p>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold text-stone-900 mb-6">Send a Message</h2>
+                  <h2 className="text-2xl font-whyte-bold text-stone-900 mb-6">Send a Message</h2>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-semibold text-stone-900 mb-2">
+                      <label htmlFor="name" className="block text-sm font-whyte-bold text-stone-900 mb-2">
                         Name
                       </label>
                       <input
@@ -142,7 +142,7 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-semibold text-stone-900 mb-2">
+                      <label htmlFor="email" className="block text-sm font-whyte-bold text-stone-900 mb-2">
                         Email
                       </label>
                       <input
@@ -158,7 +158,7 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="subject" className="block text-sm font-semibold text-stone-900 mb-2">
+                      <label htmlFor="subject" className="block text-sm font-whyte-bold text-stone-900 mb-2">
                         Subject
                       </label>
                       <input
@@ -174,7 +174,7 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="message" className="block text-sm font-semibold text-stone-900 mb-2">
+                      <label htmlFor="message" className="block text-sm font-whyte-bold text-stone-900 mb-2">
                         Message
                       </label>
                       <textarea
@@ -192,7 +192,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-amber-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-amber-800 transition-colors disabled:opacity-50 flex items-center justify-center"
+                      className="w-full bg-amber-700 text-white py-3 px-6 rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors disabled:opacity-50 flex items-center justify-center"
                     >
                       {isSubmitting ? (
                         <>

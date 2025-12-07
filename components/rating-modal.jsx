@@ -74,7 +74,7 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
                   <LuCoffee className="text-white text-lg" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-stone-800">Write a Review</h2>
+                  <h2 className="text-xl font-whyte-bold text-stone-800">Write a Review</h2>
                   <p className="text-sm text-stone-600">Share your experience</p>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
                 </p>
                 <button
                   onClick={onClose}
-                  className="w-full bg-stone-200 hover:bg-stone-300 text-stone-700 font-semibold py-3 rounded-lg transition-colors text-sm"
+                  className="w-full bg-stone-200 hover:bg-stone-300 text-stone-700 font-whyte-bold py-3 rounded-lg transition-colors text-sm"
                 >
                   Close
                 </button>
@@ -102,7 +102,7 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 {/* Star Rating */}
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-3">
+                  <label className="block text-sm font-whyte-medium text-stone-700 mb-3">
                     How would you rate this coffee shop?
                   </label>
                   <div className="flex items-center space-x-1">
@@ -136,7 +136,7 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
 
                 {/* Review Text */}
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
+                  <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
                     Tell us about your experience (optional)
                   </label>
                   <textarea
@@ -152,7 +152,7 @@ export default function RatingModal({ show, onClose, shopId, slug, onSubmitted, 
                 <button
                   type="submit"
                   disabled={rating === 0 || isSubmitting}
-                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:from-stone-400 disabled:to-stone-500 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:from-stone-400 disabled:to-stone-500 text-white py-3 px-4 rounded-lg font-whyte-bold transition-all duration-300 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Review"}
                 </button>

@@ -155,7 +155,7 @@ export default function ProfilePage() {
           <div className="container mx-auto px-4 py-20 text-center">
             <div className="max-w-md mx-auto">
               <LuCoffee className="mx-auto text-stone-300 mb-8 h-16 w-16" />
-              <h1 className="text-2xl font-bold text-stone-900 mb-4">
+              <h1 className="text-2xl font-whyte-bold text-stone-900 mb-4">
                 Sign In to Your Profile
               </h1>
               <p className="text-stone-600 mb-8">
@@ -163,7 +163,7 @@ export default function ProfilePage() {
               </p>
               <button
                 onClick={() => setShowAccountModal(true)}
-                className="bg-amber-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-800 transition-colors"
+                className="bg-amber-700 text-white px-8 py-3 rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors"
               >
                 Sign In
               </button>
@@ -215,7 +215,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex-1 pt-2">
                   <div className="flex items-center gap-3 mb-4">
-                    <h1 className="text-2xl md:text-4xl font-bold text-stone-900">
+                    <h1 className="text-2xl md:text-4xl font-whyte-bold text-stone-900">
                       {displayName}
                     </h1>
                     <button
@@ -252,24 +252,24 @@ export default function ProfilePage() {
             {/* Stats */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-3 gap-4 mb-12">
               <div className="bg-stone-50 rounded-lg p-6 text-center border border-stone-200">
-                <div className="text-3xl font-bold text-amber-700 mb-2">
+                <div className="text-3xl font-whyte-bold text-amber-700 mb-2">
                   {visitedShops.length}
                 </div>
                 <div className="text-xs text-stone-600">Visited Shops</div>
               </div>
               <div className="bg-stone-50 rounded-lg p-6 text-center border border-stone-200">
-                <div className="text-3xl font-bold text-amber-700 mb-2">0</div>
+                <div className="text-3xl font-whyte-bold text-amber-700 mb-2">0</div>
                 <div className="text-xs text-stone-600">Reviews</div>
               </div>
               <div className="bg-stone-50 rounded-lg p-6 text-center border border-stone-200">
-                <div className="text-3xl font-bold text-amber-700 mb-2">0</div>
+                <div className="text-3xl font-whyte-bold text-amber-700 mb-2">0</div>
                 <div className="text-xs text-stone-600">Favorites</div>
               </div>
             </motion.div>
 
             {/* Recent Visits */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <h2 className="text-xl font-bold text-stone-900 mb-6">Recent Visits</h2>
+              <h2 className="text-xl font-whyte-bold text-stone-900 mb-6">Recent Visits</h2>
               {visitedShops.length > 0 ? (
                 <div className="space-y-3">
                   {visitedShops.map((shop, index) => (
@@ -292,7 +292,7 @@ export default function ProfilePage() {
                             className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-stone-900 truncate">
+                            <h3 className="font-whyte-bold text-stone-900 truncate">
                               {shop.name}
                             </h3>
                             {shop.city && (
@@ -307,7 +307,7 @@ export default function ProfilePage() {
                               {shop.rating && (
                                 <div className="flex items-center gap-1 justify-end">
                                   <FaStar className="text-yellow-400 h-4 w-4" />
-                                  <span className="font-semibold text-stone-800">
+                                  <span className="font-whyte-bold text-stone-800">
                                     {shop.rating}
                                   </span>
                                 </div>
@@ -328,7 +328,7 @@ export default function ProfilePage() {
                   <p className="text-stone-600 mb-4">No coffee shops visited yet</p>
                   <Link
                     href="/explore"
-                    className="inline-flex items-center text-amber-700 font-semibold hover:text-amber-800"
+                    className="inline-flex items-center text-amber-700 font-whyte-bold hover:text-amber-800"
                   >
                     <LuCoffee className="mr-2 h-4 w-4" />
                     Start Exploring
@@ -354,10 +354,10 @@ export default function ProfilePage() {
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full"
           >
-            <h2 className="text-2xl font-bold text-stone-900 mb-6">Settings</h2>
+            <h2 className="text-2xl font-whyte-bold text-stone-900 mb-6">Settings</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-stone-700 mb-2">
+                <label className="block text-sm font-whyte-bold text-stone-700 mb-2">
                   Username
                 </label>
                 {editingUsername ? (
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                     />
                     <button
                       onClick={handleUpdateUsername}
-                      className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg font-whyte-medium transition-colors"
                     >
                       Save
                     </button>
@@ -390,7 +390,7 @@ export default function ProfilePage() {
             </div>
             <button
               onClick={() => setShowSettings(false)}
-              className="w-full mt-6 bg-stone-200 hover:bg-stone-300 text-stone-800 px-4 py-2 rounded-lg font-medium transition-colors"
+              className="w-full mt-6 bg-stone-200 hover:bg-stone-300 text-stone-800 px-4 py-2 rounded-lg font-whyte-medium transition-colors"
             >
               Close
             </button>

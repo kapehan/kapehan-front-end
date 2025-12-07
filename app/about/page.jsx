@@ -48,7 +48,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-4"
+              className="text-4xl md:text-5xl font-whyte-bold text-white mb-4"
             >
               About BrewFinder
             </motion.h1>
@@ -69,7 +69,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
+              <h2 className="text-3xl font-whyte-bold text-gray-900 mb-6">Our Story</h2>
               <p className="text-gray-600 mb-4 leading-relaxed">
                 BrewFinder began with a simple question: "Where can I find a great cup of coffee?" As avid coffee
                 enthusiasts, we found ourselves constantly searching for the perfect coffee shop – whether for a morning
@@ -98,7 +98,7 @@ export default function AboutPage() {
       <section className="py-16 bg-amber-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <h2 className="text-3xl font-whyte-bold text-gray-900 mb-4">Our Values</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               These core principles guide everything we do at BrewFinder.
             </p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
               <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaCoffee className="text-amber-700 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Quality First</h3>
+              <h3 className="text-xl font-whyte-bold text-gray-900 mb-3">Quality First</h3>
               <p className="text-gray-600">
                 We believe in the importance of exceptional coffee. We only feature shops that meet our high standards
                 for bean quality, preparation, and overall experience.
@@ -120,7 +120,7 @@ export default function AboutPage() {
               <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaLeaf className="text-amber-700 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Sustainability</h3>
+              <h3 className="text-xl font-whyte-bold text-gray-900 mb-3">Sustainability</h3>
               <p className="text-gray-600">
                 We prioritize coffee shops that demonstrate commitment to sustainable practices, from ethically sourced
                 beans to eco-friendly operations.
@@ -131,7 +131,7 @@ export default function AboutPage() {
               <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FaUsers className="text-amber-700 text-2xl" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Community</h3>
+              <h3 className="text-xl font-whyte-bold text-gray-900 mb-3">Community</h3>
               <p className="text-gray-600">
                 We celebrate coffee shops that create welcoming spaces and foster connections within their communities.
               </p>
@@ -144,7 +144,7 @@ export default function AboutPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+            <h2 className="text-3xl font-whyte-bold text-gray-900 mb-4">Meet Our Team</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">The passionate coffee lovers behind BrewFinder.</p>
           </div>
 
@@ -155,8 +155,8 @@ export default function AboutPage() {
                   <Image src={member.image || "/placeholder.svg"} alt={member.name} fill className="object-cover" />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
-                  <p className="text-amber-600 font-medium mb-3">{member.role}</p>
+                  <h3 className="text-xl font-whyte-bold text-gray-900 mb-1">{member.name}</h3>
+                  <p className="text-amber-600 font-whyte-medium mb-3">{member.role}</p>
                   <p className="text-gray-600 text-sm">{member.bio}</p>
                 </div>
               </motion.div>
@@ -169,7 +169,7 @@ export default function AboutPage() {
       <section className="py-16 bg-gray-900 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Our Impact</h2>
+            <h2 className="text-3xl font-whyte-bold mb-4">Our Impact</h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
               Since our founding, we've made a significant impact on the coffee community.
             </p>
@@ -177,22 +177,22 @@ export default function AboutPage() {
 
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">5,000+</div>
+              <div className="text-4xl font-whyte-bold text-amber-500 mb-2">5,000+</div>
               <p className="text-gray-300">Coffee Shops Listed</p>
             </div>
 
             <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">250,000+</div>
+              <div className="text-4xl font-whyte-bold text-amber-500 mb-2">250,000+</div>
               <p className="text-gray-300">Monthly Users</p>
             </div>
 
             <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">100+</div>
+              <div className="text-4xl font-whyte-bold text-amber-500 mb-2">100+</div>
               <p className="text-gray-300">Cities Covered</p>
             </div>
 
             <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">15,000+</div>
+              <div className="text-4xl font-whyte-bold text-amber-500 mb-2">15,000+</div>
               <p className="text-gray-300">User Reviews</p>
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function AboutPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Partners</h2>
+            <h2 className="text-3xl font-whyte-bold text-gray-900 mb-4">Our Partners</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               We're proud to collaborate with these organizations to promote coffee culture.
             </p>
@@ -228,20 +228,20 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="py-16 bg-amber-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Join the BrewFinder Community</h2>
+          <h2 className="text-3xl font-whyte-bold mb-6">Join the BrewFinder Community</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
             Whether you're a coffee shop owner or a coffee enthusiast, we'd love to have you be part of our journey.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#"
-              className="bg-white hover:bg-gray-100 text-amber-800 px-8 py-3 rounded-full font-medium transition-colors"
+              className="bg-white hover:bg-gray-100 text-amber-800 px-8 py-3 rounded-full font-whyte-medium transition-colors"
             >
               List Your Coffee Shop
             </a>
             <a
               href="#"
-              className="bg-transparent hover:bg-amber-700 border-2 border-white text-white px-8 py-3 rounded-full font-medium transition-colors"
+              className="bg-transparent hover:bg-amber-700 border-2 border-white text-white px-8 py-3 rounded-full font-whyte-medium transition-colors"
             >
               Become a Reviewer
             </a>

@@ -251,7 +251,7 @@ export default function CoffeeShopDetailPage() {
       <div className="min-h-screen bg-white">
         <Navigation />
         <div className="container mx-auto px-4 py-12 text-center pt-24 md:pt-32">
-          <h1 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
+          <h1 className="text-2xl md:text-3xl font-whyte-bold text-stone-800 mb-4">
             Coffee Shop Not Found
           </h1>
           <p className="text-stone-600 mb-8">
@@ -306,7 +306,7 @@ export default function CoffeeShopDetailPage() {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
           <Icon className={`h-4 md:h-5 w-4 md:w-5 mr-2 text-stone-600`} />
-          <span className="font-medium text-stone-800 text-xs md:text-sm">
+          <span className="font-whyte-medium text-stone-800 text-xs md:text-sm">
             {label}
           </span>
         </div>
@@ -319,7 +319,7 @@ export default function CoffeeShopDetailPage() {
               }`}
             />
           ))}
-          <span className="ml-1 md:ml-2 text-xs md:text-sm font-semibold text-stone-700">
+          <span className="ml-1 md:ml-2 text-xs md:text-sm font-whyte-bold text-stone-700">
             {rating}/5
           </span>
         </div>
@@ -361,7 +361,7 @@ export default function CoffeeShopDetailPage() {
                   shop.categories.slice(0, 2).map((category, index) => (
                     <span
                       key={`${category}-${index}`}
-                      className="text-white text-xs md:text-sm font-medium"
+                      className="text-white text-xs md:text-sm font-whyte-medium"
                     >
                       {category}
                       {index < Math.min(shop.categories.length, 2) - 1 && (
@@ -370,14 +370,14 @@ export default function CoffeeShopDetailPage() {
                     </span>
                   ))}
                 {shop.categories && shop.categories.length > 2 && (
-                  <span className="text-white text-xs md:text-sm font-medium ml-2">
+                  <span className="text-white text-xs md:text-sm font-whyte-medium ml-2">
                     +{shop.categories.length - 2}
                   </span>
                 )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center mb-4">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-whyte-bold text-white drop-shadow-lg text-center">
                   {shop.name}
                 </h1>
                 {shop.verified && (
@@ -388,7 +388,7 @@ export default function CoffeeShopDetailPage() {
               <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-6">
                 <div className="flex items-center bg-white/15 backdrop-blur-sm px-3 md:px-4 py-2 rounded-full">
                   <FaStar className="text-amber-300 mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
-                  <span className="text-white font-medium text-sm md:text-base">
+                  <span className="text-white font-whyte-medium text-sm md:text-base">
                     {shop.rating}
                   </span>
                   <span className="text-white text-opacity-70 ml-1 text-xs md:text-sm">
@@ -419,7 +419,7 @@ export default function CoffeeShopDetailPage() {
                   ) : (
                     <FaRegHeart className="text-white mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />
                   )}
-                  <span className="text-white font-medium text-sm md:text-base">
+                  <span className="text-white font-whyte-medium text-sm md:text-base">
                     {isFollowing ? "Following" : "Follow"}
                   </span>
                 </button>
@@ -435,7 +435,7 @@ export default function CoffeeShopDetailPage() {
           {/* About Section */}
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden mb-6 md:mb-10">
             <div className="p-4 md:p-8">
-              <h2 className="text-xl md:text-2xl font-bold text-stone-900 mb-4 flex items-center">
+              <h2 className="text-xl md:text-2xl font-whyte-bold text-stone-900 mb-4 flex items-center">
                 <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
                   <LuCoffee className="text-stone-700 text-lg md:text-xl" />
                 </div>
@@ -485,7 +485,7 @@ export default function CoffeeShopDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-0 divide-y md:divide-y-0 md:divide-x divide-stone-200">
               {/* Payment Methods */}
               <div className="p-4 md:p-5">
-                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                <h3 className="text-xs uppercase tracking-wide font-whyte-bold text-stone-700 mb-3">
                   Payment Methods
                 </h3>
                 <div className="space-y-2">
@@ -508,11 +508,11 @@ export default function CoffeeShopDetailPage() {
               {/* Hours */}
               <div className="p-4 md:p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700">
+                  <h3 className="text-xs uppercase tracking-wide font-whyte-bold text-stone-700">
                     Hours
                   </h3>
                   <div
-                    className={`inline-flex text-xs font-medium px-2 py-1 rounded ${
+                    className={`inline-flex text-xs font-whyte-medium px-2 py-1 rounded ${
                       openNow
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -539,7 +539,7 @@ export default function CoffeeShopDetailPage() {
                         const h = hours[day];
                         return (
                           <div key={day} className="flex justify-between">
-                            <span className="text-stone-600 capitalize font-medium">
+                            <span className="text-stone-600 capitalize font-whyte-medium">
                               {formatDayLabel(day)}
                             </span>
                             {h.closed ? (
@@ -558,7 +558,7 @@ export default function CoffeeShopDetailPage() {
 
               {/* Amenities */}
               <div className="p-4 md:p-5">
-                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                <h3 className="text-xs uppercase tracking-wide font-whyte-bold text-stone-700 mb-3">
                   Amenities
                 </h3>
                 <div className="space-y-2">
@@ -583,7 +583,7 @@ export default function CoffeeShopDetailPage() {
 
               {/* Location (remove inline button) */}
               <div className="p-4 md:p-5">
-                <h3 className="text-xs uppercase tracking-wide font-semibold text-stone-700 mb-3">
+                <h3 className="text-xs uppercase tracking-wide font-whyte-bold text-stone-700 mb-3">
                   Location
                 </h3>
                 <p className="text-xs text-stone-700 mb-0 leading-relaxed">
@@ -600,7 +600,7 @@ export default function CoffeeShopDetailPage() {
               <div className="bg-stone-50 p-4 md:p-6 border-b border-stone-200">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <div className="mb-4 sm:mb-0">
-                    <h2 className="text-lg md:text-xl font-bold text-stone-900 mb-1 flex items-center">
+                    <h2 className="text-lg md:text-xl font-whyte-bold text-stone-900 mb-1 flex items-center">
                       <FaCheckCircle className="text-stone-600 mr-2 h-4 w-4" />
                       Curated Review
                     </h2>
@@ -611,7 +611,7 @@ export default function CoffeeShopDetailPage() {
                   <div className="text-center sm:text-right">
                     <div className="flex items-center justify-center sm:justify-end">
                       <FaStar className="text-amber-400 mr-1 h-4 w-4" />
-                      <span className="text-lg md:text-xl font-bold text-stone-900">
+                      <span className="text-lg md:text-xl font-whyte-bold text-stone-900">
                         {shop.curated.overallRating}
                       </span>
                       <span className="text-stone-600 ml-1 text-sm">/5</span>
@@ -667,7 +667,7 @@ export default function CoffeeShopDetailPage() {
           {suggestedShops.length > 0 && (
             <div className="mb-6 md:mb-10">
               <div className="text-center mb-6 md:mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-stone-900 mb-2 flex items-center justify-center">
+                <h2 className="text-2xl md:text-3xl font-whyte-bold text-stone-900 mb-2 flex items-center justify-center">
                   <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
                     <LuCoffee className="text-stone-700 text-lg md:text-xl" />
                   </div>

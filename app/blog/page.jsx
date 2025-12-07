@@ -227,7 +227,7 @@ export default function BlogPage() {
         <div className="container mx-auto px-4 md:px-6 py-12 md:py-16 lg:py-24">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-stone-800 leading-tight mb-4 md:mb-6">
+              <h1 className="text-3xl md:text-4xl lg:text-6xl font-whyte-bold text-stone-800 leading-tight mb-4 md:mb-6">
                 <span className="bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent">Blog</span>
               </h1>
               <p className="text-lg md:text-xl lg:text-2xl text-stone-600 leading-relaxed">
@@ -246,7 +246,7 @@ export default function BlogPage() {
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`px-3 md:px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 md:px-4 py-2 rounded-full text-sm font-whyte-medium transition-colors ${
                   selectedCategory === category
                     ? "bg-amber-600 text-white"
                     : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-300"
@@ -300,14 +300,14 @@ export default function BlogPage() {
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-3 left-3">
-                          <span className="bg-amber-600 text-white px-2 md:px-3 py-1 rounded-full text-xs font-medium">
+                          <span className="bg-amber-600 text-white px-2 md:px-3 py-1 rounded-full text-xs font-whyte-medium">
                             {post.categories && post.categories.length > 0 ? post.categories[0] : "General"}
                           </span>
                         </div>
                       </div>
 
                       <div className="p-4 md:p-6">
-                        <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-2 md:mb-3 line-clamp-2 hover:text-amber-600 transition-colors">
+                        <h2 className="text-lg md:text-xl font-whyte-bold text-stone-800 mb-2 md:mb-3 line-clamp-2 hover:text-amber-600 transition-colors">
                           {post.title}
                         </h2>
 
@@ -326,7 +326,7 @@ export default function BlogPage() {
 
                         <div className="flex items-center justify-between">
                           <span className="text-xs md:text-sm text-stone-500">{post.readTime}</span>
-                          <div className="flex items-center text-amber-600 font-medium text-sm md:text-base">
+                          <div className="flex items-center text-amber-600 font-whyte-medium text-sm md:text-base">
                             Read More
                             <LuArrowRight className="ml-1 h-3 md:h-4 w-3 md:w-4" />
                           </div>
