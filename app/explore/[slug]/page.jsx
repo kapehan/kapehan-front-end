@@ -27,10 +27,8 @@ import {
   FaTruck,
   FaPlug,
   FaSnowflake,
-  FaCalendarCheck 
+  FaCalendarCheck,
 } from "react-icons/fa";
-
-import { LuCoffee } from "react-icons/lu";
 import Navigation from "../../../components/navigation";
 import RatingModal from "../../../components/rating-modal";
 import ReviewSection from "../../../components/ReviewSection";
@@ -40,15 +38,18 @@ import UserAccountModal from "../../../components/UserAccountModal";
 import MenuModal from "../../../components/MenuModal";
 import { getCoffeeShopById } from "../../../services/coffeeShopService";
 import ShopDetailSkeleton from "./loading";
-import { useAuth } from "../../../context/authContext"; // added
+import { useAuth } from "../../../context/authContext";
 import { getCache, setCache } from "../../utils/cacheUtils";
+import FloatingMenuButton from "./components/FloatingMenuButton";
+import { normalizeShop } from "./utils/shopNormalizer";
+import { toTitleCase } from "./utils/slugUtils";
+import { isCurrentlyOpen } from "./utils/timeUtils";
+import { LuCoffee } from "react-icons/lu";
 
 export default function CoffeeShopDetailPage() {
   const params = useParams();
-  // Normalize slug in case it's an array
   const shopSlug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-
-  const { isAuthenticated } = useAuth(); // use context instead of local state
+  const { isAuthenticated } = useAuth();
 
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,182 +58,63 @@ export default function CoffeeShopDetailPage() {
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [suggestedShops, setSuggestedShops] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [reviewVersion, setReviewVersion] = useState(0) // existing
-  const [userHasReview, setUserHasReview] = useState(null) // changed: was false
+  const [reviewVersion, setReviewVersion] = useState(0);
+  const [userHasReview, setUserHasReview] = useState(null);
 
-  // Create slug from shop name for comparison
-  const createSlug = (name) => {
-    return (name || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  };
-
-  // Title-case utilities
-  const toTitleCase = (s) =>
-    (s || "")
-      .replace(/[_-]+/g, " ")
-      .trim()
-      .split(/\s+/)
-      .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
-      .join(" ");
   const formatDayLabel = (day) => toTitleCase(day);
   const formatCity = (city) => toTitleCase(city);
 
-  // Handle follow button click
   const handleFollowClick = () => {
-    if (!isAuthenticated) {
-      setShowAccountModal(true);
-    } else {
-      setIsFollowing(!isFollowing);
-    }
+    if (!isAuthenticated) setShowAccountModal(true);
+    else setIsFollowing(!isFollowing);
   };
 
-  // Handle write review click (now blocked if not authenticated)
   const handleWriteReviewClick = () => {
     if (!isAuthenticated) {
-      setShowAccountModal(true)
-      return
+      setShowAccountModal(true);
+      return;
     }
-    if (userHasReview === true) return
-    setShowReviewModal(true)
-  }
+    if (userHasReview === true) return;
+    setShowReviewModal(true);
+  };
 
   const handleLoginSuccess = () => {
     setShowAccountModal(false);
-    // after login, force ReviewSection to re-fetch user-specific status
-    setReviewVersion(v => v + 1);
+    setReviewVersion((v) => v + 1);
   };
 
-  // Fetch shop details from API
   useEffect(() => {
     const CACHE_KEY = `coffeeShop:${shopSlug}`;
-    const CACHE_TTL = 24 * 60 * 60 * 1000; // 1 day in ms
+    const CACHE_TTL = 24 * 60 * 60 * 1000;
 
     const fetchShopData = async () => {
       setLoading(true);
       const cached = getCache(CACHE_KEY, CACHE_TTL);
-      
-      // Show cached data immediately while fetching
-      if (cached) {
-        setShop(cached);
-      }
+      if (cached) setShop(cached);
 
       try {
         const res = await getCoffeeShopById(shopSlug);
         const raw = res?.data ?? res;
         if (!raw) {
-          if (!cached) {
-            setShop(null);
-          }
+          if (!cached) setShop(null);
           setLoading(false);
           return;
         }
 
-        // Normalize API payload to UI shape
-        const paymentMethods = Array.isArray(raw.payment_methods)
-          ? raw.payment_methods.map((p) => p?.type).filter(Boolean)
-          : [];
-
-        const openingHoursObj = Array.isArray(raw.openingHours)
-          ? raw.openingHours.reduce((acc, cur) => {
-              const day = (cur?.day || "").toLowerCase();
-              
-              // Convert 12-hour format (7:00 AM) to 24-hour format (07:00)
-              const convertTo24Hour = (timeStr) => {
-                if (!timeStr) return timeStr;
-                const time12 = timeStr.trim();
-                const [time, period] = time12.split(' ');
-                const [hours, minutes] = time.split(':');
-                let hours24 = parseInt(hours);
-                
-                if (period?.toUpperCase() === 'AM') {
-                  if (hours24 === 12) hours24 = 0;
-                } else if (period?.toUpperCase() === 'PM') {
-                  if (hours24 !== 12) hours24 += 12;
-                }
-                
-                return `${String(hours24).padStart(2, '0')}:${minutes}`;
-              };
-              
-              acc[day] = {
-                open: convertTo24Hour(cur?.open || ""),
-                close: convertTo24Hour(cur?.close || ""),
-                closed: false, // Always false since isClosed in API is unreliable
-              };
-              return acc;
-            }, {})
-          : raw.openingHours || undefined;
-
-        const amenitiesArr = Array.isArray(raw.amenities)
-          ? raw.amenities.map((a) => String(a).toLowerCase())
-          : [];
-        const normalizedAmenities = {
-          wifi: amenitiesArr.includes("wi-fi") || amenitiesArr.includes("wifi"),
-          parking: amenitiesArr.includes("parking"),
-          outdoorSeating:
-            amenitiesArr.includes("outdoor seating") ||
-            amenitiesArr.includes("outdoor"),
-          petFriendly:
-            amenitiesArr.includes("pet-friendly") ||
-            amenitiesArr.includes("pet friendly"),
-          wheelchairAccessible:
-            amenitiesArr.includes("wheelchair-accessible") ||
-            amenitiesArr.includes("wheelchair accessible") ||
-            amenitiesArr.includes("accessible"),
-        };
-
-        const idValue = raw.id || raw._id || createSlug(raw.name || "shop");
-        const enhancedShop = {
-          _id: idValue,
-          id: idValue,
-          // primary
-          name: raw.name,
-          description: raw.description,
-          image: raw.imageUrl || raw.image,
-          address: raw.address,
-          city: raw.city,
-          rating: raw.rating,
-          review_count: raw.review_count,
-          categories:
-            Array.isArray(raw.vibes) && raw.vibes.length
-              ? raw.vibes
-              : undefined,
-          // social
-          socialMedia: {
-            facebook: raw.facebook || undefined,
-            instagram: raw.instagram || undefined,
-            twitter: raw.twitter || undefined,
-          },
-          // payment + hours + amenities
-          paymentMethods: paymentMethods.length ? paymentMethods : ["Cash"],
-          openingHours: openingHoursObj,
-          amenities: normalizedAmenities,
-          // open state
-          openNow: typeof raw.isOpen === "boolean" ? raw.isOpen : undefined,
-        };
-
-        // Verify slug by comparing normalized slugs to avoid case/space issues
-        const derivedSlug = createSlug(enhancedShop.name);
-        if (derivedSlug !== createSlug(shopSlug)) {
+        const { mismatch, shop: enhancedShop } = normalizeShop(raw, shopSlug);
+        if (mismatch) {
           setShop(null);
           setLoading(false);
           return;
         }
 
-        // Check if API data differs from cache
         if (!cached || JSON.stringify(cached) !== JSON.stringify(enhancedShop)) {
-          // Data changed, update cache and UI
           setCache(CACHE_KEY, enhancedShop);
           setShop(enhancedShop);
         }
-        // If data is same as cache, we already set it above, so just keep it
-        
       } catch (error) {
         console.error("Error fetching shop:", error);
-        if (!cached) {
-          setShop(null);
-        }
+        if (!cached) setShop(null);
       } finally {
         setLoading(false);
       }
@@ -242,9 +124,7 @@ export default function CoffeeShopDetailPage() {
     // eslint-disable-next-line
   }, [shopSlug, reviewVersion]);
 
-  if (loading) {
-    return <ShopDetailSkeleton />;
-  }
+  if (loading) return <ShopDetailSkeleton />;
 
   if (!shop) {
     return (
@@ -271,28 +151,8 @@ export default function CoffeeShopDetailPage() {
     );
   }
 
-  // Check if the shop is currently open
-  const isCurrentlyOpen = () => {
-    if (!shop.openingHours) return false;
+  const openNow = shop.openNow !== undefined ? shop.openNow : isCurrentlyOpen(shop.openingHours);
 
-    const now = new Date();
-    const dayOfWeek = now.toLocaleDateString("en-US", { weekday: "lowercase" });
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTime = `${currentHours
-      .toString()
-      .padStart(2, "0")}:${currentMinutes.toString().padStart(2, "0")}`;
-
-    const todayHours = shop.openingHours[dayOfWeek];
-    if (!todayHours || todayHours.closed) return false;
-
-    return currentTime >= todayHours.open && currentTime <= todayHours.close;
-  };
-
-  // Use the provided openNow property or calculate it
-  const openNow = shop.openNow !== undefined ? shop.openNow : isCurrentlyOpen()
-
-  // Align amenity keys with normalized object
   const amenityIcons = {
     wifi: { icon: FaWifi, label: "Wi‑Fi" },
     parking: { icon: FaCar, label: "Parking" },
@@ -301,7 +161,7 @@ export default function CoffeeShopDetailPage() {
     wheelchairAccessible: { icon: FaWheelchair, label: "Accessible" },
   };
 
-  const CuratedRating = ({ icon: Icon, label, rating, notes, color }) => (
+  const CuratedRating = ({ icon: Icon, label, rating, notes }) => (
     <div className="bg-white rounded-lg p-3 md:p-4 border border-stone-200 hover:border-stone-300 transition-colors">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center">
@@ -589,7 +449,6 @@ export default function CoffeeShopDetailPage() {
                 <p className="text-xs text-stone-700 mb-0 leading-relaxed">
                   {shop.address}
                 </p>
-                {/* View Menu button removed */}
               </div>
             </div>
           </div>
@@ -696,14 +555,7 @@ export default function CoffeeShopDetailPage() {
       </div>
 
       {/* Floating Menu FAB */}
-      <button
-        type="button"
-        aria-label="Open menu"
-        onClick={() => setShowMenuModal(true)}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-lg p-3 md:p-4 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
-      >
-        <LuCoffee className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
+      <FloatingMenuButton onClick={() => setShowMenuModal(true)} />
 
       {/* Modals */}
       <RatingModal
@@ -712,8 +564,7 @@ export default function CoffeeShopDetailPage() {
         onClose={() => setShowReviewModal(false)}
         shopId={shop._id}
         slug={shopSlug}
-        onSubmitted={() => setReviewVersion(v => v + 1)}
-        // only treat as already reviewed if authenticated and server reported true
+        onSubmitted={() => setReviewVersion((v) => v + 1)}
         userHasReview={isAuthenticated ? userHasReview === true : false}
       />
       <UserAccountModal
@@ -724,7 +575,6 @@ export default function CoffeeShopDetailPage() {
       {showMenuModal && (
         <MenuModal shop={shop} slug={shopSlug} onClose={() => setShowMenuModal(false)} />
       )}
-
       <Footer />
     </div>
   );

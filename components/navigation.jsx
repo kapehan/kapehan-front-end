@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, cache } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,6 +12,8 @@ import {
   FaChevronDown,
 } from "react-icons/fa";
 import { LuCoffee } from "react-icons/lu";
+import NiceAvatar, { genConfig } from "react-nice-avatar";
+import { getCache } from "../app/utils/cacheUtils";
 
 import { useAuth } from "../context/authContext";
 import UserAccountModal from "./UserAccountModal";
@@ -20,6 +22,7 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [avatarConfig, setAvatarConfig] = useState(null);
   const pathname = usePathname();
 
   const { user, isAuthenticated, isAnonymous, login, logout } = useAuth();
@@ -73,6 +76,17 @@ export default function Navigation() {
     setIsOpen(false);
   }, [pathname]);
 
+  // Read avatarConfig only when authenticated; clear when not
+  useEffect(() => {
+    if (isAuthenticated) {
+      const cached = getCache?.("profile:avatarConfig");
+      console.log("this is the cache", cache)
+      setAvatarConfig(cached && typeof cached === "object" ? cached : genConfig());
+    } else {
+      setAvatarConfig(null);
+    }
+  }, [isAuthenticated]);
+
   return (
     <>
       <nav className="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-40">
@@ -111,11 +125,18 @@ export default function Navigation() {
                     onClick={handleAccountClick}
                     className="flex items-center space-x-2 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition-colors"
                   >
-                    <img
-                      src={user?.avatar || "/placeholder.svg?height=32&width=32"}
-                      alt={displayName}
-                      className="w-5 h-5 rounded-full object-cover"
-                    />
+                    {/* Show avatar only when authenticated */}
+                    <span className="w-5 h-5 rounded-full overflow-hidden inline-flex">
+                      {avatarConfig ? (
+                        <NiceAvatar style={{ width: 20, height: 20 }} {...avatarConfig} />
+                      ) : (
+                        <img
+                          src={"/placeholder.svg?height=32&width=32"}
+                          alt={displayName}
+                          className="w-5 h-5 rounded-full object-cover"
+                        />
+                      )}
+                    </span>
                     <span className="text-sm font-whyte-medium text-stone-700">
                       {displayName}
                     </span>
@@ -240,11 +261,17 @@ export default function Navigation() {
                     {isAuthenticated ? (
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3 p-3 bg-stone-50 rounded-lg">
-                          <img
-                            src={user?.avatar || "/placeholder.svg?height=56&width=56"}
-                            alt={displayName}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
+                          <span className="w-10 h-10 rounded-full overflow-hidden inline-flex">
+                            {avatarConfig ? (
+                              <NiceAvatar style={{ width: 40, height: 40 }} {...avatarConfig} />
+                            ) : (
+                              <img
+                                src={"/placeholder.svg?height=56&width=56"}
+                                alt={displayName}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            )}
+                          </span>
                           <div className="min-w-0">
                             <p className="text-sm font-whyte-medium text-stone-800 truncate">
                               {displayName}

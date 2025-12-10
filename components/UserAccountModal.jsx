@@ -27,7 +27,7 @@ export default function UserAccountModal({ show, onClose }) {
     name: "",
     username: "",
     gender: "",
-    location: "",
+    location: "", // city select
     email: "",
     password: "",
     confirmPassword: "",
@@ -77,7 +77,8 @@ export default function UserAccountModal({ show, onClose }) {
           name: formData.name,
           username: formData.username,
           gender: formData.gender,
-          location: formData.location,
+          // send city derived from selected location
+          city: formData.location,
           email: formData.email,
           password: formData.password,
         });
@@ -247,7 +248,7 @@ export default function UserAccountModal({ show, onClose }) {
 
                       <div>
                         <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
-                          Location
+                          City
                         </label>
                         <div className="relative">
                           <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
