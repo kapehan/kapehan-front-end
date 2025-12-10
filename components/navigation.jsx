@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, cache } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -25,7 +25,8 @@ export default function Navigation() {
   const [avatarConfig, setAvatarConfig] = useState(null);
   const pathname = usePathname();
 
-  const { user, isAuthenticated, isAnonymous, login, logout } = useAuth();
+  // Pull in loading from auth context to gate rendering
+  const { user, isAuthenticated, isAnonymous, login, logout, loading } = useAuth();
 
   // Unified user display helpers
   const displayName =
@@ -51,6 +52,7 @@ export default function Navigation() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const handleAccountClick = () => {
+    if (loading) return; // block clicks while auth state is resolving
     if (isAuthenticated) setShowUserDropdown(!showUserDropdown);
     else setShowAccountModal(true);
   };
@@ -76,16 +78,15 @@ export default function Navigation() {
     setIsOpen(false);
   }, [pathname]);
 
-  // Read avatarConfig only when authenticated; clear when not
+  // Read avatarConfig only when authenticated and not loading; clear otherwise
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!loading && isAuthenticated) {
       const cached = getCache?.("profile:avatarConfig");
-      console.log("this is the cache", cache)
       setAvatarConfig(cached && typeof cached === "object" ? cached : genConfig());
     } else {
       setAvatarConfig(null);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loading]);
 
   return (
     <>
@@ -120,21 +121,25 @@ export default function Navigation() {
             {/* Desktop Account Section */}
             <div className="hidden md:flex items-center space-x-3">
               <div className="relative user-dropdown">
-                {isAuthenticated ? (
+                {loading ? (
+                  // Loading state: disabled button with skeleton avatar
+                  <button
+                    disabled
+                    className="flex items-center space-x-2 bg-stone-100 px-3 py-1.5 rounded-lg opacity-70 cursor-not-allowed"
+                  >
+                    <span className="w-5 h-5 rounded-full overflow-hidden inline-flex bg-stone-200 animate-pulse" />
+                    <span className="text-sm font-whyte-medium text-stone-500">Loading…</span>
+                  </button>
+                ) : isAuthenticated ? (
                   <button
                     onClick={handleAccountClick}
                     className="flex items-center space-x-2 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-lg transition-colors"
                   >
-                    {/* Show avatar only when authenticated */}
                     <span className="w-5 h-5 rounded-full overflow-hidden inline-flex">
                       {avatarConfig ? (
                         <NiceAvatar style={{ width: 20, height: 20 }} {...avatarConfig} />
                       ) : (
-                        <img
-                          src={"/placeholder.svg?height=32&width=32"}
-                          alt={displayName}
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
+                        <span className="w-5 h-5 rounded-full bg-stone-200 animate-pulse" />
                       )}
                     </span>
                     <span className="text-sm font-whyte-medium text-stone-700">
@@ -258,18 +263,24 @@ export default function Navigation() {
                   ))}
 
                   <div className="pt-3 border-t border-stone-200">
-                    {isAuthenticated ? (
+                    {loading ? (
+                      // Mobile loading block
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3 p-3 bg-stone-50 rounded-lg">
+                          <span className="w-10 h-10 rounded-full overflow-hidden inline-flex bg-stone-200 animate-pulse" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-whyte-medium text-stone-500">Loading…</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : isAuthenticated ? (
                       <div className="space-y-3">
                         <div className="flex items-center space-x-3 p-3 bg-stone-50 rounded-lg">
                           <span className="w-10 h-10 rounded-full overflow-hidden inline-flex">
                             {avatarConfig ? (
                               <NiceAvatar style={{ width: 40, height: 40 }} {...avatarConfig} />
                             ) : (
-                              <img
-                                src={"/placeholder.svg?height=56&width=56"}
-                                alt={displayName}
-                                className="w-10 h-10 rounded-full object-cover"
-                              />
+                              <span className="w-10 h-10 rounded-full bg-stone-200 animate-pulse" />
                             )}
                           </span>
                           <div className="min-w-0">
@@ -302,6 +313,7 @@ export default function Navigation() {
                     ) : (
                       <button
                         onClick={() => {
+                          if (loading) return;
                           setShowAccountModal(true);
                           setIsOpen(false);
                         }}
