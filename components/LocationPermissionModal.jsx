@@ -104,36 +104,43 @@ export default function LocationPermissionModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 bg-black/50 flex items-center justify-center p-3 sm:p-4 z-50"
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center"
+          className="bg-white rounded-lg sm:rounded-xl shadow-lg p-5 sm:p-6 md:p-8 max-w-sm w-full text-center"
         >
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FaMapMarkerAlt className="text-amber-700 text-xl" />
+          {/* Icon - responsive sizing */}
+          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <FaMapMarkerAlt className="text-amber-700 text-base sm:text-lg md:text-xl" />
           </div>
-          <h2 className="text-2xl font-whyte-bold text-stone-900 mb-2">
+
+          {/* Heading - responsive sizing */}
+          <h2 className="text-lg sm:text-xl md:text-2xl font-whyte-bold text-stone-900 mb-2 sm:mb-3">
             Find Nearest Coffee Shops
           </h2>
-          <p className="text-stone-600 mb-6">
+
+          {/* Description - responsive sizing */}
+          <p className="text-xs sm:text-sm md:text-base text-stone-600 mb-5 sm:mb-6 leading-relaxed">
             To help us show you the nearest coffee shops based on your
             location, may we access your location?
           </p>
-          <div className="flex gap-3">
+
+          {/* Buttons - responsive layout and sizing */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={onDeny}
               disabled={loading}
-              className="flex-1 px-4 py-3 border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors disabled:opacity-50"
             >
               Not Now
             </button>
             <button
               onClick={handleAllow}
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-amber-700 text-white rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base bg-amber-700 text-white rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors disabled:opacity-50"
             >
               {loading ? "Locating..." : "Allow Location"}
             </button>
