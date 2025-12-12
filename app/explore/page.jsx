@@ -17,8 +17,6 @@ import Navigation from "../../components/navigation";
 import LocationPermissionModal from "../../components/LocationPermissionModal";
 import CoffeeShopCard from "../../components/CoffeeShopCard";
 import Footer from "../../components/Footer";
-// Remove static city list import and use dynamic loader instead
-// import metroManilaCities from "../../data/metro-manila-cities.json";
 import { getAllCoffeeShop } from "../../services/coffeeShopService";
 import {
   getAnonLocation,
@@ -32,44 +30,36 @@ import { getCache, setCache } from "../utils/cacheUtils";
 export default function ExplorePage() {
   const [shops, setShops] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  // Debounced search term (3s)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [minRating, setMinRating] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedVibes, setSelectedVibes] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  // start hidden and decide on mount based on stored anon location
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // start in loading state
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // Track total results for display
   const [resultCount, setResultCount] = useState(0);
 
-  // Remove static fallbacks; load from API only
   const [amenityOptions, setAmenityOptions] = useState([]);
   const [vibesOptions, setVibesOptions] = useState([]);
   const [cities, setCities] = useState([]);
 
-  // Track location updates to re-trigger fetches
   const [locationVersion, setLocationVersion] = useState(0);
 
-  const searchParams = useSearchParams(); // added
-  const paramsInitializedRef = useRef(false); // added - ensure we initialize from URL once
+  const searchParams = useSearchParams();
+  const paramsInitializedRef = useRef(false);
   const locationIntervalRef = useRef(null);
 
-  // Local storage key + TTL (20 minutes)
   const ANON_LOC_KEY = "user_location";
-  const LOCATION_TTL = 1000 * 60 * 20; // 20 minutes
+  const LOCATION_TTL = 1000 * 60 * 20;
 
-  // Cache keys and TTL
   const CITIES_CACHE_KEY = "explore:cities";
   const AMENITIES_CACHE_KEY = "explore:amenities";
   const VIBES_CACHE_KEY = "explore:vibes";
-  const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours
+  const CACHE_TTL = 12 * 60 * 60 * 1000;
 
-  // Initialize state from URL search params once (supports direct /explore?city=... or ?q=...)
   useEffect(() => {
     if (paramsInitializedRef.current) return;
     paramsInitializedRef.current = true;
@@ -88,7 +78,7 @@ export default function ExplorePage() {
     if (cityParam) setSelectedCity(cityParam);
     if (qParam) {
       setSearchTerm(qParam);
-      setDebouncedSearchTerm(qParam); // immediate fetch when seeded from URL
+      setDebouncedSearchTerm(qParam);
     }
     if (!Number.isNaN(pageParam) && pageParam > 0) setCurrentPage(pageParam);
     if (!Number.isNaN(ratingParam) && ratingParam > 0)
@@ -111,7 +101,6 @@ export default function ExplorePage() {
     }
   }, [searchParams]);
 
-  // Helper: read stored location and validate TTL
   const getValidStoredLocation = () => {
     try {
       const raw = localStorage.getItem(ANON_LOC_KEY);
@@ -127,7 +116,6 @@ export default function ExplorePage() {
       if (notExpired && typeof latitude === "number" && typeof longitude === "number") {
         return { latitude, longitude };
       }
-      // cleanup if expired or invalid
       localStorage.removeItem(ANON_LOC_KEY);
       return null;
     } catch {
@@ -135,7 +123,6 @@ export default function ExplorePage() {
     }
   };
 
-  // Show modal if no location stored; start interval if exists
   useEffect(() => {
     const loc = getValidStoredLocation();
     if (loc) {
@@ -149,7 +136,6 @@ export default function ExplorePage() {
     };
   }, []);
 
-  // Memoize the query so effect only runs when relevant inputs change.
   const queryWithPagination = useMemo(() => {
     const loc = getValidStoredLocation();
     return {
@@ -158,10 +144,8 @@ export default function ExplorePage() {
       minRating: minRating > 0 ? minRating : undefined,
       amenities: selectedAmenities.length ? selectedAmenities.join(",") : undefined,
       vibes: selectedVibes.length ? selectedVibes.join(",") : undefined,
-      // Include coordinates if available
       lat: loc?.latitude ?? undefined,
       lng: loc?.longitude ?? undefined,
-      // Do not send page=1; backend defaults to page 1 already
       page: currentPage > 1 ? currentPage : undefined,
     };
   }, [
@@ -171,10 +155,9 @@ export default function ExplorePage() {
     selectedAmenities,
     selectedVibes,
     currentPage,
-    locationVersion, // re-run when location updates
+    locationVersion,
   ]);
 
-  // Debounce effect (3 seconds)
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -182,7 +165,6 @@ export default function ExplorePage() {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // Reset page when debounced search or other filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -193,9 +175,7 @@ export default function ExplorePage() {
     selectedVibes,
   ]);
 
-  // Fetch from backend with stale-cancel
   useEffect(() => {
-    // Wait for URL params to be initialized before fetching (so direct /explore?city=... triggers a request)
     if (!paramsInitializedRef.current) return;
 
     let cancelled = false;
@@ -205,7 +185,6 @@ export default function ExplorePage() {
       try {
         const response = await getAllCoffeeShop(queryWithPagination);
 
-        // Prefer pageInfo from API; fall back lightly without using limit
         const data = response?.data ?? response;
         const pageInfo =
           response?.pageInfo ??
@@ -251,11 +230,9 @@ export default function ExplorePage() {
     };
   }, [queryWithPagination]);
 
-  // Load dynamic filters (amenities, vibes, cities) once on mount
   useEffect(() => {
     let cancelled = false;
 
-    // Only cache if not present or expired, never update if different
     const cacheIfMissing = async (key, fetchFn, setter, normalizer) => {
       const cached = getCache(key, CACHE_TTL);
       if (cached) {
@@ -311,7 +288,6 @@ export default function ExplorePage() {
     };
   }, []);
 
-  // Fetch current geolocation and update backend + localStorage
   const updateLocation = async () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -322,7 +298,7 @@ export default function ExplorePage() {
           await getAnonLocation({ latitude, longitude });
           const payload = { latitude, longitude, ts: Date.now(), expiresAt: Date.now() + LOCATION_TTL };
           localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
-          setLocationVersion((v) => v + 1); // trigger re-fetch
+          setLocationVersion((v) => v + 1);
         } catch (e) {
           console.error("Failed to auto-update location:", e);
         }
@@ -346,16 +322,14 @@ export default function ExplorePage() {
     }
   };
 
-  // Add missing handlers
   const handleLocationSuccess = async () => {
     setShowLocationModal(false);
     await updateLocation();
     startLocationInterval();
   };
 
-  // Add a handler for "Find Nearest coffee shop"
   const handleFindNearest = async () => {
-    await updateLocation(); // updates localStorage and bumps locationVersion
+    await updateLocation();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -363,7 +337,6 @@ export default function ExplorePage() {
     setShowLocationModal(false);
   };
 
-  // ✅ Filter handlers
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedCity("");
@@ -387,7 +360,6 @@ export default function ExplorePage() {
     );
   };
 
-  // ✅ Pagination
   const goToPage = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -398,6 +370,7 @@ export default function ExplorePage() {
     minRating > 0 ||
     selectedAmenities.length > 0 ||
     selectedVibes.length > 0;
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -408,79 +381,79 @@ export default function ExplorePage() {
         localStorageKey={ANON_LOC_KEY}
         ttl={LOCATION_TTL}
       />
+
+      {/* Sticky Header - responsive */}
       <div className="pt-12 bg-stone-50 border-b border-stone-200 sticky top-12 z-30">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-stretch sm:items-center">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-full sm:max-w-md">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search coffee shops..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 text-sm"
-              />
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
+          <div className="flex flex-col gap-2.5 sm:gap-3 md:gap-4">
+            {/* Search and Controls Row - responsive flex */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+              {/* Search Bar - responsive */}
+              <div className="relative flex-1 min-w-0">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-amber-600 text-xs sm:text-sm"
+                />
+              </div>
+
+              {/* Filter Button and Results - responsive */}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-colors text-xs sm:text-sm font-whyte-medium flex-shrink-0 ${
+                    showFilters || hasActiveFilters
+                      ? "bg-amber-100 text-amber-700 border border-amber-200"
+                      : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                  }`}
+                >
+                  <FaFilter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Filters</span>
+                  {hasActiveFilters && (
+                    <span className="bg-amber-700 text-white text-xs rounded-full px-1.5 py-0.5">
+                      {
+                        [
+                          selectedCity,
+                          minRating > 0,
+                          ...selectedAmenities,
+                          ...selectedVibes,
+                        ].filter(Boolean).length
+                      }
+                    </span>
+                  )}
+                </button>
+
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="sm:hidden flex items-center gap-1 px-2 py-2 text-stone-600 hover:text-stone-800 transition-colors text-xs"
+                  >
+                    <FaTimes className="h-3 w-3" />
+                  </button>
+                )}
+
+                <button
+                  onClick={handleFindNearest}
+                  className="px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-amber-700 text-white hover:bg-amber-800 text-xs sm:text-sm font-whyte-medium whitespace-nowrap flex-shrink-0"
+                >
+                  Nearest
+                </button>
+              </div>
             </div>
 
-            {/* Filter Controls */}
-            <div className="flex items-center justify-between sm:justify-start gap-3">
-              {/* Filter Toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-colors text-sm font-whyte-medium ${
-                  showFilters || hasActiveFilters
-                    ? "bg-amber-100 text-amber-700 border border-amber-200"
-                    : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-                }`}
-              >
-                <FaFilter className="h-4 w-4" />
-                <span className="hidden sm:inline">Filters</span>
-                {hasActiveFilters && (
-                  <span className="bg-amber-700 text-white text-xs rounded-full px-2 py-0.5 ml-1">
-                    {
-                      [
-                        selectedCity,
-                        minRating > 0,
-                        ...selectedAmenities,
-                        ...selectedVibes,
-                      ].filter(Boolean).length
-                    }
-                  </span>
-                )}
-              </button>
-
-              {/* Clear Filters - Mobile */}
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="sm:hidden flex items-center space-x-1 px-3 py-2.5 text-stone-600 hover:text-stone-800 transition-colors text-sm"
-                >
-                  <FaTimes className="h-3 w-3" />
-                  <span>Clear</span>
-                </button>
-              )}
-
-              {/* Find Nearest coffee shop */}
-              <button
-                onClick={handleFindNearest}
-                className="px-4 py-2.5 rounded-lg bg-amber-700 text-white hover:bg-amber-800 text-sm font-whyte-medium"
-              >
-                Find Nearest coffee shop
-              </button>
-
-              {/* Results Count */}
-              <div className="text-stone-600 font-whyte-medium text-sm whitespace-nowrap">
-                <span className="hidden sm:inline">
-                  {resultCount} coffee shop
-                  {resultCount !== 1 ? "s" : ""} found
-                </span>
-                <span className="sm:hidden">{resultCount} found</span>
-              </div>
+            {/* Results Count - responsive */}
+            <div className="text-stone-600 font-whyte-medium text-xs sm:text-sm">
+              <span className="hidden sm:inline">
+                {resultCount} coffee shop{resultCount !== 1 ? "s" : ""} found
+              </span>
+              <span className="sm:hidden">{resultCount} found</span>
             </div>
           </div>
 
-          {/* Enhanced Expandable Filters - Mobile First */}
+          {/* Filter Panel - responsive */}
           <AnimatePresence>
             {showFilters && (
               <motion.div
@@ -488,11 +461,10 @@ export default function ExplorePage() {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="mt-4 p-4 bg-white rounded-lg border border-stone-200 overflow-hidden"
+                className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white rounded-lg border border-stone-200 overflow-hidden"
               >
-                {/* Filter Header - Mobile */}
-                <div className="flex items-center justify-between mb-4 sm:hidden">
-                  <h3 className="font-whyte-bold text-stone-900">Filters</h3>
+                <div className="flex items-center justify-between mb-3 sm:mb-4 sm:hidden">
+                  <h3 className="font-whyte-bold text-stone-900 text-sm">Filters</h3>
                   <button
                     onClick={() => setShowFilters(false)}
                     className="p-1 text-stone-500 hover:text-stone-700"
@@ -501,18 +473,18 @@ export default function ExplorePage() {
                   </button>
                 </div>
 
-                <div className="space-y-4 sm:space-y-6">
-                  {/* Basic Filters Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-3 sm:space-y-4">
+                  {/* Basic Filters - responsive grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {/* City Filter */}
                     <div>
-                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
+                      <label className="block text-xs sm:text-sm font-whyte-medium text-stone-900 mb-1.5 sm:mb-2">
                         City
                       </label>
                       <select
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
-                        className="w-full p-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-white"
+                        className="w-full p-2 sm:p-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-xs sm:text-sm bg-white"
                       >
                         <option value="">All Cities</option>
                         {cities.map((city) => (
@@ -525,73 +497,69 @@ export default function ExplorePage() {
 
                     {/* Rating Filter */}
                     <div>
-                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
-                        Minimum Rating
+                      <label className="block text-xs sm:text-sm font-whyte-medium text-stone-900 mb-1.5 sm:mb-2">
+                        Rating
                       </label>
                       <select
                         value={minRating}
                         onChange={(e) =>
                           setMinRating(Number.parseFloat(e.target.value))
                         }
-                        className="w-full p-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-white"
+                        className="w-full p-2 sm:p-2.5 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 text-xs sm:text-sm bg-white"
                       >
                         <option value={0}>Any Rating</option>
-                        <option value={4.5}>4.5+ Stars</option>
-                        <option value={4.0}>4.0+ Stars</option>
-                        <option value={3.5}>3.5+ Stars</option>
-                        <option value={3.0}>3.0+ Stars</option>
+                        <option value={4.5}>4.5+</option>
+                        <option value={4.0}>4.0+</option>
+                        <option value={3.5}>3.5+</option>
+                        <option value={3.0}>3.0+</option>
                       </select>
                     </div>
 
                     {/* Amenities Filter */}
                     <div className="sm:col-span-2 lg:col-span-1">
-                      <label className="block text-sm font-whyte-medium text-stone-900 mb-2">
+                      <label className="block text-xs sm:text-sm font-whyte-medium text-stone-900 mb-1.5 sm:mb-2">
                         Amenities
                       </label>
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                      <div className="space-y-1.5 max-h-32 overflow-y-auto">
                         {amenityOptions.map((amenity) => (
                           <label
                             key={amenity.key}
-                            className="flex items-center cursor-pointer hover:bg-stone-50 rounded p-1"
+                            className="flex items-center cursor-pointer hover:bg-stone-50 rounded p-1 text-xs sm:text-sm"
                           >
                             <input
                               type="checkbox"
                               checked={selectedAmenities.includes(amenity.key)}
                               onChange={() => handleAmenityToggle(amenity.key)}
-                              className="mr-2 h-4 w-4 text-amber-700 focus:ring-amber-600 border-stone-300 rounded"
+                              className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-700 rounded"
                             />
-                            {amenity.icon ? (
-                              <amenity.icon className="mr-2 h-3 w-3 text-stone-500 flex-shrink-0" />
-                            ) : (
-                              <span className="mr-2 h-3 w-3" />
+                            {amenity.icon && (
+                              <amenity.icon className="mr-1.5 sm:mr-2 h-3 w-3 text-stone-500 flex-shrink-0" />
                             )}
-                            <span className="text-sm text-stone-700">
-                              {amenity.label}
-                            </span>
+                            <span className="text-stone-700">{amenity.label}</span>
                           </label>
                         ))}
                       </div>
                     </div>
                   </div>
 
-                  {/* Vibes Filter - Full Width */}
+                  {/* Vibes Filter - responsive grid */}
                   <div>
-                    <label className="block text-sm font-whyte-medium text-stone-900 mb-3">
-                      Vibes & Atmosphere
+                    <label className="block text-xs sm:text-sm font-whyte-medium text-stone-900 mb-2 sm:mb-3">
+                      Vibes
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-40 overflow-y-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2 max-h-40 overflow-y-auto">
                       {vibesOptions.map((vibe) => (
                         <label
                           key={vibe.value}
-                          className="flex items-center cursor-pointer hover:bg-stone-50 rounded p-1.5"
+                          className="flex items-center cursor-pointer hover:bg-stone-50 rounded p-1 text-xs"
                         >
                           <input
                             type="checkbox"
                             checked={selectedVibes.includes(vibe.value)}
                             onChange={() => handleVibesToggle(vibe.value)}
-                            className="mr-2 h-4 w-4 text-amber-700 focus:ring-amber-600 border-stone-300 rounded flex-shrink-0"
+                            className="mr-1 h-3 w-3 text-amber-700 rounded flex-shrink-0"
                           />
-                          <span className="text-xs sm:text-sm text-stone-700 leading-tight">
+                          <span className="text-stone-700 leading-tight line-clamp-2">
                             {vibe.label}
                           </span>
                         </label>
@@ -600,25 +568,20 @@ export default function ExplorePage() {
                   </div>
 
                   {/* Filter Actions */}
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-stone-200 space-y-2 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-3 sm:pt-4 border-t border-stone-200 space-y-2 sm:space-y-0">
                     <button
                       onClick={clearFilters}
-                      className="text-stone-600 hover:text-stone-800 transition-colors text-sm font-whyte-medium"
+                      className="text-stone-600 hover:text-stone-800 transition-colors text-xs sm:text-sm font-whyte-medium"
                     >
-                      Clear All Filters
+                      Clear All
                     </button>
                     <div className="text-xs text-stone-500">
                       {selectedAmenities.length > 0 &&
-                        `${selectedAmenities.length} amenity filter${
-                          selectedAmenities.length > 1 ? "s" : ""
-                        }`}
+                        `${selectedAmenities.length} amenity`}
                       {selectedAmenities.length > 0 &&
                         selectedVibes.length > 0 &&
                         " • "}
-                      {selectedVibes.length > 0 &&
-                        `${selectedVibes.length} vibe filter${
-                          selectedVibes.length > 1 ? "s" : ""
-                        }`}
+                      {selectedVibes.length > 0 && `${selectedVibes.length} vibe`}
                     </div>
                   </div>
                 </div>
@@ -628,13 +591,13 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Coffee Shops Grid - Mobile First */}
-      <div className="container mx-auto px-4 py-6">
+      {/* Coffee Shops Grid - responsive */}
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {isLoading ? (
           <ExploreLoading />
         ) : shops.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10">
               {shops.map((shop, index) => (
                 <motion.div
                   key={shop.id || `${shop._id || "shop"}-${index}`}
@@ -647,15 +610,15 @@ export default function ExplorePage() {
               ))}
             </div>
 
-            {/* Pagination - Mobile First */}
+            {/* Pagination - responsive */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-1 md:space-x-2">
+              <div className="flex justify-center items-center gap-1 sm:gap-2 flex-wrap">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg border border-stone-300 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1.5 sm:p-2 rounded-lg border border-stone-300 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <LuChevronLeft className="h-4 md:h-5 w-4 md:w-5" />
+                  <LuChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 </button>
 
                 {[...Array(totalPages)].map((_, index) => {
@@ -669,7 +632,7 @@ export default function ExplorePage() {
                       <button
                         key={page}
                         onClick={() => goToPage(page)}
-                        className={`px-3 md:px-4 py-2 rounded-lg border transition-colors text-sm md:text-base ${
+                        className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg border transition-colors text-xs sm:text-sm md:text-base ${
                           currentPage === page
                             ? "bg-amber-700 text-white border-amber-700"
                             : "border-stone-300 hover:bg-stone-100"
@@ -685,7 +648,7 @@ export default function ExplorePage() {
                     return (
                       <span
                         key={page}
-                        className="px-1 md:px-2 text-stone-400 text-sm md:text-base"
+                        className="px-0.5 sm:px-1 md:px-2 text-stone-400 text-xs sm:text-sm md:text-base"
                       >
                         ...
                       </span>
@@ -697,25 +660,25 @@ export default function ExplorePage() {
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg border border-stone-300 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1.5 sm:p-2 rounded-lg border border-stone-300 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <LuChevronRight className="h-4 md:h-5 w-4 md:w-5" />
+                  <LuChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 </button>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-12 md:py-16">
-            <LuCoffee className="mx-auto text-stone-400 mb-4 h-12 md:h-16 w-12 md:w-16" />
-            <h3 className="text-xl md:text-2xl font-whyte-bold text-stone-900 mb-2">
-              No coffee shops found
+          <div className="text-center py-8 sm:py-12 md:py-16">
+            <LuCoffee className="mx-auto text-stone-400 mb-3 sm:mb-4 h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16" />
+            <h3 className="text-lg sm:text-xl md:text-2xl font-whyte-bold text-stone-900 mb-1.5 sm:mb-2">
+              No shops found
             </h3>
-            <p className="text-stone-600 mb-4 md:mb-6 text-sm md:text-base">
-              Try adjusting your search criteria or filters
+            <p className="text-stone-600 mb-3 sm:mb-4 md:mb-6 text-xs sm:text-sm md:text-base px-2">
+              Try adjusting your filters
             </p>
             <button
               onClick={clearFilters}
-              className="px-4 md:px-6 py-2 md:py-3 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors text-sm md:text-base"
+              className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors text-xs sm:text-sm md:text-base"
             >
               Clear Filters
             </button>
