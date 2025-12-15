@@ -8,176 +8,30 @@ import { LuCalendar, LuUser, LuArrowRight, LuChevronLeft, LuChevronRight } from 
 
 // Sample blog posts data
 const blogPosts = [
+  // {
+  //   id: 10,
+  //   slug: "manila-coffee-history",
+  //   title: "The History of Coffee Culture in Manila",
+  //   excerpt:
+  //     "Explore how coffee culture evolved in Manila from Spanish colonial times to the modern specialty coffee movement.",
+  //   author: "Elena Vasquez",
+  //   date: "2023-12-22",
+  //   categories: ["Coffee Culture"],
+  //   image: "/placeholder.svg?height=300&width=500",
+  //   readTime: "8 min read",
+  // },
   {
     id: 1,
-    slug: "best-coffee-shops-makati-2024",
-    title: "The Best Coffee Shops in Makati for 2024",
-    excerpt:
-      "Discover the top coffee destinations in Makati's bustling business district, from artisanal roasters to cozy neighborhood cafés.",
-    author: "Maria Santos",
-    date: "2024-01-15",
-    categories: ["City Guides"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "5 min read",
-  },
-  {
-    id: 2,
-    slug: "coffee-brewing-methods-guide",
-    title: "A Complete Guide to Coffee Brewing Methods",
-    excerpt:
-      "From pour-over to espresso, learn about different brewing methods and how they affect the taste of your coffee.",
-    author: "Juan Dela Cruz",
-    date: "2024-01-12",
-    categories: ["Coffee Education"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "8 min read",
-  },
-  {
-    id: 3,
-    slug: "supporting-local-coffee-farmers",
-    title: "Supporting Local Coffee Farmers in the Philippines",
-    excerpt:
-      "Learn about the importance of supporting local coffee farmers and how your coffee choices can make a difference.",
-    author: "Ana Reyes",
-    date: "2024-01-10",
-    categories: ["Sustainability"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "6 min read",
-  },
-  {
-    id: 4,
-    slug: "coffee-shop-etiquette-guide",
-    title: "Coffee Shop Etiquette: A Guide for Everyone",
-    excerpt:
-      "Essential tips for being a considerate coffee shop customer, from ordering to finding the perfect spot to work.",
-    author: "Carlos Mendoza",
-    date: "2024-01-08",
-    categories: ["Coffee Culture"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "4 min read",
-  },
-  {
-    id: 5,
-    slug: "hidden-gems-quezon-city",
-    title: "Hidden Coffee Gems in Quezon City",
-    excerpt: "Explore lesser-known coffee shops in QC that serve exceptional brews away from the crowds.",
-    author: "Lisa Garcia",
-    date: "2024-01-05",
-    categories: ["City Guides"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "7 min read",
-  },
-  {
-    id: 6,
-    slug: "coffee-and-productivity",
-    title: "Coffee and Productivity: Finding Your Perfect Work Café",
-    excerpt:
-      "Tips for choosing the right coffee shop for work, including what to look for in WiFi, seating, and atmosphere.",
-    author: "Mark Tan",
-    date: "2024-01-03",
-    categories: ["Lifestyle"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "5 min read",
-  },
-  {
-    id: 7,
-    slug: "third-wave-coffee-philippines",
-    title: "The Rise of Third Wave Coffee in the Philippines",
-    excerpt: "How specialty coffee culture is transforming the local coffee scene and what it means for coffee lovers.",
-    author: "Sarah Kim",
-    date: "2024-01-01",
-    categories: ["Coffee Education"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "6 min read",
-  },
-  {
-    id: 8,
-    slug: "coffee-shop-design-trends",
-    title: "Modern Coffee Shop Design Trends in Metro Manila",
-    excerpt: "Exploring the latest interior design trends that are shaping the aesthetic of Manila's coffee shops.",
-    author: "David Chen",
-    date: "2023-12-28",
-    categories: ["Coffee Culture"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "4 min read",
-  },
-  {
-    id: 9,
-    slug: "coffee-roasting-basics",
-    title: "Coffee Roasting Basics: Understanding Light, Medium, and Dark Roasts",
-    excerpt: "Learn about different roast levels and how they affect the flavor profile of your coffee beans.",
-    author: "Roberto Silva",
-    date: "2023-12-25",
-    categories: ["Coffee Education"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "6 min read",
-  },
-  {
-    id: 10,
     slug: "manila-coffee-history",
-    title: "The History of Coffee Culture in Manila",
+    title: "How it Started.",
     excerpt:
-      "Explore how coffee culture evolved in Manila from Spanish colonial times to the modern specialty coffee movement.",
-    author: "Elena Vasquez",
+      "Kapehan started in 2025 with a simple question: Where can I find great coffee? As coffee lovers, we were always searching for cafés that had not just quality coffee, but also the right vibe and amenities for work, meetups, or relaxing breaks.",
+    author: "Mark Lester Caletina",
     date: "2023-12-22",
-    categories: ["Coffee Culture"],
+    categories: ["All"],
     image: "/placeholder.svg?height=300&width=500",
-    readTime: "8 min read",
-  },
-  {
-    id: 11,
-    slug: "home-barista-equipment-guide",
-    title: "Essential Equipment for the Home Barista",
-    excerpt: "A comprehensive guide to building your home coffee setup, from grinders to espresso machines.",
-    author: "Michael Torres",
-    date: "2023-12-20",
-    categories: ["Coffee Education"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "7 min read",
-  },
-  {
-    id: 12,
-    slug: "coffee-shop-wifi-etiquette",
-    title: "WiFi Etiquette in Coffee Shops: A Digital Nomad's Guide",
-    excerpt: "Best practices for using coffee shops as your remote office while being respectful to other customers.",
-    author: "Jessica Park",
-    date: "2023-12-18",
-    categories: ["Lifestyle"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "5 min read",
-  },
-  {
-    id: 13,
-    slug: "seasonal-coffee-drinks-philippines",
-    title: "Seasonal Coffee Drinks Perfect for Philippine Weather",
-    excerpt: "Discover refreshing coffee beverages that are perfect for the tropical climate of the Philippines.",
-    author: "Carmen Lopez",
-    date: "2023-12-15",
-    categories: ["Coffee Culture"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "4 min read",
-  },
-  {
-    id: 14,
-    slug: "coffee-shop-photography-tips",
-    title: "Instagram-Worthy Coffee Shop Photography Tips",
-    excerpt: "Learn how to capture the perfect coffee shop moments for your social media feeds.",
-    author: "Alex Rivera",
-    date: "2023-12-12",
-    categories: ["Lifestyle"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "6 min read",
-  },
-  {
-    id: 15,
-    slug: "fair-trade-coffee-impact",
-    title: "The Impact of Fair Trade Coffee on Filipino Farmers",
-    excerpt: "Understanding how fair trade certification is changing the lives of coffee farmers in the Philippines.",
-    author: "Maria Gonzalez",
-    date: "2023-12-10",
-    categories: ["Sustainability"],
-    image: "/placeholder.svg?height=300&width=500",
-    readTime: "7 min read",
+    link: "https://www.notion.so/How-it-started-2c2a134b0fca807c858be3c1cc0c5f65?source=copy_link",
+    readTime: "2 min read",
   },
 ]
 
@@ -292,47 +146,96 @@ export default function BlogPage() {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
                   >
-                    <Link href={`/blog/${post.slug}`}>
-                      <div className="relative h-40 md:h-48 overflow-hidden">
-                        <img
-                          src={post.image || "/placeholder.svg"}
-                          alt={post.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-amber-600 text-white px-2 md:px-3 py-1 rounded-full text-xs font-whyte-medium">
-                            {post.categories && post.categories.length > 0 ? post.categories[0] : "General"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-4 md:p-6">
-                        <h2 className="text-lg md:text-xl font-whyte-bold text-stone-800 mb-2 md:mb-3 line-clamp-2 hover:text-amber-600 transition-colors">
-                          {post.title}
-                        </h2>
-
-                        <p className="text-stone-600 mb-3 md:mb-4 line-clamp-3 text-sm md:text-base">{post.excerpt}</p>
-
-                        <div className="flex items-center justify-between text-xs md:text-sm text-stone-500 mb-3 md:mb-4">
-                          <div className="flex items-center">
-                            <LuUser className="mr-1 h-3 md:h-4 w-3 md:w-4" />
-                            {post.author}
-                          </div>
-                          <div className="flex items-center">
-                            <LuCalendar className="mr-1 h-3 md:h-4 w-3 md:w-4" />
-                            {new Date(post.date).toLocaleDateString()}
+                    {post.link ? (
+                      <a
+                        href={post.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="relative h-40 md:h-48 overflow-hidden">
+                          <img
+                            src={post.image || "/placeholder.svg"}
+                            alt={post.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-amber-600 text-white px-2 md:px-3 py-1 rounded-full text-xs font-whyte-medium">
+                              {post.categories && post.categories.length > 0 ? post.categories[0] : "General"}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs md:text-sm text-stone-500">{post.readTime}</span>
-                          <div className="flex items-center text-amber-600 font-whyte-medium text-sm md:text-base">
-                            Read More
-                            <LuArrowRight className="ml-1 h-3 md:h-4 w-3 md:w-4" />
+                        <div className="p-4 md:p-6">
+                          <h2 className="text-lg md:text-xl font-whyte-bold text-stone-800 mb-2 md:mb-3 line-clamp-2 hover:text-amber-600 transition-colors">
+                            {post.title}
+                          </h2>
+
+                          <p className="text-stone-600 mb-3 md:mb-4 line-clamp-3 text-sm md:text-base">{post.excerpt}</p>
+
+                          <div className="flex items-center justify-between text-xs md:text-sm text-stone-500 mb-3 md:mb-4">
+                            <div className="flex items-center">
+                              <LuUser className="mr-1 h-3 md:h-4 w-3 md:w-4" />
+                              {post.author}
+                            </div>
+                            <div className="flex items-center">
+                              <LuCalendar className="mr-1 h-3 md:h-4 w-3 md:w-4" />
+                              {new Date(post.date).toLocaleDateString()}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs md:text-sm text-stone-500">{post.readTime}</span>
+                            <div className="flex items-center text-amber-600 font-whyte-medium text-sm md:text-base">
+                              Read More
+                              <LuArrowRight className="ml-1 h-3 md:h-4 w-3 md:w-4" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
+                      </a>
+                    ) : (
+                      <Link href={`/blog/${post.slug}`} className="block">
+                        <div className="relative h-40 md:h-48 overflow-hidden">
+                          <img
+                            src={post.image || "/placeholder.svg"}
+                            alt={post.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-amber-600 text-white px-2 md:px-3 py-1 rounded-full text-xs font-whyte-medium">
+                              {post.categories && post.categories.length > 0 ? post.categories[0] : "General"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 md:p-6">
+                          <h2 className="text-lg md:text-xl font-whyte-bold text-stone-800 mb-2 md:mb-3 line-clamp-2 hover:text-amber-600 transition-colors">
+                            {post.title}
+                          </h2>
+
+                          <p className="text-stone-600 mb-3 md:mb-4 line-clamp-3 text-sm md:text-base">{post.excerpt}</p>
+
+                          <div className="flex items-center justify-between text-xs md:text-sm text-stone-500 mb-3 md:mb-4">
+                            <div className="flex items-center">
+                              <LuUser className="mr-1 h-3 md:h-4 w-3 md:w-4" />
+                              {post.author}
+                            </div>
+                            <div className="flex items-center">
+                              <LuCalendar className="mr-1 h-3 md:h-4 w-3 md:w-4" />
+                              {new Date(post.date).toLocaleDateString()}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs md:text-sm text-stone-500">{post.readTime}</span>
+                            <div className="flex items-center text-amber-600 font-whyte-medium text-sm md:text-base">
+                              Read More
+                              <LuArrowRight className="ml-1 h-3 md:h-4 w-3 md:w-4" />
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    )}
                   </motion.article>
                 ))}
               </div>

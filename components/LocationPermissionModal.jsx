@@ -14,7 +14,7 @@ export default function LocationPermissionModal({
 }) {
   const [loading, setLoading] = useState(false);
 
-  // Check if valid location exists in localStorage (with TTL)
+  // Check if valid location exists in localStorage (with TTL) - sync helper
   const checkStoredLocation = useCallback(() => {
     try {
       const raw = localStorage.getItem(localStorageKey);
@@ -31,76 +31,108 @@ export default function LocationPermissionModal({
     }
   }, [localStorageKey, ttl]);
 
-  // Save location to localStorage with timestamp
+  // Async wrapper to avoid synchronous trigger paths
+  const checkStoredLocationAsync = useCallback(() => {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(checkStoredLocation()), 0);
+    });
+  }, [checkStoredLocation]);
+
   const saveLocation = ({ latitude, longitude }) => {
     if (!saveToLocalStorage) return;
     try {
       const now = Date.now();
-      const payload = {
-        latitude,
-        longitude,
-        ts: now,
-        expiresAt: now + ttl, // human-readable expiry
-      };
+      const payload = { latitude, longitude, ts: now, expiresAt: now + ttl };
       localStorage.setItem(localStorageKey, JSON.stringify(payload));
-      console.log(
-        "Location saved to localStorage with expiry:",
-        new Date(payload.expiresAt)
-      );
+      console.log("Location saved to localStorage with expiry:", new Date(payload.expiresAt));
     } catch (e) {
       console.error("Error saving location:", e);
     }
   };
 
-  // Handler for Allow Location
+  // Handler for Allow Location (non-blocking, hide immediately)
   const handleAllow = async () => {
+    console.log("[LocationModal] Allow clicked → hiding modal and requesting geolocation in background…");
+    // Hide the modal right away (no coords yet)
+    onSuccess && setTimeout(() => onSuccess(), 0);
+
     if (!navigator.geolocation) {
-      alert("Geolocation not supported");
-      if (onDeny) onDeny();
-      return;
+      console.warn("[LocationModal] Geolocation not supported by this browser.");
+      return; // already hidden
     }
+
     setLoading(true);
+
+    const sendBackend = (coords) => {
+      // Save locally
+      saveLocation(coords);
+      // Fire-and-forget backend update
+      getAnonLocation(coords)
+        .then(() => console.log("[LocationModal] Sent location to backend."))
+        .catch((err) => console.error("[LocationModal] Backend update failed:", err));
+    };
+
+    // First attempt: high accuracy (10s)
+    console.log("[LocationModal] Attempt #1 (high accuracy, 10s) …");
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const latitude = pos.coords.latitude;
-        const longitude = pos.coords.longitude;
-        try {
-          await getAnonLocation({ latitude, longitude });
-          saveLocation({ latitude, longitude });
-          if (onSuccess) onSuccess({ latitude, longitude });
-        } catch (err) {
-          console.error("Failed to send location:", err);
-          if (onDeny) onDeny();
-        } finally {
-          setLoading(false);
-        }
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        console.log("[LocationModal] Geolocation success (attempt #1):", { latitude, longitude });
+        sendBackend({ latitude, longitude });
+        setLoading(false);
       },
       (err) => {
-        // Log more helpful details (some environments stringify PositionError poorly)
-        console.error("Failed to get location:", {
-          code: err?.code,
-          message: err?.message,
-          name: err?.name,
-        });
-        setLoading(false);
-        if (onDeny) onDeny();
+        console.warn("[LocationModal] Attempt #1 failed:", { code: err?.code, message: err?.message });
+        // If timeout, fallback to low accuracy (25s)
+        if (err?.code === 3) {
+          console.log("[LocationModal] Attempt #2 (low accuracy, 25s) …");
+          navigator.geolocation.getCurrentPosition(
+            (pos2) => {
+              const { latitude, longitude } = pos2.coords;
+              console.log("[LocationModal] Geolocation success (attempt #2):", { latitude, longitude });
+              sendBackend({ latitude, longitude });
+              setLoading(false);
+            },
+            (err2) => {
+              console.error("[LocationModal] Attempt #2 failed:", { code: err2?.code, message: err2?.message });
+              setLoading(false);
+              // modal already hidden
+            },
+            { enableHighAccuracy: false, timeout: 25000, maximumAge: 60000 }
+          );
+        } else {
+          setLoading(false);
+          // modal already hidden
+        }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
   useEffect(() => {
-    if (isOpen) {
-      const storedLocation = checkStoredLocation();
-      if (storedLocation) {
-        // If valid location exists, directly call onSuccess
-        onSuccess({
-          latitude: storedLocation.latitude,
-          longitude: storedLocation.longitude,
-        });
+    if (!isOpen) return;
+    console.log("[LocationModal] Checking stored location (async) …");
+    let mounted = true;
+    (async () => {
+      const storedLocation = await checkStoredLocationAsync();
+      if (mounted && storedLocation && onSuccess) {
+        console.log("[LocationModal] Stored location found → hiding modal and using cached coords.");
+        setTimeout(
+          () =>
+            onSuccess({
+              latitude: storedLocation.latitude,
+              longitude: storedLocation.longitude,
+            }),
+          0
+        );
+      } else {
+        console.log("[LocationModal] No valid stored location.");
       }
-    }
-  }, [isOpen, checkStoredLocation, onSuccess]);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen, checkStoredLocationAsync, onSuccess]);
 
   if (!isOpen) return null;
 
@@ -129,7 +161,7 @@ export default function LocationPermissionModal({
           </h2>
 
           {/* Description - responsive sizing */}
-          <p className="text-xs sm:text-sm md:text-base text-stone-600 mb-5 sm:mb-6 leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-stone-600 mb-5 sm:mb-6 leading-relaxed font-whyte-regular">
             To help us show you the nearest coffee shops based on your
             location, may we access your location?
           </p>
@@ -137,18 +169,18 @@ export default function LocationPermissionModal({
           {/* Buttons - responsive layout and sizing */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
-              onClick={onDeny}
-              disabled={loading}
-              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors disabled:opacity-50"
-            >
-              Not Now
-            </button>
-            <button
               onClick={handleAllow}
               disabled={loading}
               className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base bg-amber-700 text-white rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors disabled:opacity-50"
             >
               {loading ? "Locating..." : "Allow Location"}
+            </button>
+            <button
+              onClick={onDeny}
+              disabled={loading}
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors disabled:opacity-50"
+            >
+              Not Now
             </button>
           </div>
         </motion.div>

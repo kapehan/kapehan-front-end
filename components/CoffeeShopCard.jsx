@@ -55,6 +55,14 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
     "Wheelchair Accessible": { icon: FaWheelchair, label: "Accessible" },
   };
 
+  // derive a single vibe label from various shapes
+  const vibeLabel = (() => {
+    if (typeof shop?.vibe === "string" && shop.vibe.trim()) return shop.vibe;
+    if (typeof shop?.vibes === "string" && shop.vibes.trim()) return shop.vibes;
+    if (Array.isArray(shop?.vibes) && shop.vibes.length > 0) return shop.vibes[0];
+    return null;
+  })();
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -119,22 +127,12 @@ export default function CoffeeShopCard({ shop, showDistance = true }) {
               </span>
             </div>
 
-            {/* Vibes - responsive grid */}
-            {shop.vibes && shop.vibes.length > 0 && (
+            {/* Vibe - single badge */}
+            {vibeLabel && (
               <div className="flex flex-wrap gap-1">
-                {shop.vibes.slice(0, 2).map((vibe, index) => (
-                  <span
-                    key={index}
-                    className="inline-block px-1.5 sm:px-2 py-0.5 sm:py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-whyte-medium line-clamp-1"
-                  >
-                    {vibe}
-                  </span>
-                ))}
-                {shop.vibes.length > 2 && (
-                  <span className="inline-block px-1.5 sm:px-2 py-0.5 sm:py-1 bg-stone-100 text-stone-600 text-xs rounded-full font-whyte-medium">
-                    +{shop.vibes.length - 2}
-                  </span>
-                )}
+                <span className="inline-block px-1.5 sm:px-2 py-0.5 sm:py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-whyte-medium line-clamp-1">
+                  {vibeLabel}
+                </span>
               </div>
             )}
 

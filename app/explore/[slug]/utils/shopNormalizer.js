@@ -39,9 +39,11 @@ export const normalizeShop = (raw, slugFromRoute) => {
     wifi: amenitiesArr.includes("wi-fi") || amenitiesArr.includes("wifi"),
     parking: amenitiesArr.includes("parking"),
     outdoorSeating:
-      amenitiesArr.includes("outdoor seating") || amenitiesArr.includes("outdoor"),
+      amenitiesArr.includes("outdoor seating") ||
+      amenitiesArr.includes("outdoor"),
     petFriendly:
-      amenitiesArr.includes("pet-friendly") || amenitiesArr.includes("pet friendly"),
+      amenitiesArr.includes("pet-friendly") ||
+      amenitiesArr.includes("pet friendly"),
     wheelchairAccessible:
       amenitiesArr.includes("wheelchair-accessible") ||
       amenitiesArr.includes("wheelchair accessible") ||
@@ -59,7 +61,8 @@ export const normalizeShop = (raw, slugFromRoute) => {
     city: raw.city,
     rating: raw.rating,
     review_count: raw.review_count,
-    categories: Array.isArray(raw.vibes) && raw.vibes.length ? raw.vibes : undefined,
+    categories:
+      Array.isArray(raw.vibes) && raw.vibes.length ? raw.vibes : undefined,
     socialMedia: {
       facebook: raw.facebook || undefined,
       instagram: raw.instagram || undefined,
@@ -68,8 +71,44 @@ export const normalizeShop = (raw, slugFromRoute) => {
     paymentMethods: paymentMethods.length ? paymentMethods : ["Cash"],
     openingHours: openingHoursObj,
     amenities: normalizedAmenities,
+    amenities: normalizedAmenities,
+
     openNow: typeof raw.isOpen === "boolean" ? raw.isOpen : undefined,
   };
+
+  // --- added: resolve numeric coordinates from common shapes ---
+  const tryNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const coordCandidates = [
+    [raw.latitude, raw.longitude],
+    [raw.lat, raw.lng],
+    [raw.lat, raw.longitude],
+    [raw.latitude, raw.lng],
+    [raw.location?.lat, raw.location?.lng],
+    [raw.location?.latitude, raw.location?.longitude],
+    // coords arrays [lng, lat] or [lat, lng]
+    ...(Array.isArray(raw.location?.coordinates)
+      ? [[raw.location.coordinates[1], raw.location.coordinates[0]], [raw.location.coordinates[0], raw.location.coordinates[1]]]
+      : []),
+    ...(Array.isArray(raw.coordinates)
+      ? [[raw.coordinates[1], raw.coordinates[0]], [raw.coordinates[0], raw.coordinates[1]]]
+      : []),
+  ];
+
+  for (const [latRaw, lngRaw] of coordCandidates) {
+    const lat = tryNum(latRaw);
+    const lng = tryNum(lngRaw);
+    if (lat !== null && lng !== null) {
+      enhancedShop.latitude = lat;
+      enhancedShop.longitude = lng;
+      enhancedShop.location = { latitude: lat, longitude: lng };
+      break;
+    }
+  }
+  // --- end added ---
 
   const derivedSlug = createSlug(enhancedShop.name);
   if (derivedSlug !== createSlug(slugFromRoute)) {
