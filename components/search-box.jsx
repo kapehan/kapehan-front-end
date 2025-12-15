@@ -38,7 +38,8 @@ export default function SearchBox() {
             transition-all duration-200
             bg-white
             placeholder:text-stone-400
-            placeholder:text-xs
+            placeholder:text-sm
+            leading-normal
           "
         />
       </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { getAnonLocation } from "../services/commonService";
@@ -15,7 +15,7 @@ export default function LocationPermissionModal({
   const [loading, setLoading] = useState(false);
 
   // Check if valid location exists in localStorage (with TTL)
-  const checkStoredLocation = () => {
+  const checkStoredLocation = useCallback(() => {
     try {
       const raw = localStorage.getItem(localStorageKey);
       if (!raw) return null;
@@ -29,17 +29,18 @@ export default function LocationPermissionModal({
       console.error("Error reading location:", e);
       return null;
     }
-  };
+  }, [localStorageKey, ttl]);
 
   // Save location to localStorage with timestamp
   const saveLocation = ({ latitude, longitude }) => {
     if (!saveToLocalStorage) return;
     try {
+      const now = Date.now();
       const payload = {
         latitude,
         longitude,
-        ts: Date.now(),
-        expiresAt: Date.now() + ttl, // human-readable expiry
+        ts: now,
+        expiresAt: now + ttl, // human-readable expiry
       };
       localStorage.setItem(localStorageKey, JSON.stringify(payload));
       console.log(
@@ -75,7 +76,12 @@ export default function LocationPermissionModal({
         }
       },
       (err) => {
-        console.error("Failed to get location:", err);
+        // Log more helpful details (some environments stringify PositionError poorly)
+        console.error("Failed to get location:", {
+          code: err?.code,
+          message: err?.message,
+          name: err?.name,
+        });
         setLoading(false);
         if (onDeny) onDeny();
       },

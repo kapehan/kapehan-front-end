@@ -8,7 +8,6 @@ import SearchBox from "../components/search-box";
 import HowItWorks from "../components/HowItWorks";
 import PopularCities from "../components/PopularCities";
 import OwnerCTA from "../components/OwnerCTA";
-import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import Navigation from "../components/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -18,56 +17,26 @@ import { getAllCoffeeShop } from "../services/coffeeShopService";
 import { getCache, setCache } from "./utils/cacheUtils";
 
 const Page = () => {
-  const [showLocationModal, setShowLocationModal] = useState(false);
+  // Open the modal by default; it will auto-close if cached location is valid
+  const [showLocationModal, setShowLocationModal] = useState(true);
   const locationIntervalRef = useRef(null);
 
   // Featured shops state (API-driven)
   const [featuredShops, setFeaturedShops] = useState([]);
   const [shopsLoading, setShopsLoading] = useState(true);
 
-  // Local storage key + TTL (20 minutes)
-  const ANON_LOC_KEY = "user_location";
-  const ANON_LOC_TTL = 1000 * 60 * 20; // 20 minutes
+  // Only keep interval; caching handled by LocationPermissionModal
   const REFRESH_INTERVAL = 1000 * 60 * 30; // 30 minutes
 
-  // helper: save anon location
-  const saveAnonLocation = ({ latitude, longitude }) => {
-    try {
-      const payload = { latitude, longitude, ts: Date.now() };
-      localStorage.setItem(ANON_LOC_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.error("Error saving anon location:", e);
-    }
-  };
-
-  // helper: read and validate stored anon location
-  const readAnonLocation = () => {
-    try {
-      const raw = localStorage.getItem(ANON_LOC_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed.ts || Date.now() - parsed.ts > ANON_LOC_TTL) {
-        localStorage.removeItem(ANON_LOC_KEY);
-        return null;
-      }
-      return parsed;
-    } catch (e) {
-      console.error("Error reading anon location:", e);
-      return null;
-    }
-  };
-
-  // Fetch current geolocation and update backend + localStorage
+  // Fetch current geolocation and update backend (no localStorage here)
   const updateLocation = async () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const latitude = pos.coords.latitude;
         const longitude = pos.coords.longitude;
-        console.log("Auto-updating location:", { latitude, longitude });
         try {
           await getAnonLocation({ latitude, longitude });
-          saveAnonLocation({ latitude, longitude });
         } catch (e) {
           console.error("Failed to auto-update location:", e);
         }
@@ -93,24 +62,18 @@ const Page = () => {
     }
   };
 
-  // on mount: check stored anon location and decide whether to show modal
+  // Cleanup on unmount
   useEffect(() => {
-    const stored = readAnonLocation();
-    if (stored) {
-      console.log("Found stored anon location:", stored);
-      setShowLocationModal(false);
-      startLocationInterval();
-    } else {
-      // no stored coords -> show modal to ask user
-      setShowLocationModal(true);
-    }
-
     return () => {
       stopLocationInterval();
     };
   }, []);
 
-  const handleLocationSuccess = () => {
+  const handleLocationSuccess = (coords) => {
+    // Modal already saved to localStorage if needed. Just notify backend and start interval.
+    if (coords && typeof coords.latitude === "number" && typeof coords.longitude === "number") {
+      getAnonLocation({ latitude: coords.latitude, longitude: coords.longitude }).catch(() => {});
+    }
     setShowLocationModal(false);
     startLocationInterval();
   };
