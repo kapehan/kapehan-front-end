@@ -28,6 +28,9 @@ export default function Navigation() {
   // Pull in loading from auth context to gate rendering
   const { user, isAuthenticated, isAnonymous, login, logout, loading } = useAuth();
 
+  // Treat only non-anonymous authenticated users as logged in
+  const isLoggedIn = isAuthenticated && !isAnonymous;
+
   // Unified user display helpers
   const displayName =
     user?.data?.username ||
@@ -53,8 +56,8 @@ export default function Navigation() {
 
   const handleAccountClick = () => {
     if (loading) return;
-    // Only toggle dropdown if authenticated; otherwise show modal
-    if (isAuthenticated) {
+    // Only toggle dropdown if truly logged in; otherwise show modal
+    if (isLoggedIn) {
       setShowUserDropdown(!showUserDropdown);
     } else {
       setShowAccountModal(true);
@@ -82,15 +85,15 @@ export default function Navigation() {
     setIsOpen(false);
   }, [pathname]);
 
-  // Read avatarConfig only when authenticated and not loading; clear otherwise
+  // Read avatarConfig only when logged in and not loading; clear otherwise
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (!loading && isLoggedIn) {
       const cached = getCache?.("profile:avatarConfig");
       setAvatarConfig(cached && typeof cached === "object" ? cached : genConfig());
     } else {
       setAvatarConfig(null);
     }
-  }, [isAuthenticated, loading]);
+  }, [isLoggedIn, loading]);
 
   return (
     <>
@@ -134,8 +137,8 @@ export default function Navigation() {
                     <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full overflow-hidden inline-flex bg-stone-200 animate-pulse" />
                     <span className="font-whyte-medium text-stone-500 hidden sm:inline">Loading…</span>
                   </button>
-                ) : isAuthenticated ? (
-                  // Only show avatar button when authenticated
+                ) : isLoggedIn ? (
+                  // Only show avatar button when logged in
                   <button
                     onClick={handleAccountClick}
                     className="flex items-center gap-1.5 sm:gap-2 bg-stone-100 hover:bg-stone-200 px-2 sm:px-3 py-1.5 rounded-lg transition-colors text-xs sm:text-sm"
@@ -153,7 +156,7 @@ export default function Navigation() {
                     <FaChevronDown className="text-stone-500 text-xs flex-shrink-0" />
                   </button>
                 ) : (
-                  // Show Account button only when NOT authenticated
+                  // Show Account button only when NOT logged in
                   <button
                     onClick={handleAccountClick}
                     className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-3 sm:px-4 py-1.5 rounded-lg transition-all duration-300 font-whyte-medium text-xs sm:text-sm whitespace-nowrap"
@@ -162,9 +165,9 @@ export default function Navigation() {
                   </button>
                 )}
 
-                {/* User Dropdown - only show when authenticated AND dropdown is open */}
+                {/* User Dropdown - only when logged in AND dropdown is open */}
                 <AnimatePresence>
-                  {isAuthenticated && showUserDropdown && (
+                  {isLoggedIn && showUserDropdown && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -278,8 +281,8 @@ export default function Navigation() {
                         <span className="w-10 h-10 rounded-full overflow-hidden inline-flex flex-shrink-0 bg-stone-200 animate-pulse" />
                         <p className="text-xs sm:text-sm font-whyte-medium text-stone-500">Loading…</p>
                       </div>
-                    ) : isAuthenticated ? (
-                      // Authenticated user section
+                    ) : isLoggedIn ? (
+                      // Authenticated user section (only when logged in)
                       <div className="space-y-2">
                         <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg">
                           <span className="w-10 h-10 rounded-full overflow-hidden inline-flex flex-shrink-0">
@@ -317,7 +320,7 @@ export default function Navigation() {
                         </button>
                       </div>
                     ) : (
-                      // Not authenticated - show Account button only
+                      // Not logged in - show Account button only
                       <button
                         onClick={() => {
                           if (!loading) {
