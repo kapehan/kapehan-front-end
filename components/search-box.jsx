@@ -28,18 +28,19 @@ export default function SearchBox() {
           autoComplete="off"
           className="
             w-full
-            pl-11 sm:pl-13 md:pl-16
+            appearance-none
+            pl-11 sm:pl-12 md:pl-16
             pr-4 sm:pr-5 md:pr-6
-            h-12 sm:h-12 md:h-14
+            py-3 sm:py-3 md:py-4
+            min-h-[3rem] md:min-h-[3.5rem]
             text-sm sm:text-base md:text-lg
+            leading-[1.50]
             border border-stone-300 rounded-full
             shadow-sm
             focus:outline-none focus:ring-2 focus:ring-[#8B5E3B] focus:border-transparent
             transition-all duration-200
             bg-white
             placeholder:text-stone-400
-            placeholder:text-sm
-            leading-normal
           "
         />
       </div>

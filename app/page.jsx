@@ -13,8 +13,7 @@ import Navigation from "../components/navigation";
 import { useState, useEffect, useRef } from "react";
 import LocationPermissionModal from "../components/LocationPermissionModal";
 import { getAnonLocation } from "../services/commonService";
-import { getAllCoffeeShop } from "../services/coffeeShopService";
-import { getCache, setCache } from "./utils/cacheUtils";
+import { getFeaturedCoffeeShops } from "../services/coffeeShopService";
 
 const Page = () => {
   // Open the modal by default; it will auto-close if cached location is valid
@@ -31,17 +30,40 @@ const Page = () => {
   // Fetch current geolocation and update backend (no localStorage here)
   const updateLocation = async () => {
     if (!navigator.geolocation) return;
+
+    const sendBackend = async ({ latitude, longitude }) => {
+      try {
+        await getAnonLocation({ latitude, longitude });
+        console.log("[AutoUpdate] Sent location to backend.");
+      } catch (e) {
+        console.error("[AutoUpdate] Failed to auto-update location:", e);
+      }
+    };
+
+    console.log("[AutoUpdate] Attempt #1 (high accuracy, 10s) …");
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const latitude = pos.coords.latitude;
-        const longitude = pos.coords.longitude;
-        try {
-          await getAnonLocation({ latitude, longitude });
-        } catch (e) {
-          console.error("Failed to auto-update location:", e);
+        const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        console.log("[AutoUpdate] Geolocation success (attempt #1):", coords);
+        await sendBackend(coords);
+      },
+      (err) => {
+        console.warn("[AutoUpdate] Attempt #1 failed:", err);
+        if (err?.code === 3) {
+          console.log("[AutoUpdate] Attempt #2 (low accuracy, 25s) …");
+          navigator.geolocation.getCurrentPosition(
+            async (pos2) => {
+              const coords2 = { latitude: pos2.coords.latitude, longitude: pos2.coords.longitude };
+              console.log("[AutoUpdate] Geolocation success (attempt #2):", coords2);
+              await sendBackend(coords2);
+            },
+            (err2) => {
+              console.warn("[AutoUpdate] Attempt #2 failed:", err2);
+            },
+            { enableHighAccuracy: false, timeout: 25000, maximumAge: 60000 }
+          );
         }
       },
-      (err) => console.warn("Geolocation error during auto-update:", err),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
@@ -78,24 +100,14 @@ const Page = () => {
     startLocationInterval();
   };
 
-  // Fetch top-rated shops (limit 4) with caching
+  // Fetch top-rated shops (limit 4) without caching
   useEffect(() => {
     let cancelled = false;
     setShopsLoading(true);
-    
-    const CACHE_KEY = "featured_shops";
-    const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
     (async () => {
-      // Try to get cached data first
-      const cached = getCache(CACHE_KEY, CACHE_TTL);
-      if (cached && !cancelled) {
-        setFeaturedShops(cached);
-        setShopsLoading(false);
-      }
-
       try {
-        const resp = await getAllCoffeeShop({ limit: 4, sort: "rating:desc" });
+        const resp = await getFeaturedCoffeeShops({ limit: 4, sort: "rating:desc" });
         const data = resp?.data ?? resp;
         const items =
           (Array.isArray(data) && data) ||
@@ -103,10 +115,7 @@ const Page = () => {
           (Array.isArray(data?.docs) && data.docs) ||
           (Array.isArray(resp?.items) && resp.items) ||
           [];
-        
         if (!cancelled) {
-          // Cache the fresh data
-          setCache(CACHE_KEY, items);
           setFeaturedShops(items);
         }
       } catch (e) {
@@ -115,7 +124,7 @@ const Page = () => {
         if (!cancelled) setShopsLoading(false);
       }
     })();
-    
+
     return () => {
       cancelled = true;
     };

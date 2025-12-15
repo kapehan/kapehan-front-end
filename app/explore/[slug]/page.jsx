@@ -36,15 +36,16 @@ import CoffeeShopCard from "../../../components/CoffeeShopCard";
 import Footer from "../../../components/Footer";
 import UserAccountModal from "../../../components/UserAccountModal";
 import MenuModal from "../../../components/MenuModal";
-import { getCoffeeShopById } from "../../../services/coffeeShopService";
+import FloatingNavigationButton from "./components/FloatingNavigationButton";
+import { getCoffeeShopById,getFeaturedCoffeeShops } from "../../../services/coffeeShopService";
 import ShopDetailSkeleton from "./loading";
 import { useAuth } from "../../../context/authContext";
-import { getCache, setCache } from "../../utils/cacheUtils";
 import FloatingMenuButton from "./components/FloatingMenuButton";
 import { normalizeShop } from "./utils/shopNormalizer";
 import { toTitleCase } from "./utils/slugUtils";
 import { isCurrentlyOpen } from "./utils/timeUtils";
 import { LuCoffee } from "react-icons/lu";
+import SuggestedCoffeeShops from "../../../components/SuggestedCoffeeShops";
 
 export default function CoffeeShopDetailPage() {
   const params = useParams();
@@ -60,6 +61,13 @@ export default function CoffeeShopDetailPage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [reviewVersion, setReviewVersion] = useState(0);
   const [userHasReview, setUserHasReview] = useState(null);
+
+  // DEBUG: log shop object whenever it updates (helps inspect shapes like latitude/longitude)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("DEBUG: shop object:", shop);
+    }
+  }, [shop]);
 
   const formatDayLabel = (day) => toTitleCase(day);
   const formatCity = (city) => toTitleCase(city);
@@ -84,19 +92,14 @@ export default function CoffeeShopDetailPage() {
   };
 
   useEffect(() => {
-    const CACHE_KEY = `coffeeShop:${shopSlug}`;
-    const CACHE_TTL = 24 * 60 * 60 * 1000;
-
     const fetchShopData = async () => {
       setLoading(true);
-      const cached = getCache(CACHE_KEY, CACHE_TTL);
-      if (cached) setShop(cached);
 
       try {
         const res = await getCoffeeShopById(shopSlug);
         const raw = res?.data ?? res;
         if (!raw) {
-          if (!cached) setShop(null);
+          setShop(null);
           setLoading(false);
           return;
         }
@@ -108,13 +111,10 @@ export default function CoffeeShopDetailPage() {
           return;
         }
 
-        if (!cached || JSON.stringify(cached) !== JSON.stringify(enhancedShop)) {
-          setCache(CACHE_KEY, enhancedShop);
-          setShop(enhancedShop);
-        }
+        setShop(enhancedShop);
       } catch (error) {
         console.error("Error fetching shop:", error);
-        if (!cached) setShop(null);
+        setShop(null);
       } finally {
         setLoading(false);
       }
@@ -190,6 +190,18 @@ export default function CoffeeShopDetailPage() {
     </div>
   );
 
+  // format "HH:mm" to "h:mm AM/PM"
+  const to12Hour = (time) => {
+    if (!time || typeof time !== "string") return "";
+    const [hStr, mStr] = time.split(":");
+    const h = Number(hStr);
+    const m = Number(mStr ?? 0);
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return time;
+    const period = h >= 12 ? "PM" : "AM";
+    const hour12 = h % 12 === 0 ? 12 : h % 12;
+    return `${hour12}:${m.toString().padStart(2, "0")} ${period}`;
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -236,12 +248,12 @@ export default function CoffeeShopDetailPage() {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center mb-4">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-whyte-bold text-white drop-shadow-lg text-center">
+              <div className="flex flex-col sm:flex-row items-center justify-center mb-4 px-4">
+                <h1 className="text-3xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-whyte-bold text-white drop-shadow-lg text-center leading-snug break-words max-w-[min(90vw,900px)]">
                   {shop.name}
                 </h1>
                 {shop.verified && (
-                  <FaCheckCircle className="text-blue-300 text-xl md:text-2xl lg:text-3xl mt-2 sm:mt-0 sm:ml-4 drop-shadow-lg" />
+                  <FaCheckCircle className="text-blue-300 text-lg md:text-xl lg:text-2xl mt-2 sm:mt-0 sm:ml-4 drop-shadow-lg" />
                 )}
               </div>
 
@@ -295,11 +307,16 @@ export default function CoffeeShopDetailPage() {
           {/* About Section */}
           <div className="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden mb-6 md:mb-10">
             <div className="p-4 md:p-8">
-              <h2 className="text-xl md:text-2xl font-whyte-bold text-stone-900 mb-4 flex items-center">
-                <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
-                  <LuCoffee className="text-stone-700 text-lg md:text-xl" />
-                </div>
-                About {shop.name}
+              <h2 className="text-base sm:text-lg md:text-xl font-whyte-bold text-stone-900 mb-4 flex items-center gap-2 md:gap-3">
+                <span className="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 md:w-9 md:h-9 rounded-full bg-stone-100">
+                  <LuCoffee className="text-stone-700 text-sm md:text-base" />
+                </span>
+                <span className="flex items-baseline gap-1 min-w-0">
+                  <span className="font-whyte-medium">About</span>
+                  <span className="font-whyte-bold truncate max-w-[70vw] sm:max-w-[55vw] md:max-w-[42vw] lg:max-w-[36vw] xl:max-w-[32vw]">
+                    {shop.name}
+                  </span>
+                </span>
               </h2>
 
               <p className="text-stone-700 text-base md:text-lg leading-relaxed mb-4">
@@ -406,7 +423,7 @@ export default function CoffeeShopDetailPage() {
                               <span className="text-stone-400">Closed</span>
                             ) : (
                               <span className="text-stone-700">
-                                {h.open} - {h.close}
+                                {to12Hour(h.open)} - {to12Hour(h.close)}
                               </span>
                             )}
                           </div>
@@ -523,39 +540,20 @@ export default function CoffeeShopDetailPage() {
           )}
 
           {/* You Might Also Like */}
-          {suggestedShops.length > 0 && (
-            <div className="mb-6 md:mb-10">
-              <div className="text-center mb-6 md:mb-8">
-                <h2 className="text-2xl md:text-3xl font-whyte-bold text-stone-900 mb-2 flex items-center justify-center">
-                  <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">
-                    <LuCoffee className="text-stone-700 text-lg md:text-xl" />
-                  </div>
-                  You Might Also Like
-                </h2>
-                <p className="text-stone-600 text-sm md:text-base">
-                  More coffee shops in {formatCity(shop.city || "")}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-                {suggestedShops.map((suggestedShop, index) => (
-                  <motion.div
-                    key={suggestedShop.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <CoffeeShopCard shop={suggestedShop} showDistance={false} />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
+          <SuggestedCoffeeShops
+            subtitle={`More coffee shops in ${formatCity(shop.city || "")}`}
+            city={shop.city}
+          />
         </div>
       </div>
 
-      {/* Floating Menu FAB */}
-      <FloatingMenuButton onClick={() => setShowMenuModal(true)} />
+      {/* Floating buttons stacked at bottom-right */}
+      <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 flex flex-col items-center gap-2">
+        {shop?.latitude && shop?.longitude && (
+          <FloatingNavigationButton latitude={shop.latitude} longitude={shop.longitude} />
+        )}
+        <FloatingMenuButton onClick={() => setShowMenuModal(true)} />
+      </div>
 
       {/* Modals */}
       <RatingModal
