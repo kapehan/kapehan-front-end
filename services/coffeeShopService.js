@@ -23,6 +23,16 @@ export const getAllCoffeeShop = async (query = {}) => {
   }
 };
 
+export const getFeaturedCoffeeShops = async (query = {}) => {
+  try {
+    const response = await axiosInstance.get("/featured-coffee-shops", { params: query });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching coffee shops:", error);
+    throw error;
+  }
+};
+
 export const getCoffeeShopById = async (slug) => {
   try {
     const response = await axiosInstance.get(`/shop/${slug}`);

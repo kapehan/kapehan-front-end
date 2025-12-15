@@ -263,6 +263,59 @@
     font-family: "Whyte", ui-sans-serif, system-ui, sans-serif;
     font-weight: 900;
   }
+
+  /* Button baseline + centering fix (mobile-safe) */
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  [role="button"] {
+    /* Normalize across mobile browsers */
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+
+    /* Center label vertically and horizontally */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Avoid webfont metric clipping on mobile */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    line-height: 1.2 !important;
+    vertical-align: middle;
+    text-align: center;
+
+    /* Smoothing for better rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Prevent inherited font-size/weight from custom classes */
+    font-size: 1rem;
+    font-weight: 500;
+    min-height: 2.25rem;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* Ensure text is vertically centered even with custom font classes */
+  button span,
+  button strong,
+  button b {
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    display: inline-block;
+  }
+
+  /* Keep icons aligned with text inside buttons */
+  button > svg,
+  [type="button"] > svg,
+  [type="submit"] > svg,
+  [type="reset"] > svg,
+  [role="button"] > svg {
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
 }
 
 /* stylelint-enable unknownAtRules */
