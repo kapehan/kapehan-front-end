@@ -239,7 +239,7 @@ export default function ProfilePage() {
                 <div className="text-xs text-stone-600">Visited Shops</div>
               </div>
               <div className="bg-stone-50 rounded-lg p-6 text-center border border-stone-200">
-                <div className="text-3xl font-whyte-bold text-amber-700 mb-2">0</div>
+                <div className="text-3xl font-whyte-bold text-amber-700 mb-2">{apiUser.review_count}</div>
                 <div className="text-xs text-stone-600">Reviews</div>
               </div>
               <div className="bg-stone-50 rounded-lg p-6 text-center border border-stone-200">
