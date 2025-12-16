@@ -15,9 +15,53 @@ export const AuthProvider = ({ children }) => {
   // helper to detect anonymous payload in various shapes
   const detectAnonymous = (payload) => {
     if (!payload) return false;
-    const role = (payload.role || payload.data?.role || payload.user?.role || "").toString().toLowerCase();
-    const maybeAnonMarker = payload?.role === undefined && payload?.id && payload?.username === "anonymous";
-    return role === "anonymous" || maybeAnonMarker;
+    const toLower = (v) => (v ?? "").toString().toLowerCase();
+
+    const roles = [
+      payload.role,
+      payload.data?.role,
+      payload.user?.role,
+      payload.userType,
+    ].map(toLower);
+
+    const usernames = [
+      payload.username,
+      payload.data?.username,
+      payload.user?.username,
+    ].map(toLower);
+
+    const flags = [
+      payload.isAnonymous,
+      payload.data?.isAnonymous,
+      payload.user?.isAnonymous,
+    ];
+
+    const maybeAnonMarker =
+      (payload?.role === undefined || payload?.role === null) &&
+      (payload?.id || payload?.data?.id || payload?.user?.id) &&
+      usernames.some((u) => u === "anonymous" || u === "guest");
+
+    return (
+      roles.some((r) => r === "anonymous" || r === "anon" || r === "guest") ||
+      usernames.some((u) => u === "anonymous" || u === "guest") ||
+      flags.some((f) => f === true) ||
+      maybeAnonMarker
+    );
+  };
+
+  // Validate if payload represents a fully authenticated user
+  const isValidAuthenticatedUser = (payload) => {
+    if (!payload) return false;
+    if (detectAnonymous(payload)) return false;
+
+    const id = payload?.data?.id || payload?.user?.id || payload?.id;
+    const email = payload?.data?.email || payload?.user?.email || payload?.email;
+    const authFlag =
+      payload?.authenticated === true ||
+      payload?.data?.authenticated === true ||
+      payload?.user?.authenticated === true;
+
+    return Boolean(authFlag || (id && email));
   };
 
   // Fetch current user on mount
@@ -27,17 +71,18 @@ export const AuthProvider = ({ children }) => {
         const currentUser = await fetchCurrentUser();
 
         const anon = detectAnonymous(currentUser);
+        const valid = isValidAuthenticatedUser(currentUser);
 
-        if (anon) {
+        if (anon || !valid) {
           // keep anonymous payload for analytics/debug but treat as not authenticated
           setAnonymousInfo(currentUser);
           setUser(null);
           setIsAuthenticated(false);
-          setIsAnonymous(true);
+          setIsAnonymous(anon);
         } else {
           setAnonymousInfo(null);
           setUser(currentUser || null);
-          setIsAuthenticated(!!currentUser);
+          setIsAuthenticated(true);
           setIsAnonymous(false);
         }
       } catch (err) {
@@ -54,14 +99,17 @@ export const AuthProvider = ({ children }) => {
 
   // Login helper
   const login = (userData) => {
-    // Ignore anonymous payloads on login
-    if (detectAnonymous(userData)) {
+    const anon = detectAnonymous(userData);
+    const valid = isValidAuthenticatedUser(userData);
+
+    if (anon || !valid) {
       setAnonymousInfo(userData);
       setUser(null);
       setIsAuthenticated(false);
-      setIsAnonymous(true);
+      setIsAnonymous(anon);
       return;
     }
+
     setAnonymousInfo(null);
     setUser(userData);
     setIsAuthenticated(true);

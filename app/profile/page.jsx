@@ -19,9 +19,7 @@ import NiceAvatar, { genConfig } from "react-nice-avatar";
 import { getCache, setCache } from "../utils/cacheUtils";
 
 export default function ProfilePage() {
-  const DETAILS_CACHE_KEY = "profile:userDetails";
   const AVATAR_CACHE_KEY = "profile:avatarConfig";
-  const DETAILS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
   const AVATAR_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
   const { user, isAuthenticated, loading } = useAuth();
@@ -29,23 +27,7 @@ export default function ProfilePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [editingUsername, setEditingUsername] = useState(false);
-
-  // Cache user details for 24h, update only if changed
-  useEffect(() => {
-    if (!user || !isAuthenticated) return;
-    const cached = getCache(DETAILS_CACHE_KEY, DETAILS_CACHE_TTL);
-    const userData = user?.data || {};
-    if (
-      !cached ||
-      JSON.stringify(cached) !== JSON.stringify(userData)
-    ) {
-      setCache(DETAILS_CACHE_KEY, userData);
-    }
-  }, [user, isAuthenticated]);
-
-  // Use cached details if available
-  const cachedDetails = getCache(DETAILS_CACHE_KEY, DETAILS_CACHE_TTL);
-  const apiUser = cachedDetails || user?.data || {};
+  const apiUser = user?.data || {};
   const displayName = apiUser.username || "User";
   const email = apiUser.email || "";
   const joinedRaw = apiUser.created_at;
@@ -124,7 +106,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (authChecked && !isAuthenticated) {
-      localStorage.removeItem(DETAILS_CACHE_KEY);
       localStorage.removeItem(AVATAR_CACHE_KEY);
     }
   }, [isAuthenticated, authChecked]);
