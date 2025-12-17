@@ -1,8 +1,8 @@
 // app/layout.js
 import "./globals.css";
 import { AuthProvider } from "../context/authContext";
-import TrackExplorePage from "../components/TrackExplorePage.js";
-import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
+import UmamiPageView from "../components/UmamiPageView";
 
 export const metadata = {
   title: "Kapehan - Coffee Shop Finder",
@@ -12,18 +12,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const isProduction = process.env.NODE_ENV === "production";
-  console.log("production environment", isProduction);
+
   return (
     <html lang="en">
+      <head>
+        {isProduction && (
+          <Script
+            src="https://cloud.umami.is/script.js"
+            data-website-id="07ec39de-5c21-4f00-9ddb-9f987c805af7"
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
+
       <body className="font-whyte-regular antialiased">
         <AuthProvider>
+          {isProduction && <UmamiPageView />}
           {children}
-          {isProduction && (
-            <>
-              <Analytics mode="manual" />
-              <TrackExplorePage />
-            </>
-          )}{" "}
         </AuthProvider>
       </body>
     </html>
