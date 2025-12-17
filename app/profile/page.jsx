@@ -17,6 +17,7 @@ import { LuCoffee } from "react-icons/lu";
 import { useAuth } from "../../context/authContext";
 import NiceAvatar, { genConfig } from "react-nice-avatar";
 import { getCache, setCache } from "../utils/cacheUtils";
+import { getReviewsByUser } from "../../services/coffeeShopReviews";
 
 export default function ProfilePage() {
   const AVATAR_CACHE_KEY = "profile:avatarConfig";
@@ -43,6 +44,35 @@ export default function ProfilePage() {
     }
     setAvatarConfig(config);
   }, []);
+
+  // User reviews state
+  const [userReviews, setUserReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  // Fetch user reviews on mount (when authenticated)
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    let cancelled = false;
+    setReviewsLoading(true);
+
+    (async () => {
+      try {
+        const resp = await getReviewsByUser();
+        const data = resp?.data ?? resp;
+        if (!cancelled && Array.isArray(data)) {
+          setUserReviews(data);
+        }
+      } catch {
+        if (!cancelled) setUserReviews([]);
+      } finally {
+        if (!cancelled) setReviewsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user]);
 
   // Format helpers
   const formatDate = (dateString) =>
@@ -94,6 +124,7 @@ export default function ProfilePage() {
   const handleUpdateUsername = () => {
     if (newUsername.trim()) {
       // Placeholder for API call to update username
+      // TODO: Implement username update API call here
       setEditingUsername(false);
     }
   };
@@ -199,12 +230,12 @@ export default function ProfilePage() {
                     <h1 className="text-2xl md:text-4xl font-whyte-bold text-stone-900">
                       {displayName}
                     </h1>
-                    <button
+                    {/* <button
                       onClick={() => setShowSettings(true)}
                       className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
                     >
                       <FaCog className="text-stone-400 hover:text-stone-600 text-lg" />
-                    </button>
+                    </button> */}
                   </div>
                   <div className="space-y-2 text-sm text-stone-600">
                     {email && (
@@ -248,53 +279,64 @@ export default function ProfilePage() {
               </div>
             </motion.div>
 
-            {/* Recent Visits */}
+            {/* Reviewed Coffee Shop */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <h2 className="text-xl font-whyte-bold text-stone-900 mb-6">Recent Visits</h2>
-              {visitedShops.length > 0 ? (
+              <h2 className="text-xl font-whyte-bold text-stone-900 mb-6">Reviewed Coffee Shops</h2>
+              {reviewsLoading ? (
+                <div className="text-center py-12">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-stone-100 animate-pulse mb-4" />
+                  <p className="text-stone-600">Loading reviews…</p>
+                </div>
+              ) : userReviews.length > 0 ? (
                 <div className="space-y-3">
-                  {visitedShops.map((shop, index) => (
+                  {userReviews.map((review, index) => (
                     <motion.div
-                      key={shop.id || index}
+                      key={review.id || review._id || index}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
                       <Link
-                        href={`/explore/${(shop.name || "")
+                        href={`/explore/${(review.shop?.name || "")
                           .toLowerCase()
                           .replace(/[^a-z0-9]+/g, "-")
                           .replace(/(^-|-$)/g, "")}`}
                       >
                         <div className="flex gap-4 p-4 bg-stone-50 rounded-lg border border-stone-200 hover:border-amber-300 hover:bg-amber-50 transition-all">
                           <img
-                            src={shop.image || "/placeholder.svg?height=80&width=100"}
-                            alt={shop.name}
+                            src={review.image || "/placeholder.svg?height=80&width=100"}
+                            alt={review.name}
                             className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
                             <h3 className="font-whyte-bold text-stone-900 truncate">
-                              {shop.name}
+                              {review?.coffee_shop_name}
                             </h3>
-                            {shop.city && (
+                            {review.city && (
                               <p className="text-sm text-stone-600 flex items-center gap-1 mt-1">
                                 <FaMapMarkerAlt className="h-3 w-3 flex-shrink-0" />
-                                {formatCity(shop.city)}
+                                {formatCity(review.city)}
+                              </p>
+                            )}
+                                        {review.address && (
+                              <p className="text-sm text-stone-600 flex items-center gap-1 mt-1">
+                                <FaMapMarkerAlt className="h-3 w-3 flex-shrink-0" />
+                                {formatCity(review.address)}
                               </p>
                             )}
                           </div>
                           <div className="flex items-center gap-3 flex-shrink-0">
                             <div className="text-right">
-                              {shop.rating && (
+                              {review.rating && (
                                 <div className="flex items-center gap-1 justify-end">
                                   <FaStar className="text-yellow-400 h-4 w-4" />
                                   <span className="font-whyte-bold text-stone-800">
-                                    {shop.rating}
+                                    {review.rating}
                                   </span>
                                 </div>
                               )}
                               <p className="text-xs text-stone-500">
-                                {getTimeAgo(shop.visitedAt)}
+                                {getTimeAgo(review.createdAt || review.created_at)}
                               </p>
                             </div>
                           </div>
@@ -306,13 +348,13 @@ export default function ProfilePage() {
               ) : (
                 <div className="text-center py-12 bg-stone-50 rounded-lg border border-stone-200">
                   <LuCoffee className="mx-auto text-stone-300 mb-4 h-12 w-12" />
-                  <p className="text-stone-600 mb-4">No coffee shops visited yet</p>
+                  <p className="text-stone-600 mb-4">No reviewed coffee shops yet.</p>
                   <Link
                     href="/explore"
                     className="inline-flex items-center text-amber-700 font-whyte-bold hover:text-amber-800"
                   >
                     <LuCoffee className="mr-2 h-4 w-4" />
-                    Start Exploring
+                    Start Reviewing
                   </Link>
                 </div>
               )}
@@ -321,7 +363,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Settings Modal */}
+      {/* Settings Modal
       {showSettings && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -351,8 +393,9 @@ export default function ProfilePage() {
                     />
                     <button
                       onClick={handleUpdateUsername}
-                      className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg font-whyte-medium transition-colors"
+                      className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg font-whyte-medium transition-colors flex items-center gap-2"
                     >
+                      <FaEdit className="w-4 h-4" />
                       Save
                     </button>
                   </div>
@@ -361,9 +404,10 @@ export default function ProfilePage() {
                     <span className="text-stone-700">{displayName}</span>
                     <button
                       onClick={() => setEditingUsername(true)}
-                      className="text-amber-700 hover:text-amber-800"
+                      className="text-amber-700 hover:text-amber-800 flex items-center gap-1"
                     >
-                      <FaEdit />
+                      <FaEdit className="w-4 h-4" />
+                      Edit
                     </button>
                   </div>
                 )}
@@ -377,7 +421,7 @@ export default function ProfilePage() {
             </button>
           </motion.div>
         </motion.div>
-      )}
+      )} */}
 
       <Footer />
       <UserAccountModal

@@ -14,6 +14,7 @@ import { useState, useEffect, useRef } from "react";
 import LocationPermissionModal from "../components/LocationPermissionModal";
 import { getAnonLocation } from "../services/commonService";
 import { getFeaturedCoffeeShops } from "../services/coffeeShopService";
+import {getGeneralAnalytics} from '../services/commonService'
 
 const Page = () => {
   // Open the modal by default; it will auto-close if cached location is valid
@@ -23,6 +24,13 @@ const Page = () => {
   // Featured shops state (API-driven)
   const [featuredShops, setFeaturedShops] = useState([]);
   const [shopsLoading, setShopsLoading] = useState(true);
+
+  // General analytics state
+  const [analytics, setAnalytics] = useState({
+    cities: 0,
+    active_coffee_shops: 0,
+    reviews: 0,
+  });
 
   // Only keep interval; caching handled by LocationPermissionModal
   const REFRESH_INTERVAL = 1000 * 60 * 30; // 30 minutes
@@ -107,19 +115,42 @@ const Page = () => {
 
     (async () => {
       try {
-        const resp = await getFeaturedCoffeeShops({ limit: 4, sort: "rating:desc" });
-        const data = resp?.data ?? resp;
+        // Fetch featured shops and analytics in parallel
+        const [featuredResp, analyticsResp] = await Promise.all([
+          getFeaturedCoffeeShops({ limit: 4, sort: "rating:desc" }),
+          getGeneralAnalytics(),
+        ]);
+
+        // Featured shops
+        const featuredData = featuredResp?.data ?? featuredResp;
         const items =
-          (Array.isArray(data) && data) ||
-          (Array.isArray(data?.items) && data.items) ||
-          (Array.isArray(data?.docs) && data.docs) ||
-          (Array.isArray(resp?.items) && resp.items) ||
+          (Array.isArray(featuredData) && featuredData) ||
+          (Array.isArray(featuredData?.items) && featuredData.items) ||
+          (Array.isArray(featuredData?.docs) && featuredData.docs) ||
+          (Array.isArray(featuredResp?.items) && featuredResp.items) ||
           [];
         if (!cancelled) {
           setFeaturedShops(items);
         }
-      } catch (e) {
-        if (!cancelled) setFeaturedShops([]);
+
+        // Analytics
+        const analyticsData = analyticsResp?.data ?? analyticsResp;
+        if (!cancelled && analyticsData) {
+          setAnalytics({
+            cities: analyticsData.cities ?? 0,
+            active_coffee_shops: analyticsData.active_coffee_shops ?? 0,
+            reviews: analyticsData.reviews ?? 0,
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setFeaturedShops([]);
+          setAnalytics({
+            cities: 0,
+            active_coffee_shops: 0,
+            reviews: 0,
+          });
+        }
       } finally {
         if (!cancelled) setShopsLoading(false);
       }
@@ -181,7 +212,7 @@ const Page = () => {
                   transition={{ delay: 0.2 }}
                 >
                   <div className="text-xl sm:text-3xl md:text-4xl font-whyte-bold text-amber-700">
-                    500+
+                    {analytics.active_coffee_shops}
                   </div>
                   <div className="text-xs sm:text-sm font-whyte-medium text-stone-600 mt-1">
                     Coffee Shops
@@ -195,7 +226,7 @@ const Page = () => {
                   transition={{ delay: 0.3 }}
                 >
                   <div className="text-xl sm:text-3xl md:text-4xl font-whyte-bold text-amber-700">
-                    50K+
+                    {analytics.reviews}
                   </div>
                   <div className="text-xs sm:text-sm font-whyte-medium text-stone-600 mt-1">
                     Reviews
@@ -209,7 +240,7 @@ const Page = () => {
                   transition={{ delay: 0.4 }}
                 >
                   <div className="text-xl sm:text-3xl md:text-4xl font-whyte-bold text-amber-700">
-                    17
+                    {analytics.cities}
                   </div>
                   <div className="text-xs sm:text-sm font-whyte-medium text-stone-600 mt-1">
                     Cities

@@ -23,14 +23,17 @@ export default function ContactPage() {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    // Open user's email client with pre-filled fields
+    const mailto = `mailto:kapehan.platform@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+    )}`;
+    window.location.href = mailto;
 
-    setIsSubmitted(true)
-    setIsSubmitting(false)
+    setIsSubmitting(false);
+    setIsSubmitted(true);
     setFormData({ name: "", email: "", subject: "", message: "" })
 
     // Reset success message after 5 seconds
@@ -79,7 +82,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-whyte-bold text-stone-900">Email</h3>
-                    <p className="text-stone-600">hello@kapehan.com</p>
+                    <p className="text-stone-600">kapehan.platform@gmail.com</p>
                   </div>
                 </div>
 

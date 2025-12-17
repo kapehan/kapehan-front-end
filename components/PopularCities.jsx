@@ -46,6 +46,7 @@ const PopularCities = () => {
           const normalized = data.map(c => ({
             name: c.city_name ?? c.name ?? c.city ?? c.city_value,
             count: c.count ?? c.shop_count ?? 0,
+            image: c.image ?? c.city_image ?? undefined,
           })).filter(c => c.name)
           if (!cancelled) setCities(normalized)
           // Save to localStorage with timestamp
@@ -94,7 +95,7 @@ const PopularCities = () => {
             >
               <div className="aspect-w-16 aspect-h-9 h-32 sm:h-40 md:h-48 relative">
                 <Image
-                  src={`/placeholder.svg?height=300&width=400&text=${city.name.replace(" ", "+")}`}
+                  src={city.image ? city.image : `/placeholder.svg?height=300&width=400&text=${city.name.replace(" ", "+")}`}
                   alt={`${city.name} coffee shops`}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"

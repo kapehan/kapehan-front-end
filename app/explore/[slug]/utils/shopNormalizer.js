@@ -32,22 +32,26 @@ export const normalizeShop = (raw, slugFromRoute) => {
       }, {})
     : raw.openingHours || undefined;
 
-  const amenitiesArr = Array.isArray(raw.amenities)
-    ? raw.amenities.map((a) => String(a).toLowerCase())
-    : [];
+  let amenitiesArr = [];
+  if (Array.isArray(raw.amenities)) {
+    amenitiesArr = raw.amenities.map((a) => (typeof a === 'string' ? a.trim() : a)).filter(Boolean);
+  } else if (raw.amenities && typeof raw.amenities === 'object') {
+    amenitiesArr = Object.keys(raw.amenities).filter((k) => raw.amenities[k]);
+  }
+  const amenitiesArrLower = amenitiesArr.map((a) => String(a).toLowerCase());
   const normalizedAmenities = {
-    wifi: amenitiesArr.includes("wi-fi") || amenitiesArr.includes("wifi"),
-    parking: amenitiesArr.includes("parking"),
+    wifi: amenitiesArrLower.includes("wi-fi") || amenitiesArrLower.includes("wifi"),
+    parking: amenitiesArrLower.includes("parking"),
     outdoorSeating:
-      amenitiesArr.includes("outdoor seating") ||
-      amenitiesArr.includes("outdoor"),
+      amenitiesArrLower.includes("outdoor seating") || amenitiesArrLower.includes("outdoor"),
     petFriendly:
-      amenitiesArr.includes("pet-friendly") ||
-      amenitiesArr.includes("pet friendly"),
+      amenitiesArrLower.includes("pet-friendly") || amenitiesArrLower.includes("pet friendly"),
     wheelchairAccessible:
-      amenitiesArr.includes("wheelchair-accessible") ||
-      amenitiesArr.includes("wheelchair accessible") ||
-      amenitiesArr.includes("accessible"),
+      amenitiesArrLower.includes("wheelchair-accessible") || amenitiesArrLower.includes("wheelchair accessible") || amenitiesArrLower.includes("accessible"),
+    airConditioning:
+      amenitiesArrLower.includes("air conditioning") || amenitiesArrLower.includes("airconditioning") || amenitiesArrLower.includes("aircon"),
+    powerOutlets:
+      amenitiesArrLower.includes("power outlets") || amenitiesArrLower.includes("power outlet") || amenitiesArrLower.includes("outlets") || amenitiesArrLower.includes("outlet"),
   };
 
   const idValue = raw.id || raw._id || createSlug(raw.name || "shop");
@@ -71,7 +75,7 @@ export const normalizeShop = (raw, slugFromRoute) => {
     paymentMethods: paymentMethods.length ? paymentMethods : ["Cash"],
     openingHours: openingHoursObj,
     amenities: normalizedAmenities,
-    amenities: normalizedAmenities,
+    amenitiesArray: amenitiesArr,
 
     openNow: typeof raw.isOpen === "boolean" ? raw.isOpen : undefined,
   };
