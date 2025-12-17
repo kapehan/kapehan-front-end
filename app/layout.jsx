@@ -27,7 +27,6 @@ export default function RootLayout({ children }) {
 
       <body className="font-whyte-regular antialiased">
         <AuthProvider>
-          {isProduction && <UmamiPageView />}
           {children}
         </AuthProvider>
       </body>
