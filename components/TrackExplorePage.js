@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { track } from "@vercel/analytics";
 
 const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const trackedInMemory = new Set();
 
 function shouldTrack(pathname) {
   return pathname && (pathname === "/" || pathname === "/explore" || pathname.startsWith("/explore/"));
@@ -16,40 +17,37 @@ export default function TrackExplorePage() {
   useEffect(() => {
     if (!pathname || !shouldTrack(pathname)) return;
 
-    // Check localStorage first
+    // Always check localStorage for expiry
     let stored = {};
     try {
       stored = JSON.parse(localStorage.getItem("trackedPagesWithExpiry") || "{}");
-    } catch {
-      stored = {};
-    }
-
+    } catch {}
     const lastTracked = Number(stored[pathname]) || 0;
     const now = Date.now();
 
     if (now - lastTracked < EXPIRY_MS) {
       console.log(`⏱ Already tracked recently (${new Date(lastTracked).toLocaleString()}), skipping`);
-      return; // already tracked within 24 hours
+      return;
     }
 
-    // Wait for Analytics script to be ready
-    const waitForAnalytics = setInterval(() => {
-      if (typeof track === "function") {
-        try {
-          track("explore_page_visit", { path: pathname });
-          console.log("✅ Analytics event tracked:", pathname);
+    // Prevent double tracking in memory (per session, per effect run)
+    if (trackedInMemory.has(pathname)) {
+      console.log("⚠️ Already tracked in memory for this session, skipping");
+      return;
+    }
 
-          stored[pathname] = now;
-          localStorage.setItem("trackedPagesWithExpiry", JSON.stringify(stored));
-
-          clearInterval(waitForAnalytics); // stop checking
-        } catch (err) {
-          console.error("❌ Failed to track Analytics event:", err);
-        }
+    // Actually track
+    if (typeof track === "function") {
+      try {
+        console.log("🚀 Sending analytics event for", pathname);
+        track("explore_page_visit", { path: pathname });
+        stored[pathname] = now;
+        localStorage.setItem("trackedPagesWithExpiry", JSON.stringify(stored));
+        trackedInMemory.add(pathname);
+      } catch (err) {
+        console.error("❌ Failed to track Analytics event:", err);
       }
-    }, 200);
-
-    return () => clearInterval(waitForAnalytics);
+    }
   }, [pathname]);
 
   return null;
