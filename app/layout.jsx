@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   const isProduction = process.env.NODE_ENV === "production";
-
+  console.log("production environment", isProduction)
   return (
     <html lang="en">
       <body className="font-whyte-regular antialiased">
