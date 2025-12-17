@@ -1,7 +1,6 @@
 // app/layout.js
 import "./globals.css";
 import { AuthProvider } from "../context/authContext";
-import { Analytics } from '@vercel/analytics/next';
 import TrackExplorePage from '../components/TrackExplorePage.js';
 
 export const metadata = {
@@ -18,12 +17,7 @@ export default function RootLayout({ children }) {
       <body className="font-whyte-regular antialiased">
         <AuthProvider>
           {children}
-          {isProduction && (
-            <>
-              <Analytics mode="manual" />
-              <TrackExplorePage />
-            </>
-          )}
+          {isProduction && <TrackExplorePage />}
         </AuthProvider>
       </body>
     </html>
