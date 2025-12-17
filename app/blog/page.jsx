@@ -77,14 +77,19 @@ export default function BlogPage() {
       <Navigation />
 
       {/* Hero Section - Mobile First */}
-      <div className="pt-20 bg-gradient-to-br from-stone-100 to-amber-50">
-        <div className="container mx-auto px-4 md:px-6 py-12 md:py-16 lg:py-24">
+      <div className="pt-16 sm:pt-20 bg-gradient-to-br from-stone-100 to-amber-50">
+        <div className="container mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 lg:py-24">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <h1 className="text-3xl md:text-4xl lg:text-6xl font-whyte-bold text-stone-800 leading-tight mb-4 md:mb-6">
-                <span className="bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent">Blog</span>
+              <h1
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-whyte-bold text-stone-800 leading-[1.1] mb-3 sm:mb-4 md:mb-6 break-words"
+                style={{ wordBreak: 'break-word', hyphens: 'auto' }}
+              >
+                <span className="bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent block w-full">
+                  Blog
+                </span>
               </h1>
-              <p className="text-lg md:text-xl lg:text-2xl text-stone-600 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-stone-600 leading-relaxed px-1 sm:px-0">
                 Discover the latest in coffee culture, shop reviews, and brewing tips
               </p>
             </motion.div>

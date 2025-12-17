@@ -1,9 +1,37 @@
 import SocialIcons from "./SocialIcons"
 import Link from "next/link"
 import { FaMapMarkerAlt, FaEnvelope, FaPhone } from "react-icons/fa"
+import { useEffect, useState } from "react"
+import {getCache} from "../app/utils/cacheUtils"
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
+  const [popularCities, setPopularCities] = useState([])
+
+  useEffect(() => {
+    // Try to get city_shop_counts from getCache utility
+    let cached = null
+    if (getCache && typeof getCache === 'function') {
+      cached = getCache("city_shop_counts")
+    }
+    // Fallback: try to read from localStorage directly if getCache fails
+    if (!cached) {
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem("city_shop_counts") : null
+        if (raw) {
+          cached = JSON.parse(raw)
+        }
+      } catch {}
+    }
+    if (cached && Array.isArray(cached.data)) {
+      // Sort by count descending, take top 5
+      const sorted = [...cached.data]
+        .filter(c => c.name)
+        .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+        .slice(0, 5)
+      setPopularCities(sorted)
+    }
+  }, [])
 
   return (
     <footer className="bg-white border-t border-gray-200">
@@ -46,16 +74,29 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-whyte-bold text-[#5F4429] mb-4">Popular Cities</h3>
             <ul className="space-y-2">
-              {["Makati", "BGC", "Quezon City", "Pasig", "Manila"].map((city) => (
-                <li key={city}>
-                  <Link
-                    href={`/explore?city=${city}`}
-                    className="text-gray-600 hover:text-amber-600 transition-colors text-sm font-poppins"
-                  >
-                    {city}
-                  </Link>
-                </li>
-              ))}
+              {popularCities.length > 0 ? (
+                popularCities.map((city) => (
+                  <li key={city.name}>
+                    <Link
+                      href={`/explore?city=${encodeURIComponent(city.name)}`}
+                      className="text-gray-600 hover:text-amber-600 transition-colors text-sm font-poppins"
+                    >
+                      {city.name}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                ["Makati", "BGC", "Quezon City", "Pasig", "Manila"].map((city) => (
+                  <li key={city}>
+                    <Link
+                      href={`/explore?city=${city}`}
+                      className="text-gray-600 hover:text-amber-600 transition-colors text-sm font-poppins"
+                    >
+                      {city}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
 

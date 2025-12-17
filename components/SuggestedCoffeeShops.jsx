@@ -45,7 +45,7 @@ export default function SuggestedCoffeeShops({
   if (loading || items.length === 0) return null;
 
   return (
-    <div className="mb-6 md:mb-10">
+    <div className="mt-10 sm:mt-8 md:mt-10 mb-6 md:mb-10">
       <div className="text-center mb-6 md:mb-8">
         <h2 className="text-2xl md:text-3xl font-whyte-bold text-stone-900 mb-2 flex items-center justify-center">
           <div className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-stone-100 flex items-center justify-center mr-3">

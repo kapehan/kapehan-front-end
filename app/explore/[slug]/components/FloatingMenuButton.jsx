@@ -1,37 +1,38 @@
 "use client";
-import { LuCoffee } from "react-icons/lu";
+import { useState } from "react";
+import { IoMenu } from "react-icons/io5";
 
 export default function FloatingMenuButton({ onClick }) {
-	return (
-		<button
-			type="button"
-			aria-label="Open menu"
-			onClick={onClick}
-			className="
-        group inline-flex items-center rounded-full
-        bg-white border border-amber-600 text-amber-700
-        shadow-lg px-2.5 md:px-4 py-1.5 md:py-2
-        transition-all duration-200 hover:shadow-xl
-        focus:outline-none focus:ring-2 focus:ring-amber-500
-        cursor-pointer
-      "
-		>
-			{/* match navigation button circle/icon sizing */}
-			<span className="inline-flex items-center justify-center bg-amber-600 text-white rounded-full w-6 h-6 md:w-7 md:h-7 leading-none">
-				<LuCoffee className="block w-2.5 h-2.5 md:w-3 md:h-3" />
-			</span>
+  const [showTooltip, setShowTooltip] = useState(false);
 
-			<span
-				className="
-          hidden md:inline-block overflow-hidden
-          opacity-0 group-hover:opacity-100
-          max-w-0 group-hover:max-w-[110px]
-          transition-[opacity,max-width] duration-200 ease-out
-          font-whyte-medium text-sm whitespace-nowrap ml-2
+  return (
+    <div className="relative flex items-center">
+      <button
+        type="button"
+        aria-label="Open menu"
+        onClick={onClick}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onFocus={() => setShowTooltip(true)}
+        onBlur={() => setShowTooltip(false)}
+        className="
+          group inline-flex items-center rounded-full
+          text-amber-700
+          px-3 md:px-4 py-2 md:py-2
+          transition-all duration-200
+          focus:outline-none focus:ring-2 focus:ring-amber-500
+          cursor-pointer
+          min-h-[44px] min-w-[44px]
+          bg-transparent
         "
-			>
-				Menu
-			</span>
-		</button>
-	);
+      >
+        <IoMenu className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+      {showTooltip && (
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-10 px-3 py-1 rounded bg-stone-800 text-white text-xs font-whyte-medium shadow-lg whitespace-nowrap">
+          Menu
+        </div>
+      )}
+    </div>
+  );
 }
