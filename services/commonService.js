@@ -20,6 +20,16 @@ export const getVibes = async () => {
   }
 };
 
+export const getGeneralAnalytics = async () => {
+  try {
+    const response = await axiosInstance.get("/analytics");
+    return response.data.data; // Return the data from the response
+  } catch (error) {
+    console.error("Error fetching General Analytics:", error);
+    throw error; // Re-throw the error for further handling
+  }
+};
+
 export const getAmenities = async () => {
   try {
     const response = await axiosInstance.get("/amenities");
@@ -39,6 +49,7 @@ export const getCityShopCounts = async () => {
     throw error; // Re-throw the error for further handling
   }
 };
+
 
 // Updated: accept payload and POST to /user/anon
 export const getAnonLocation = async (payload) => {
@@ -71,4 +82,14 @@ export const autoComplete = async (query = {}) => {
 
   const response = await axiosInstance.get("/places/autocomplete", { params });
   return response.data.data;
+};
+
+export const createCoffeeShopReports = async (id, data = {}) => {
+  try {
+    const response = await axiosInstance.post(`/coffee-shop/${id}/report`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating coffee shop report:", error);
+    throw error;
+  }
 };

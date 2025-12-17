@@ -30,6 +30,7 @@ import {
   FaCalendarCheck,
 } from "react-icons/fa";
 import { IoInformation } from "react-icons/io5";
+import { LuCoffee } from "react-icons/lu";
 
 import Navigation from "../../../components/navigation";
 import RatingModal from "../../../components/rating-modal";
@@ -39,14 +40,19 @@ import Footer from "../../../components/Footer";
 import UserAccountModal from "../../../components/UserAccountModal";
 import MenuModal from "../../../components/MenuModal";
 import FloatingNavigationButton from "./components/FloatingNavigationButton";
-import { getCoffeeShopById,getFeaturedCoffeeShops } from "../../../services/coffeeShopService";
+import FloatingMenuButton from "./components/FloatingMenuButton";
+import FloatingReportModal, {
+  FloatingReportButton,
+} from "./components/FloatingReport"; // <-- import the modal
+import {
+  getCoffeeShopById,
+  getFeaturedCoffeeShops,
+} from "../../../services/coffeeShopService";
 import ShopDetailSkeleton from "./loading";
 import { useAuth } from "../../../context/authContext";
-import FloatingMenuButton from "./components/FloatingMenuButton";
 import { normalizeShop } from "./utils/shopNormalizer";
 import { toTitleCase } from "./utils/slugUtils";
 import { isCurrentlyOpen } from "./utils/timeUtils";
-import { LuCoffee } from "react-icons/lu";
 import SuggestedCoffeeShops from "../../../components/SuggestedCoffeeShops";
 
 export default function CoffeeShopDetailPage() {
@@ -59,6 +65,7 @@ export default function CoffeeShopDetailPage() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false); // <-- add state
   const [suggestedShops, setSuggestedShops] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [reviewVersion, setReviewVersion] = useState(0);
@@ -153,14 +160,25 @@ export default function CoffeeShopDetailPage() {
     );
   }
 
-  const openNow = shop.openNow !== undefined ? shop.openNow : isCurrentlyOpen(shop.openingHours);
+  const openNow =
+    shop.openNow !== undefined
+      ? shop.openNow
+      : isCurrentlyOpen(shop.openingHours);
 
   const amenityIcons = {
     wifi: { icon: FaWifi, label: "Wi‑Fi" },
     parking: { icon: FaCar, label: "Parking" },
-    outdoorSeating: { icon: FaLeaf, label: "Outdoor Seating" },
-    petFriendly: { icon: FaDog, label: "Pet Friendly" },
-    wheelchairAccessible: { icon: FaWheelchair, label: "Accessible" },
+    outdoorseating: { icon: FaLeaf, label: "Outdoor Seating" },
+    petfriendly: { icon: FaDog, label: "Pet Friendly" },
+    wheelchairaccessible: { icon: FaWheelchair, label: "Accessible" },
+    airconditioning: { icon: FaSnowflake, label: "Air Conditioning" },
+    "air conditioning": { icon: FaSnowflake, label: "Air Conditioning" },
+    aircon: { icon: FaSnowflake, label: "Air Conditioning" },
+    poweroutlets: { icon: FaPlug, label: "Power Outlets" },
+    "power outlets": { icon: FaPlug, label: "Power Outlets" },
+    "power outlet": { icon: FaPlug, label: "Power Outlets" },
+    outlets: { icon: FaPlug, label: "Power Outlets" },
+    outlet: { icon: FaPlug, label: "Power Outlets" },
   };
 
   const CuratedRating = ({ icon: Icon, label, rating, notes }) => (
@@ -284,7 +302,7 @@ export default function CoffeeShopDetailPage() {
                   </span>
                 </div>
 
-                <button
+                {/* <button
                   onClick={handleFollowClick}
                   className="flex items-center bg-white/15 backdrop-blur-sm hover:bg-white/25 px-3 md:px-4 py-2 rounded-full transition-colors"
                 >
@@ -296,7 +314,7 @@ export default function CoffeeShopDetailPage() {
                   <span className="text-white font-whyte-medium text-sm md:text-base">
                     {isFollowing ? "Following" : "Follow"}
                   </span>
-                </button>
+                </button> */}
               </div>
             </motion.div>
           </div>
@@ -440,22 +458,38 @@ export default function CoffeeShopDetailPage() {
                   Amenities
                 </h3>
                 <div className="space-y-2">
-                  {shop.amenities &&
-                    Object.entries(shop.amenities)
-                      .filter(([key, value]) => value && amenityIcons[key])
+                  {(() => {
+                    let amenityArr = [];
+                    if (Array.isArray(shop.amenities)) {
+                      amenityArr = shop.amenities;
+                    } else if (
+                      shop.amenities &&
+                      typeof shop.amenities === "object"
+                    ) {
+                      amenityArr = Object.keys(shop.amenities).filter(
+                        (key) => shop.amenities[key]
+                      );
+                    }
+
+                    return amenityArr
+                      .map((a) =>
+                        typeof a === "string" ? a.trim().toLowerCase() : a
+                      )
+                      .filter((a) => amenityIcons[a])
                       .slice(0, 3)
-                      .map(([key, value]) => {
-                        const { icon: Icon, label } = amenityIcons[key];
+                      .map((a) => {
+                        const { icon: Icon, label } = amenityIcons[a];
                         return (
                           <div
-                            key={key}
+                            key={a}
                             className="flex items-center text-xs text-stone-700"
                           >
                             <Icon className="h-3 w-3 mr-2 text-stone-500" />
                             {label}
                           </div>
                         );
-                      })}
+                      });
+                  })()}
                 </div>
               </div>
 
@@ -548,12 +582,29 @@ export default function CoffeeShopDetailPage() {
         </div>
       </div>
 
-      {/* Floating buttons stacked at bottom-right */}
-      <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 flex flex-col items-center gap-2">
-        {shop?.latitude && shop?.longitude && (
-          <FloatingNavigationButton latitude={shop.latitude} longitude={shop.longitude} />
-        )}
-        <FloatingMenuButton onClick={() => setShowMenuModal(true)} />
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 md:right-6 md:bottom-6 md:left-auto z-20 pointer-events-none">
+        <div
+          className="flex flex-row md:flex-col items-center justify-center md:items-end gap-3 
+                  pointer-events-auto border border-amber-700 rounded-3xl p-2 
+                  text-amber-700 bg-white/95 backdrop-blur-md shadow-lg"
+        >
+          {shop?.latitude && shop?.longitude && (
+            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+              <FloatingNavigationButton
+                latitude={shop.latitude}
+                longitude={shop.longitude}
+              />
+            </div>
+          )}
+
+          <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+            <FloatingMenuButton onClick={() => setShowMenuModal(true)} />
+          </div>
+
+          <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+            <FloatingReportButton onClick={() => setShowReportModal(true)} />
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
@@ -572,8 +623,18 @@ export default function CoffeeShopDetailPage() {
         onLogin={handleLoginSuccess}
       />
       {showMenuModal && (
-        <MenuModal shop={shop} slug={shopSlug} onClose={() => setShowMenuModal(false)} />
+        <MenuModal
+          shop={shop}
+          slug={shopSlug}
+          onClose={() => setShowMenuModal(false)}
+        />
       )}
+      <FloatingReportModal
+        open={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        shopName={shop.name}
+        shopId={shop._id}
+      />
       <Footer />
     </div>
   );

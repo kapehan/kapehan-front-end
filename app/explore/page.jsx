@@ -383,7 +383,7 @@ export default function ExplorePage() {
       />
 
       {/* Sticky Header - responsive */}
-      <div className="pt-12 bg-stone-50 border-b border-stone-200 sticky top-12 z-30">
+      <div className="pt-2 bg-stone-50 border-b border-stone-200 sticky top-12 z-30">
         <div className="container mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4">
           <div className="flex flex-col gap-2.5 sm:gap-3 md:gap-4">
             {/* Search and Controls Row - responsive flex */}
