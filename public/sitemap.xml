@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://www.kapehan.ph/</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/find</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/blog</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/about</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/contact</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/list</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore?city=Makati</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore?city=BGC</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore?city=Quezon%20City</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore?city=Pasig</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.kapehan.ph/explore?city=Manila</loc>
+  <lastmod>2025-12-17T21:12:55+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+
+
+</urlset>
