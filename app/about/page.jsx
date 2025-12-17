@@ -84,7 +84,7 @@ export default function AboutPage() {
             <div className="md:w-1/2 relative h-[400px] rounded-xl overflow-hidden shadow-lg">
               <Image
                 src="/placeholder.svg?height=800&width=1200"
-                alt="BrewFinder team"
+                alt="Kapehan team"
                 fill
                 className="object-cover"
               />
@@ -160,7 +160,7 @@ export default function AboutPage() {
               Meet Our Team
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              The passionate coffee lovers behind BrewFinder.
+              The passionate coffee lovers behind Kapehan.
             </p>
           </div>
 

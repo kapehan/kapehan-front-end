@@ -29,6 +29,8 @@ import {
   FaSnowflake,
   FaCalendarCheck,
 } from "react-icons/fa";
+import { IoInformation } from "react-icons/io5";
+
 import Navigation from "../../../components/navigation";
 import RatingModal from "../../../components/rating-modal";
 import ReviewSection from "../../../components/ReviewSection";
@@ -309,10 +311,9 @@ export default function CoffeeShopDetailPage() {
             <div className="p-4 md:p-8">
               <h2 className="text-base sm:text-lg md:text-xl font-whyte-bold text-stone-900 mb-4 flex items-center gap-2 md:gap-3">
                 <span className="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 md:w-9 md:h-9 rounded-full bg-stone-100">
-                  <LuCoffee className="text-stone-700 text-sm md:text-base" />
+                  <IoInformation className="text-stone-700 text-sm md:text-base" />
                 </span>
                 <span className="flex items-baseline gap-1 min-w-0">
-                  <span className="font-whyte-medium">About</span>
                   <span className="font-whyte-bold truncate max-w-[70vw] sm:max-w-[55vw] md:max-w-[42vw] lg:max-w-[36vw] xl:max-w-[32vw]">
                     {shop.name}
                   </span>
