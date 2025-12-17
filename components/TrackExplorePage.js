@@ -17,7 +17,13 @@ export default function TrackExplorePage() {
   useEffect(() => {
     if (!pathname || !shouldTrack(pathname)) return;
 
-    // Always check localStorage for expiry
+    // Prevent double tracking in memory (per session)
+    if (trackedInMemory.has(pathname)) {
+      console.log("⚠️ Already tracked in memory, skipping", pathname);
+      return;
+    }
+
+    // Check localStorage for expiry
     let stored = {};
     try {
       stored = JSON.parse(localStorage.getItem("trackedPagesWithExpiry") || "{}");
@@ -26,23 +32,33 @@ export default function TrackExplorePage() {
     const now = Date.now();
 
     if (now - lastTracked < EXPIRY_MS) {
-      console.log(`⏱ Already tracked recently (${new Date(lastTracked).toLocaleString()}), skipping`);
+      console.log(`⏱ Already tracked recently (${new Date(lastTracked).toLocaleString()}), skipping`, pathname);
+      trackedInMemory.add(pathname);
       return;
     }
 
-    // Prevent double tracking in memory (per session, per effect run)
-    if (trackedInMemory.has(pathname)) {
-      console.log("⚠️ Already tracked in memory for this session, skipping");
-      return;
+    // Determine event name
+    let eventName = "page_visit";
+
+    if (pathname === "/") {
+      eventName = "home_page_visit";
+    } else if (pathname === "/explore") {
+      eventName = "explore_index_visit";
+    } else if (pathname.startsWith("/explore/")) {
+      const slug = pathname.replace("/explore/", "");
+      eventName = `explore_page_visit:${slug}`; // Event name now includes slug
     }
 
-    // Actually track
+    // Track the event
     if (typeof track === "function") {
       try {
-        console.log("🚀 Sending analytics event for", pathname);
-        track("explore_page_visit", { path: pathname });
+        console.log("🚀 Sending analytics event:", eventName);
+        track(eventName, { path: pathname });
+
+        // Save to localStorage
         stored[pathname] = now;
         localStorage.setItem("trackedPagesWithExpiry", JSON.stringify(stored));
+
         trackedInMemory.add(pathname);
       } catch (err) {
         console.error("❌ Failed to track Analytics event:", err);
