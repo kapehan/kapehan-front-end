@@ -41,8 +41,7 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-whyte-bold text-[#5F4429] mb-4">Kapehan</h3>
             <p className="text-sm font-poppins text-gray-600 mb-4">
-              We index the unique coffee shops in Metro Manila to help you find the best local spots for your caffeine
-              fix.
+              A growing index of local coffee shops across the Philippines, built to make finding good coffee easier.
             </p>
             <SocialIcons />
           </div>
@@ -111,10 +110,10 @@ const Footer = () => {
               <li className="flex items-center">
                 <FaEnvelope className="text-amber-600 mr-2" />
                 <a
-                  href="mailto:hello@kapehan.com"
+                  href="mailto:kapehan.platform@gmail.com"
                   className="text-sm font-poppins text-gray-600 hover:text-amber-600 transition-colors"
                 >
-                  hello@kapehan.com
+                  kapehan.platform@gmail.com
                 </a>
               </li>
               <li className="flex items-center">

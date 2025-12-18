@@ -181,13 +181,12 @@ const Page = () => {
               transition={{ duration: 0.8 }}
             >
               <p className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-whyte-bold text-stone-900 leading-tight sm:leading-tight md:leading-[1.1] mb-4 sm:mb-6">
-                Discover Metro Manila's{" "}
-                <span className="text-amber-700">Best Coffee</span>
+                Discover local coffee shops, {" "}
+                <span className="text-amber-700">wherever you are.</span>
               </p>
 
               <p className="text-base sm:text-lg md:text-xl font-whyte text-stone-600 leading-relaxed mb-6 sm:mb-8 max-w-3xl mx-auto px-2">
-                From hidden gems to iconic brews, find your perfect coffee
-                experience with Kapehan
+                From hidden gems to iconic brews, find spots made for every kind of coffee day.
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 mb-8">

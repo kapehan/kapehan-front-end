@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Navigation from "../../components/navigation";
@@ -18,8 +19,12 @@ import { useAuth } from "../../context/authContext";
 import NiceAvatar, { genConfig } from "react-nice-avatar";
 import { getCache, setCache } from "../utils/cacheUtils";
 import { getReviewsByUser } from "../../services/coffeeShopReviews";
+import { findUser } from '../../services/commonService';
 
 export default function ProfilePage() {
+  const params = useParams();
+  const slug = params?.slug;
+
   const AVATAR_CACHE_KEY = "profile:avatarConfig";
   const AVATAR_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -28,11 +33,11 @@ export default function ProfilePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [editingUsername, setEditingUsername] = useState(false);
-  const apiUser = user?.data || {};
-  const displayName = apiUser.username || "User";
-  const email = apiUser.email || "";
-  const joinedRaw = apiUser.created_at;
-  const visitedShops = Array.isArray(apiUser.visitedShops) ? apiUser.visitedShops : [];
+
+  // User data state (for viewing other users)
+  const [profileUser, setProfileUser] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileNotFound, setProfileNotFound] = useState(false);
 
   // Avatar config caching
   const [avatarConfig, setAvatarConfig] = useState(null);
@@ -49,30 +54,96 @@ export default function ProfilePage() {
   const [userReviews, setUserReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  // Fetch user reviews on mount (when authenticated)
+  // Main logic for slug/profile fetch
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    let cancelled = false;
-    setReviewsLoading(true);
+    // If not authenticated, show modal and skip fetch
+    if (!loading && !isAuthenticated) {
+      setShowAccountModal(true);
+      setProfileUser(null);
+      setProfileNotFound(false);
+      setProfileLoading(false);
+      return;
+    }
 
-    (async () => {
-      try {
-        const resp = await getReviewsByUser();
-        const data = resp?.data ?? resp;
-        if (!cancelled && Array.isArray(data)) {
-          setUserReviews(data);
-        }
-      } catch {
-        if (!cancelled) setUserReviews([]);
-      } finally {
-        if (!cancelled) setReviewsLoading(false);
+    // If authenticated, fetch user by slug
+    if (!loading && isAuthenticated) {
+      let cancelled = false;
+      setProfileLoading(true);
+      setProfileNotFound(false);
+
+      // If logged-in user matches slug, use local user data
+      if (
+        user &&
+        (user?.username === slug || user?.data?.username === slug)
+      ) {
+        setProfileUser(user?.data || user);
+        setProfileLoading(false);
+        setProfileNotFound(false);
+        return;
       }
-    })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, user]);
+      // Otherwise, fetch user by slug
+      (async () => {
+        try {
+          const found = await findUser(slug);
+          if (!cancelled && found) {
+            setProfileUser(found);
+            setProfileNotFound(false);
+          } else if (!cancelled) {
+            setProfileUser(null);
+            setProfileNotFound(true);
+          }
+        } catch {
+          if (!cancelled) {
+            setProfileUser(null);
+            setProfileNotFound(true);
+          }
+        } finally {
+          if (!cancelled) setProfileLoading(false);
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [slug, isAuthenticated, loading, user]);
+
+  // Fetch user reviews on mount (when authenticated and viewing own profile)
+  useEffect(() => {
+    if (
+      !profileUser ||
+      !profileUser.username ||
+      (isAuthenticated && (user?.username === slug || user?.data?.username === slug))
+    ) {
+      // Only fetch reviews for own profile
+      if (!isAuthenticated || !user) return;
+      let cancelled = false;
+      setReviewsLoading(true);
+
+      (async () => {
+        try {
+          const resp = await getReviewsByUser();
+          const data = resp?.data ?? resp;
+          if (!cancelled && Array.isArray(data)) {
+            setUserReviews(data);
+          }
+        } catch {
+          if (!cancelled) setUserReviews([]);
+        } finally {
+          if (!cancelled) setReviewsLoading(false);
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      // For other users, you may want to implement getReviewsByUser(slug) if available
+      setUserReviews([]);
+      setReviewsLoading(false);
+    }
+  }, [isAuthenticated, user, profileUser, slug]);
 
   // Format helpers
   const formatDate = (dateString) =>
@@ -109,10 +180,10 @@ export default function ProfilePage() {
 
   // Sync editable username
   useEffect(() => {
-    setNewUsername(displayName);
-  }, [displayName]);
+    setNewUsername(profileUser?.username || "");
+  }, [profileUser]);
 
-  // Auto open login modal once auth is loading
+  // Auto open login/register modal if unauthenticated and not loading
   useEffect(() => {
     if (!loading && !isAuthenticated) setShowAccountModal(true);
   }, [loading, isAuthenticated]);
@@ -141,8 +212,8 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, authChecked]);
 
-  // ✅ Show loader first while auth is loading
-  if (loading) {
+  // Show loader while loading
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen bg-white">
         <Navigation />
@@ -159,38 +230,53 @@ export default function ProfilePage() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  // If not authenticated, show only modal
+  if (!isAuthenticated) {
     return (
       <>
-        <div className="min-h-screen bg-white">
-          <Navigation />
-          <div className="container mx-auto px-4 py-20 text-center">
-            <div className="max-w-md mx-auto">
-              <LuCoffee className="mx-auto text-stone-300 mb-8 h-16 w-16" />
-              <h1 className="text-2xl font-whyte-bold text-stone-900 mb-4">
-                Sign In to Your Profile
-              </h1>
-              <p className="text-stone-600 mb-8">
-                Access your profile, view your coffee shop visits, and manage your preferences.
-              </p>
-              <button
-                onClick={() => setShowAccountModal(true)}
-                className="bg-amber-700 text-white px-8 py-3 rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors"
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-          <Footer />
-        </div>
+        <Navigation />
         <UserAccountModal
-          show={showAccountModal}
+          show={true}
           onClose={() => setShowAccountModal(false)}
-          onLogin={handleLoginSuccess}
+          onLogin={() => setShowAccountModal(false)}
         />
       </>
     );
   }
+
+  // If authenticated and user not found, show not found
+  if (profileNotFound) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navigation />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="max-w-md mx-auto">
+            <LuCoffee className="mx-auto text-stone-300 mb-8 h-16 w-16" />
+            <h1 className="text-2xl font-whyte-bold text-stone-900 mb-4">
+              User Not Found
+            </h1>
+            <p className="text-stone-600 mb-8">
+              The user you are looking for does not exist.
+            </p>
+            <Link
+              href="/explore"
+              className="bg-amber-700 text-white px-8 py-3 rounded-lg font-whyte-bold hover:bg-amber-800 transition-colors"
+            >
+              Back to Explore
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Use profileUser for display
+  const apiUser = profileUser || {};
+  const displayName = apiUser.username || "User";
+  const email = apiUser.email || "";
+  const joinedRaw = apiUser.created_at;
+  const visitedShops = Array.isArray(apiUser.visitedShops) ? apiUser.visitedShops : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -238,12 +324,7 @@ export default function ProfilePage() {
                     </button> */}
                   </div>
                   <div className="space-y-2 text-sm text-stone-600">
-                    {email && (
-                      <div className="flex items-center gap-2">
-                        <FaEnvelope className="h-4 w-4 text-stone-400" />
-                        <span>{email}</span>
-                      </div>
-                    )}
+           
                     {apiUser.city && (
                       <div className="flex items-center gap-2">
                         <FaMapMarkerAlt className="h-4 w-4 text-stone-400" />
