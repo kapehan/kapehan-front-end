@@ -9,14 +9,14 @@ import Footer from "../../components/Footer";
 const teamMembers = [
   {
     name: "Mark Lester Caletina",
-    role: "Founder & CEO",
-    bio: "A guy who likes coffee his coffee sweet.",
+    role: "Founder",
+    bio: "Powered by caffeine and bad Google Maps searches. Started Kapehan after realizing finding a coffee shop shouldn’t be this complicated.",
     image: "/placeholder.svg?height=300&width=300",
   },
   {
     name: "Jonas Tulang",
-    role: "Co Founder & Coffee Specialist",
-    bio: "A guy who likes coffee his coffee sweet.",
+    role: "Co Founder",
+    bio: "Also drinks coffee. Likes things clean, simple, and useful. Helped build Kapehan so finding a coffee shop doesnt feel like a research paper.",
     image: "/placeholder.svg?height=300&width=300",
   },
 ];
@@ -70,15 +70,9 @@ export default function AboutPage() {
                 hanging out with friends.
               </p>
               <p className="text-gray-600 mb-4 leading-relaxed">
-                We realized it wasn’t easy to find the perfect spot, so we
-                created Kapehan — a place to help people discover coffee shops
+                We realized it wasn't easy to find the perfect spot, so we
+                created Kapehan, a place to help people discover coffee shops
                 that match their needs.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                Since we started in 2025, we’ve grown to feature many coffee
-                shops across the Philippines, all personally checked and
-                reviewed by our team. Our goal is simple: to help coffee lovers
-                find their perfect cup, every time.
               </p>
             </div>
             <div className="md:w-1/2 relative h-[400px] rounded-xl overflow-hidden shadow-lg">

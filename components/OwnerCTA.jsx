@@ -19,7 +19,7 @@ const OwnerCTA = () => {
               Grow Your Coffee Business
             </h2>
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-600 max-w-2xl mx-auto font-whyte px-2">
-              Join Kapehan and connect with coffee lovers across Metro Manila. It's completely free and takes just 5
+              Join Kapehan and connect with coffee lovers across the Philippines. It's completely free and takes just 5
               minutes to get started.
             </p>
           </motion.div>
@@ -45,7 +45,7 @@ const OwnerCTA = () => {
                   Reach Coffee Enthusiasts
                 </h3>
                 <p className="text-xs sm:text-sm md:text-base text-stone-600">
-                  Connect with people actively searching for new coffee experiences in Metro Manila.
+                  Connect with people actively searching for new coffee experiences.
                 </p>
               </div>
             </div>
@@ -75,7 +75,7 @@ const OwnerCTA = () => {
                   Build Community
                 </h3>
                 <p className="text-xs sm:text-sm md:text-base text-stone-600">
-                  Be part of Metro Manila's growing coffee community and culture.
+                  Be part of the growing coffee community and culture.
                 </p>
               </div>
             </div>
