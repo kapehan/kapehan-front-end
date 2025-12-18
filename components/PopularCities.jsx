@@ -79,7 +79,7 @@ const PopularCities = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-600 mb-8 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-whyte px-2"
         >
-          Explore coffee shops by city and discover the unique coffee culture in each area of Metro Manila
+          Explore coffee shops by city and discover the unique coffee culture in each area of the Philippines.
         </motion.p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">

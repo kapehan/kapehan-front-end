@@ -55,13 +55,14 @@ export const AuthProvider = ({ children }) => {
     if (detectAnonymous(payload)) return false;
 
     const id = payload?.data?.id || payload?.user?.id || payload?.id;
-    const email = payload?.data?.email || payload?.user?.email || payload?.email;
+    const username = payload?.data?.username || payload?.user?.username || payload?.username;
     const authFlag =
       payload?.authenticated === true ||
       payload?.data?.authenticated === true ||
       payload?.user?.authenticated === true;
 
-    return Boolean(authFlag || (id && email));
+    // Accept if authenticated flag, or id+username (no longer require email)
+    return Boolean(authFlag || (id && username));
   };
 
   // Fetch current user on mount

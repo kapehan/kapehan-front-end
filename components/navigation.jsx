@@ -32,15 +32,14 @@ export default function Navigation() {
   const isLoggedIn = isAuthenticated && !isAnonymous;
 
   // Unified user display helpers
-  const displayName =
-    user?.data?.username ||
-    user?.username ||
-    user?.name ||
-    "Account";
+  const displayName = user?.data.username || "";
   const email =
     user?.data?.email ||
     user?.email ||
     "";
+
+  // Profile slug path
+  const profilePath = user?.data.username ? `/${user.data.username}` : "/";
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -185,7 +184,7 @@ export default function Navigation() {
                         )}
                       </div>
                       <Link
-                        href="/profile"
+                        href={profilePath}
                         className="w-full text-left px-3 sm:px-4 py-2 text-xs sm:text-sm text-stone-700 hover:bg-stone-50 flex items-center"
                         onClick={() => setShowUserDropdown(false)}
                       >
@@ -304,7 +303,7 @@ export default function Navigation() {
                           </div>
                         </div>
                         <Link
-                          href="/profile"
+                          href={profilePath}
                           onClick={() => setIsOpen(false)}
                           className="w-full text-left px-3 py-2 text-xs sm:text-sm text-stone-700 hover:bg-stone-50 rounded-lg flex items-center"
                         >

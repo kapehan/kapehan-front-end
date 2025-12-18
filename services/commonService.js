@@ -93,3 +93,15 @@ export const createCoffeeShopReports = async (id, data = {}) => {
     throw error;
   }
 };
+
+
+export const findUser = async (username) => {
+  try {
+    const response = await axiosInstance.get(`/user/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error finding user:", error);
+    throw error;
+  }
+};
+

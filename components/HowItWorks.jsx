@@ -8,7 +8,7 @@ const HowItWorks = () => {
       icon: <FaSearch className="text-amber-600 text-2xl sm:text-3xl" />,
       title: "Search & Discover",
       description:
-        "Browse our curated collection of Metro Manila's finest coffee shops or search by location, vibe, or amenities.",
+        "Browse our curated collection of finest coffee shops or search by location, vibe, or amenities.",
     },
     {
       icon: <FaCoffee className="text-amber-600 text-2xl sm:text-3xl" />,
@@ -43,7 +43,7 @@ const HowItWorks = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-600 mb-8 sm:mb-12 md:mb-16 max-w-3xl mx-auto font-whyte px-2"
         >
-          Finding your perfect coffee spot in Metro Manila has never been easier
+          Finding your perfect coffee spot has never been easier
         </motion.p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">

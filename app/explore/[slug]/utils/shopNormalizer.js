@@ -8,29 +8,89 @@ export const normalizeShop = (raw, slugFromRoute) => {
     ? raw.payment_methods.map((p) => p?.type).filter(Boolean)
     : [];
 
-  const openingHoursObj = Array.isArray(raw.openingHours)
-    ? raw.openingHours.reduce((acc, cur) => {
-        const day = (cur?.day || "").toLowerCase();
+  // --- Robust opening hours normalization ---
+  const DAYS = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+  const DAY_ALIASES = {
+    mon: "monday",
+    monday: "monday",
+    tue: "tuesday",
+    tues: "tuesday",
+    tuesday: "tuesday",
+    wed: "wednesday",
+    weds: "wednesday",
+    wednesday: "wednesday",
+    thu: "thursday",
+    thur: "thursday",
+    thurs: "thursday",
+    thursday: "thursday",
+    fri: "friday",
+    friday: "friday",
+    sat: "saturday",
+    saturday: "saturday",
+    sun: "sunday",
+    sunday: "sunday",
+  };
+
+  let openingHoursObj = {};
+  if (Array.isArray(raw.openingHours)) {
+    const inputByDay = {};
+    raw.openingHours.forEach((cur) => {
+      let dayRaw = (cur?.day || "").toLowerCase().replace(/\s+/g, "");
+      let dayNorm = DAY_ALIASES[dayRaw] || DAY_ALIASES[dayRaw.slice(0, 3)] || null;
+      if (dayNorm && DAYS.includes(dayNorm)) inputByDay[dayNorm] = cur;
+    });
+    for (const day of DAYS) {
+      const cur = inputByDay[day];
+      if (cur) {
         const rawOpen = cur?.open ?? null;
         const rawClose = cur?.close ?? null;
-        const isClosedFlag = Boolean(cur?.isClosed);
+        // Only treat as closed if isClosed is strictly true, not just truthy
+        const isClosedFlag = cur?.isClosed === true;
         const open24 = convertTo24Hour(rawOpen);
         const close24 = convertTo24Hour(rawClose);
-        const closed =
-          isClosedFlag ||
-          !rawOpen ||
-          !rawClose ||
-          open24 === null ||
-          close24 === null;
-
-        acc[day] = {
+        // If isClosed is true, mark closed, otherwise only check for valid open/close times
+        const closed = isClosedFlag || open24 === null || close24 === null;
+        openingHoursObj[day] = {
           open: closed ? null : open24,
           close: closed ? null : close24,
           closed,
         };
-        return acc;
-      }, {})
-    : raw.openingHours || undefined;
+      } else {
+        openingHoursObj[day] = { open: null, close: null, closed: true };
+      }
+    }
+  } else if (raw.openingHours && typeof raw.openingHours === "object") {
+    // Accept both lower/upper case and abbreviations as keys
+    for (const day of DAYS) {
+      let cur =
+        raw.openingHours[day] ||
+        raw.openingHours[day.charAt(0).toUpperCase() + day.slice(1)] ||
+        raw.openingHours[day.slice(0, 3)] ||
+        raw.openingHours[day.slice(0, 1).toUpperCase() + day.slice(1, 3)];
+      if (cur) {
+        openingHoursObj[day] = {
+          open: cur.open ?? null,
+          close: cur.close ?? null,
+          closed: typeof cur.closed === "boolean" ? cur.closed : false,
+        };
+      } else {
+        openingHoursObj[day] = { open: null, close: null, closed: true };
+      }
+    }
+  } else {
+    for (const day of DAYS) {
+      openingHoursObj[day] = { open: null, close: null, closed: true };
+    }
+  }
+  // --- end robust opening hours normalization ---
 
   let amenitiesArr = [];
   if (Array.isArray(raw.amenities)) {
