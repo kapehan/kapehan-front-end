@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { getAnonLocation } from "../services/commonService";
 
+const DENY_KEY = "location_permission_denied";
+const DENY_TTL = 1000 * 60 * 60; // 1 hour
+
 export default function LocationPermissionModal({
   isOpen,
   onSuccess,
@@ -13,6 +16,7 @@ export default function LocationPermissionModal({
   ttl = 1000 * 60 * 20, // 20 minutes
 }) {
   const [loading, setLoading] = useState(false);
+  const [shouldShow, setShouldShow] = useState(true);
 
   // Check if valid location exists in localStorage (with TTL) - sync helper
   const checkStoredLocation = useCallback(() => {
@@ -109,8 +113,42 @@ export default function LocationPermissionModal({
     );
   };
 
+  // Handler for "Not Now"
+  const handleDeny = () => {
+    try {
+      localStorage.setItem(DENY_KEY, JSON.stringify({ ts: Date.now() }));
+    } catch (e) {
+      // ignore
+    }
+    setShouldShow(false);
+    onDeny && onDeny();
+  };
+
+  // Define checkDenyFlag inside the component
+  const checkDenyFlag = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(DENY_KEY);
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed.ts || Date.now() - parsed.ts > DENY_TTL) {
+        localStorage.removeItem(DENY_KEY);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
-    if (!isOpen) return;
+    // On mount, check deny flag
+    if (isOpen) {
+      setShouldShow(!checkDenyFlag());
+    }
+  }, [isOpen, checkDenyFlag]);
+
+  useEffect(() => {
+    if (!isOpen || !shouldShow) return;
     console.log("[LocationModal] Checking stored location (async) …");
     let mounted = true;
     (async () => {
@@ -132,9 +170,9 @@ export default function LocationPermissionModal({
     return () => {
       mounted = false;
     };
-  }, [isOpen, checkStoredLocationAsync, onSuccess]);
+  }, [isOpen, shouldShow, checkStoredLocationAsync, onSuccess]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !shouldShow) return null;
 
   return (
     <AnimatePresence>
@@ -176,7 +214,7 @@ export default function LocationPermissionModal({
               {loading ? "Locating..." : "Allow Location"}
             </button>
             <button
-              onClick={onDeny}
+              onClick={handleDeny}
               disabled={loading}
               className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm md:text-base border border-stone-300 text-stone-700 rounded-lg font-whyte-bold hover:bg-stone-50 transition-colors disabled:opacity-50"
             >
