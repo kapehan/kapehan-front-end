@@ -308,7 +308,7 @@ const Page = () => {
       <PopularCities />
 
       {/* Own a Coffee Shop Section */}
-      <OwnerCTA />
+      {/* <OwnerCTA /> */}
 
       {/* Footer */}
       <Footer />
