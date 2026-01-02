@@ -18,7 +18,7 @@ import { LuCoffee } from "react-icons/lu";
 import { useAuth } from "../../context/authContext";
 import NiceAvatar, { genConfig } from "react-nice-avatar";
 import { getCache, setCache } from "../utils/cacheUtils";
-import { getReviewsByUser } from "../../services/coffeeShopReviews";
+import { getReviewsByUser, getReviewsByUserId } from "../../services/coffeeShopReviews";
 import { findUser } from '../../services/commonService';
 
 export default function ProfilePage() {
@@ -53,6 +53,51 @@ export default function ProfilePage() {
   // User reviews state
   const [userReviews, setUserReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  // Fetch user reviews: use getReviewsByUser for own profile, getReviewsByUserId for others
+  useEffect(() => {
+    if (!profileUser || !profileUser.username) {
+      setUserReviews([]);
+      setReviewsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setReviewsLoading(true);
+
+    const isOwnProfile =
+      isAuthenticated &&
+      user &&
+      (user?.username === slug || user?.data?.username === slug);
+
+    (async () => {
+      try {
+        let data;
+        if (isOwnProfile) {
+          const resp = await getReviewsByUser();
+          data = resp?.data ?? resp;
+        } else if (profileUser.id) {
+          const resp = await getReviewsByUserId(profileUser.id);
+          data = resp?.data ?? resp;
+        } else {
+          data = [];
+        }
+        if (!cancelled && Array.isArray(data)) {
+          setUserReviews(data);
+        } else if (!cancelled) {
+          setUserReviews([]);
+        }
+      } catch {
+        if (!cancelled) setUserReviews([]);
+      } finally {
+        if (!cancelled) setReviewsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user, profileUser, slug]);
 
   // Main logic for slug/profile fetch
   useEffect(() => {
@@ -108,42 +153,6 @@ export default function ProfilePage() {
       };
     }
   }, [slug, isAuthenticated, loading, user]);
-
-  // Fetch user reviews on mount (when authenticated and viewing own profile)
-  useEffect(() => {
-    if (
-      !profileUser ||
-      !profileUser.username ||
-      (isAuthenticated && (user?.username === slug || user?.data?.username === slug))
-    ) {
-      // Only fetch reviews for own profile
-      if (!isAuthenticated || !user) return;
-      let cancelled = false;
-      setReviewsLoading(true);
-
-      (async () => {
-        try {
-          const resp = await getReviewsByUser();
-          const data = resp?.data ?? resp;
-          if (!cancelled && Array.isArray(data)) {
-            setUserReviews(data);
-          }
-        } catch {
-          if (!cancelled) setUserReviews([]);
-        } finally {
-          if (!cancelled) setReviewsLoading(false);
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-      };
-    } else {
-      // For other users, you may want to implement getReviewsByUser(slug) if available
-      setUserReviews([]);
-      setReviewsLoading(false);
-    }
-  }, [isAuthenticated, user, profileUser, slug]);
 
   // Format helpers
   const formatDate = (dateString) =>

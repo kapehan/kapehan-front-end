@@ -58,10 +58,19 @@ export const updateCoffeeShopReview = async (
   }
 };
 
-
 export const getReviewsByUser = async () => {
   try {
     const response = await axiosInstance.get("/user/reviews");
+    return response.data.data; // Return the data from the response
+  } catch (error) {
+    console.error("Error fetching city counts:", error);
+    throw error; // Re-throw the error for further handling
+  }
+};
+
+export const getReviewsByUserId = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/user/reviews/${id}`);
     return response.data.data; // Return the data from the response
   } catch (error) {
     console.error("Error fetching city counts:", error);
