@@ -14,7 +14,7 @@ const processQueue = (error, token = null) => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/v1",
+  baseURL: process.env.API_URL_SECRET || "http://localhost:4000/v1",
   withCredentials: true,
   timeout: 10000,
 });
