@@ -10,6 +10,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Install pnpm in builder stage
+RUN npm install -g pnpm@9
+
 RUN pnpm build
 
 # Production image, copy all the files and run next
