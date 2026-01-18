@@ -22,6 +22,7 @@ export default function UserAccountModal({ show, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showWelcome, setShowWelcome] = useState(false); // <-- new state
+  const [isResetPassword, setIsResetPassword] = useState(false); // <-- new state
   const [formData, setFormData] = useState({
     // Sign Up fields
     name: "",
@@ -67,6 +68,16 @@ export default function UserAccountModal({ show, onClose }) {
     setError("");
 
     try {
+      if (isResetPassword) {
+        // Placeholder for password reset logic
+        // You may want to call a service here
+        alert("Password reset instructions sent to your email (not implemented).");
+        setLoading(false);
+        setIsResetPassword(false);
+        resetForm();
+        return;
+      }
+
       if (isSignUp) {
         // Handle sign up
         if (formData.password !== formData.confirmPassword) {
@@ -123,6 +134,22 @@ export default function UserAccountModal({ show, onClose }) {
 
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
+    setIsResetPassword(false);
+    resetForm();
+  };
+
+  const handleForgotPassword = () => {
+    setIsResetPassword(true);
+    setError("");
+    setFormData((prev) => ({
+      ...prev,
+      loginPassword: "",
+    }));
+  };
+
+  const handleBackToSignIn = () => {
+    setIsResetPassword(false);
+    setError("");
     resetForm();
   };
 
@@ -182,10 +209,18 @@ export default function UserAccountModal({ show, onClose }) {
                   </div>
                   <div>
                     <h2 className="text-xl font-whyte-bold text-stone-800">
-                      {isSignUp ? "Join Kapehan" : "Welcome Back"}
+                      {isResetPassword
+                        ? "Reset Your Password"
+                        : isSignUp
+                        ? "Join Kapehan"
+                        : "Welcome Back"}
                     </h2>
                     <p className="text-sm text-stone-600">
-                      {isSignUp ? "Create your account" : "Sign in to your account"}
+                      {isResetPassword
+                        ? "Enter your email to receive reset instructions"
+                        : isSignUp
+                        ? "Create your account"
+                        : "Sign in to your account"}
                     </p>
                   </div>
                 </div>
@@ -206,7 +241,28 @@ export default function UserAccountModal({ show, onClose }) {
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                {isSignUp ? (
+                {isResetPassword ? (
+                  // Password Reset Form
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-whyte-medium text-stone-700 mb-2">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400" />
+                        <input
+                          type="email"
+                          name="loginEmail"
+                          value={formData.loginEmail}
+                          onChange={handleInputChange}
+                          className="w-full pl-10 pr-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : isSignUp ? (
                   <>
                     {/* Sign Up Form */}
                     <div className="space-y-4">
@@ -393,6 +449,16 @@ export default function UserAccountModal({ show, onClose }) {
                             required
                           />
                         </div>
+                        {/* Forgot Password Link */}
+                        <div className="flex justify-end mt-2">
+                          <button
+                            type="button"
+                            className="text-xs text-amber-600 hover:text-amber-700 font-whyte-medium transition-colors"
+                            onClick={handleForgotPassword}
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </>
@@ -405,9 +471,13 @@ export default function UserAccountModal({ show, onClose }) {
                   className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-3 px-4 rounded-lg font-whyte-bold hover:shadow-lg transition-all duration-300 mt-6 disabled:opacity-50"
                 >
                   {loading
-                    ? isSignUp
+                    ? isResetPassword
+                      ? "Sending..."
+                      : isSignUp
                       ? "Creating Account..."
                       : "Signing In..."
+                    : isResetPassword
+                    ? "Send Reset Link"
                     : isSignUp
                     ? "Create Account"
                     : "Sign In"}
@@ -415,21 +485,31 @@ export default function UserAccountModal({ show, onClose }) {
 
                 {/* Toggle Mode */}
                 <div className="text-center pt-4 border-t border-stone-200">
-                  <p className="text-sm text-stone-600">
-                    {isSignUp
-                      ? "Already have an account?"
-                      : "Don't have an account?"}{" "}
+                  {isResetPassword ? (
                     <button
                       type="button"
-                      onClick={toggleMode}
-                      className="text-amber-600 hover:text-amber-700 font-whyte-medium transition-colors"
+                      onClick={handleBackToSignIn}
+                      className="text-amber-600 hover:text-amber-700 font-whyte-medium text-sm transition-colors"
                     >
-                      {isSignUp ? "Sign In" : "Sign Up"}
+                      Back to Sign In
                     </button>
-                  </p>
+                  ) : (
+                    <p className="text-sm text-stone-600">
+                      {isSignUp
+                        ? "Already have an account?"
+                        : "Don't have an account?"}{" "}
+                      <button
+                        type="button"
+                        onClick={toggleMode}
+                        className="text-amber-600 hover:text-amber-700 font-whyte-medium transition-colors"
+                      >
+                        {isSignUp ? "Sign In" : "Sign Up"}
+                      </button>
+                    </p>
+                  )}
                 </div>
 
-                {isSignUp && (
+                {isSignUp && !isResetPassword && (
                   <p className="text-xs text-stone-500 text-center mt-4">
                     By creating an account, you agree to our Terms of Service and
                     Privacy Policy.
