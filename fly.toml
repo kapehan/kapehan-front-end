@@ -4,7 +4,7 @@
 #
 
 app = 'kapehan-front-end'
-primary_region = 'fra'
+primary_region = 'sin'
 
 [build]
 
