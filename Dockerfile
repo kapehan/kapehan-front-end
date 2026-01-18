@@ -11,9 +11,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Install pnpm in builder stage
 RUN npm install -g pnpm@9
-
 RUN pnpm build
 
 # Production image, copy all the files and run next
@@ -21,6 +19,8 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
+
+RUN npm install -g pnpm@9
 
 # If you use a custom next.config.mjs, uncomment below
 # COPY --from=builder /app/next.config.mjs ./
