@@ -450,7 +450,7 @@ export default function UserAccountModal({ show, onClose }) {
                           />
                         </div>
                         {/* Forgot Password Link */}
-                        <div className="flex justify-end mt-2">
+                        {/* <div className="flex justify-end mt-2">
                           <button
                             type="button"
                             className="text-xs text-amber-600 hover:text-amber-700 font-whyte-medium transition-colors"
@@ -458,7 +458,7 @@ export default function UserAccountModal({ show, onClose }) {
                           >
                             Forgot password?
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </>
