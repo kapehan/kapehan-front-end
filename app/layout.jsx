@@ -5,8 +5,9 @@ import Script from "next/script";
 import UmamiPageView from "../components/UmamiPageView";
 
 export const metadata = {
-  title: "Kapehan - Coffee Shop Finder",
-  description: "Discover the best coffee shops in your area",
+  title: "Kapehan — Your Local Coffee Guide",
+  description:
+    "Discover neighborhood cafés, hidden gems, and local brews near you.",
   generator: "v0.app",
 };
 
@@ -26,9 +27,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className="font-whyte-regular antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
