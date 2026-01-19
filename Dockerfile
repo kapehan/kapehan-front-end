@@ -30,5 +30,5 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-EXPOSE 3000
-CMD ["pnpm", "exec", "next", "start", "-p", "3000", "-H", "0.0.0.0"]
+EXPOSE 4200
+CMD ["pnpm", "exec", "next", "start", "-p", "4200", "-H", "0.0.0.0"]
