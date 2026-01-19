@@ -1,5 +1,5 @@
 # fly.toml for Frontend (kapehan)
-app = "kapehan"                      # Rename the app to "kapehan"
+app = "kapehan-front-end"                      # Rename the app to "kapehan"
 primary_region = "sin"
 
 [build]
