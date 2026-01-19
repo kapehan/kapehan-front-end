@@ -1,26 +1,21 @@
-# fly.toml app configuration file generated for kapehan-front-end on 2026-01-18T09:00:11Z
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
-app = 'kapehan-front-end'
-primary_region = 'sin'
+# fly.toml for Frontend (kapehan-front-end)
+app = "kapehan"
+primary_region = "sin"
 
 [build]
 
 [http_service]
-  internal_port = 3000
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+  internal_port = 4200                # Default port for the Next.js dev server
+  force_https = true                  # Enforce HTTPS for the public-facing frontend
+  auto_stop_machines = "stop"         # Automatically stop idle machines
+  auto_start_machines = true          # Automatically start machines on traffic
+  min_machines_running = 1            # Keep at least 1 instance running to handle requests
+  processes = ["app"]
 
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
-  memory_mb = 256
+[[services]]
+  internal_port = 4200
+  protocol = "tcp"
 
-[env]
-  NEXT_PUBLIC_API_URL = 'https://kapehan-api.fly.dev/v1'
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80                         # Public port for serving the frontend (HTTP)
