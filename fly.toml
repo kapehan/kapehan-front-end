@@ -1,15 +1,15 @@
-# fly.toml for Frontend (kapehan-front-end)
-app = "kapehan"
+# fly.toml for Frontend (kapehan)
+app = "kapehan"                      # Rename the app to "kapehan"
 primary_region = "sin"
 
 [build]
 
 [http_service]
-  internal_port = 4200                # Default port for the Next.js dev server
-  force_https = true                  # Enforce HTTPS for the public-facing frontend
-  auto_stop_machines = "stop"         # Automatically stop idle machines
-  auto_start_machines = true          # Automatically start machines on traffic
-  min_machines_running = 1            # Keep at least 1 instance running to handle requests
+  internal_port = 4200               # Default port for the Next.js dev server
+  force_https = true                 # Enforce HTTPS for the public-facing frontend
+  auto_stop_machines = "stop"        # Automatically stop idle machines
+  auto_start_machines = true         # Automatically start machines on traffic
+  min_machines_running = 1           # Keep at least 1 instance running to handle requests
   processes = ["app"]
 
 [[services]]
@@ -18,7 +18,7 @@ primary_region = "sin"
 
   [[services.ports]]
     handlers = ["http"]
-    port = 80                         # Public port for serving the frontend (HTTP)
+    port = 80                        # Public port for serving the frontend (HTTP)
 
 [env]
   NEXT_PUBLIC_API_URL = "http://kapehan-api.internal:3000/v1"
