@@ -12,8 +12,9 @@ module.exports = {
   }),
   additionalPaths: async (config) => {
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "/v1";
+      const apiUrl = "";
+      // const apiUrl =
+      //   process.env.NEXT_PUBLIC_API_URL || "/v1";
 
       // Fetch first 1000 coffee shops
       const res = await axios.get(`${apiUrl}/shops?limit=1000`);

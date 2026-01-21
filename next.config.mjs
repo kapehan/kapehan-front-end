@@ -10,7 +10,7 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*", // "/api" will be the frontend proxy path
+        source: "/v1/:path*", // "/v1" will be the frontend proxy path
         destination: "http://kapehan-api.internal:3000/:path*", // Forward requests to your backend
       },
     ];
