@@ -13,7 +13,7 @@ module.exports = {
   additionalPaths: async (config) => {
     try {
       const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://kapehan-api.internal:3000/v1";
+        process.env.NEXT_PUBLIC_API_URL || "https://kapehan-api.internal:3000/v1";
 
       // Fetch first 1000 coffee shops
       const res = await axios.get(`${apiUrl}/shops?limit=1000`);
