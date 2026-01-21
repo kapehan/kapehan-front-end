@@ -13,8 +13,9 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// ✅ Create Axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "/v1", // Default to "/v1"
   withCredentials: true,
   timeout: 10000,
 });
