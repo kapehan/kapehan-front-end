@@ -14,7 +14,7 @@ const processQueue = (error, token = null) => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://kapehan-api.internal:3000/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "/v1",
   withCredentials: true,
   timeout: 10000,
 });
